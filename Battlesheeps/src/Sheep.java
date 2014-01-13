@@ -5,7 +5,8 @@ public class Sheep {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		int numberOfSheep = 5;
+		System.out.println("Number of sheep is " + numberOfSheep);
 
 	}
 
