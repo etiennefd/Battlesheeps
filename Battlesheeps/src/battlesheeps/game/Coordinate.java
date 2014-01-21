@@ -1,4 +1,4 @@
-package battlesheeps.elements;
+package battlesheeps.game;
 
 public class Coordinate {
 
