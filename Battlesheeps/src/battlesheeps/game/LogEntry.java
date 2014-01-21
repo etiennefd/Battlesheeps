@@ -1,6 +1,6 @@
 package battlesheeps.game;
 
-import battlesheeps.elements.Coordinate;
+import battlesheeps.game.Coordinate;
 
 public class LogEntry {
 
