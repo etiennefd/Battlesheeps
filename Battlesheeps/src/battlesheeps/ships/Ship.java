@@ -44,6 +44,15 @@ public abstract class Ship {
 		}
 	}
 	
+	public void setLocation(Coordinate pHead, Coordinate pTail) {
+		aLocationHead = pHead;
+		aLocationTail = pTail;
+	}
+	
+	public int getSize() {
+		return aSize;
+	}
+	
 	public int getActualSpeed() {
 		return aActualSpeed;
 	}
