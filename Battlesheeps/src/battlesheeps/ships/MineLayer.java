@@ -8,7 +8,7 @@ public class MineLayer extends Ship {
 		
 		super();
 		aSize = 2;
-		aSpeed = 6;
+		aMaxSpeed = 6;
 		aHeavyArmour = true;
 		aRadarRangeLength = 6;
 		aRadarRangeWidth = 5;
@@ -16,6 +16,8 @@ public class MineLayer extends Ship {
 		aCannonRangeWidth = 5;
 		aTurnPoint = 1;	
 		
-		aMineSupply = 5;		//A mine layer starts with 5 mines!
+		initializeShip();
+		
+		aMineSupply = 5;		//A mine layer starts with 5 mines
 	}
 }

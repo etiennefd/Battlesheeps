@@ -8,13 +8,15 @@ public class RadarBoat extends Ship {
 		
 		super();
 		aSize = 3;
-		aSpeed = 3;
+		aMaxSpeed = 3;
 		aHeavyArmour = false;
 		aRadarRangeLength = 6;
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 5;
 		aCannonRangeWidth = 3;
 		aTurnPoint = 1;	
+		
+		initializeShip();
 		
 		aExtendedRadar = false;
 	}

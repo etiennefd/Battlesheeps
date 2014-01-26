@@ -6,12 +6,14 @@ public class Cruiser extends Ship {
 		
 		super();
 		aSize = 5;
-		aSpeed = 10;
+		aMaxSpeed = 10;
 		aHeavyArmour = true;
 		aRadarRangeLength = 10;
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 15;
 		aCannonRangeWidth = 11;
 		aTurnPoint = 4;	
+		
+		initializeShip();
 	}
 }
