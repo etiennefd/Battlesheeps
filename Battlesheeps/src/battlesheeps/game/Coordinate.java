@@ -18,4 +18,9 @@ public class Coordinate {
 		return y;
 	}
 
+	public static Coordinate randomCoord(int pXmin, int pXmax, int pYmin, int pYmax) {
+		int rX = pXmin + (int) (Math.random() * ((pXmax - pXmin) + 1));
+		int rY = pYmin + (int) (Math.random() * ((pYmax - pYmin) + 1));
+		return new Coordinate(rX, rY);
+	}
 }
