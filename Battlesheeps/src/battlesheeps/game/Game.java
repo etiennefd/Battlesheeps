@@ -36,7 +36,7 @@ public class Game {
 		for (int i = 0; i<aBoard.length; i++) {
 			for (int j = 0 ; j<aBoard[i].length; j++) {
 				if (i >= 10 && i < 20 && (j==0 || j==29)) {
-					aBoard[i][j] = new BaseSquare();
+					aBoard[i][j] = new BaseSquare(Damage.UNDAMAGED);
 				}
 				else {
 					aBoard[i][j] = new Sea();
@@ -89,6 +89,12 @@ public class Game {
 		}
 	}
 	
+	/**
+	 * Places a ship on the board, i.e. sets the appropriate squares on the board to ShipSquares. 
+	 * @param pShip
+	 * @param pHead
+	 * @param pTail
+	 */
 	public void setShipPosition(Ship pShip, Coordinate pHead, Coordinate pTail) {
 		
 		//Are the head and the tail on the same X column? Do they correspond to the length of the ship? 
@@ -105,7 +111,7 @@ public class Game {
 					aBoard[pHead.getX()][y] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
 				}
 			}
-			if (pHead.getY() < pTail.getY()) {
+			else if (pHead.getY() < pTail.getY()) {
 				for (int y = pHead.getY() + 1; y < pTail.getY(); y++) {
 					aBoard[pHead.getX()][y] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
 				}
@@ -128,7 +134,7 @@ public class Game {
 					aBoard[x][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
 				}
 			}
-			if (pHead.getX() < pTail.getX()) {
+			else if (pHead.getX() < pTail.getX()) {
 				for (int x = pHead.getX() + 1; x < pTail.getX(); x++) {
 					aBoard[x][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
 				}
@@ -137,7 +143,7 @@ public class Game {
 			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
 		}
 		else {
-			System.out.println("Problem: coordinates don't match");
+			System.out.println("Problem: coordinates don't match");//Should be an exception
 		}
 		
 		
@@ -145,7 +151,19 @@ public class Game {
 	
 	
 	public String printBoard() {
-		String s = "";
+		String s = "Legend: \n" +
+				"~  - Empty sea square\n" +
+				"XX - Coral reef\n" +
+				"B  - Base\n" +
+				"C  - Cruiser\n" +
+				"D  - Destroyer\n" +
+				"T  - Torpedo boat\n" +
+				"M  - Mine layer\n" +
+				"R  - Radar boat\n" +
+				"MM - Mine\n" +
+				" 2 - Undamaged\n" +
+				" 1 - Damaged (heavy armored ships only)\n" +
+				" 0 - Destroyed\n";
 		for (int i = 0; i<aBoard.length; i++) {
 			for (int j = 0 ; j<aBoard[i].length; j++) {
 				s = s + aBoard[i][j].toString();
