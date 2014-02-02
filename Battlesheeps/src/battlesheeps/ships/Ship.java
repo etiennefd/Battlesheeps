@@ -1,6 +1,8 @@
 package battlesheeps.ships;
 
+import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.game.Coordinate;
+import battlesheeps.game.Game.Direction;
 
 /**
  * Ship is an abstract class containing the common functionality of actual ships such as 
@@ -55,6 +57,34 @@ public abstract class Ship {
 	
 	public int getActualSpeed() {
 		return aActualSpeed;
+	}
+	
+	public Coordinate getHead() {
+		return aLocationHead;
+	}
+	
+	public Coordinate getTail() {
+		return aLocationTail;
+	}
+	
+	/**
+	 * Returns one of North, South, East, or West, depending on the position of the ship's head and tail.  
+	 * @return
+	 */
+	public Direction getDirection() {
+		if (aLocationHead.getX() == aLocationTail.getX()) {
+			//Both head and tail in same column: either facing North or South
+			if (aLocationHead.getY() > aLocationTail.getY()) return Direction.SOUTH;
+			else return Direction.NORTH;
+		}
+		else if (aLocationHead.getY() == aLocationTail.getY()){
+			//Both head and tail in same row: either facing East or West
+			if (aLocationHead.getX() > aLocationTail.getX()) return Direction.EAST;
+			else return Direction.WEST;
+		}
+		else {
+			throw new InvalidCoordinateException();
+		}
 	}
 	
 	

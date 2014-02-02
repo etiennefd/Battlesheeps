@@ -29,7 +29,7 @@ public class ShipSquare implements Square {
 			s = "R";
 		} else s = "S";
 		
-		if (aHead) s.toLowerCase();
+		if (aHead) s = s.toLowerCase();
 		
 		if (aDamage == Damage.UNDAMAGED) {
 			s = s + "2";
