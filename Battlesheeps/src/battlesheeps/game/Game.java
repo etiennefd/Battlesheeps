@@ -212,8 +212,24 @@ public class Game {
 		}
 	}
 	
-	public void layMine(Coordinate pCoord) {
-		aBoard[pCoord.getX()][pCoord.getY()] = new MineSquare();
+	/**
+	 * Sets a square of the board to a MineSquare
+	 * @param pCoord
+	 */
+	public void addMine(Coordinate pCoord) {
+		if (aBoard[pCoord.getX()][pCoord.getY()] instanceof Sea) {
+			aBoard[pCoord.getX()][pCoord.getY()] = new MineSquare();
+		}
+	}
+	
+	/**
+	 * Reverts a MineSquare back to empty sea
+	 * @param pCoord
+	 */
+	public void removeMine(Coordinate pCoord) {
+		if (aBoard[pCoord.getX()][pCoord.getY()] instanceof MineSquare) {
+			aBoard[pCoord.getX()][pCoord.getY()] = new Sea();
+		}
 	}
 	
 	
@@ -870,6 +886,26 @@ public class Game {
 	private void fireCannon(Ship pShip, Coordinate pCoord) {
 		Square s = aBoard[pCoord.getX()][pCoord.getY()];
 		
+		if (s instanceof Sea) {
+			//Miss
+			//TODO Log entry
+		}
+		else if (s instanceof CoralReef) {
+			//Hit coral reef (no effect)
+			//TODO Log entry
+		}
+		else if (s instanceof MineSquare) {
+			removeMine(pCoord);
+			//TODO Log entry
+		}
+		else if (s instanceof BaseSquare) {
+			//some method to SetBaseDamage
+			//TODO Log entry
+		}
+		else if (s instanceof ShipSquare) {
+			//some method to set ship damage; need to get which ship is affected though. Hopefully the reference to a ship in ShipSquare class is sufficient
+			//TODO Log entry
+		}
 	}
 	private void fireTorpedo(Ship pShip, Coordinate pCoord) {
 

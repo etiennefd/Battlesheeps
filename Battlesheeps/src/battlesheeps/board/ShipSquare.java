@@ -5,27 +5,27 @@ import battlesheeps.ships.*;
 
 public class ShipSquare implements Square {
 
-	private Ship aShipType;
+	private Ship aShip;
 	private Damage aDamage;
 	private boolean aHead;
 
-	public ShipSquare(Ship pType, Damage pDamage, boolean pHead) {
-		aShipType = pType;
+	public ShipSquare(Ship pShip, Damage pDamage, boolean pHead) {
+		aShip = pShip;
 		aDamage = pDamage;
 		aHead = pHead;
 	}
 	
 	public String toString() {
 		String s = "s";
-		if (aShipType instanceof Cruiser) {
+		if (aShip instanceof Cruiser) {
 			s = "C";
-		} else if (aShipType instanceof Destroyer) {
+		} else if (aShip instanceof Destroyer) {
 			s = "D";
-		} else if (aShipType instanceof TorpedoBoat) {
+		} else if (aShip instanceof TorpedoBoat) {
 			s = "T";
-		} else if (aShipType instanceof MineLayer) {
+		} else if (aShip instanceof MineLayer) {
 			s = "M";
-		} else if (aShipType instanceof RadarBoat) {
+		} else if (aShip instanceof RadarBoat) {
 			s = "R";
 		} else s = "S";
 		
