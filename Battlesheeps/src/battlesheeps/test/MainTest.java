@@ -16,6 +16,7 @@ public class MainTest {
 		g.setShipPosition(c, new Coordinate(5, 5), new Coordinate(5, 9));
 		MineLayer m = new MineLayer();
 		g.setShipPosition(m, new Coordinate(4, 3), new Coordinate(5, 3));
+		g.layMine(new Coordinate(5, 1));
 		System.out.println(g.printBoard());
 		
 		g.computeMoveResult(m, MoveType.TRANSLATE_SHIP, new Coordinate(3, 3));
