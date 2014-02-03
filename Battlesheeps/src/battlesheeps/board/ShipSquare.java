@@ -41,5 +41,9 @@ public class ShipSquare implements Square {
 		
 		return s;
 	}
+	
+	public Ship getShip() {
+		return aShip;
+	}
 
 }
