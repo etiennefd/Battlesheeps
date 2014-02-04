@@ -19,5 +19,8 @@ public class Account {
 		aNumGamesWon = 0; 
 		aNumGamesLost = 0; 
 	}
-
+	/*getters*/
+	public String getUsername() {
+		return aUsername;
+	}
 }
