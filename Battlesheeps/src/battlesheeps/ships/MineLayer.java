@@ -1,10 +1,12 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
+
 public class MineLayer extends Ship {
 
 	private int aMineSupply; 			//Number of mines on board. 
 
-	public MineLayer() {
+	public MineLayer(Account pPlayer) {
 		
 		super();
 		aSize = 2;
@@ -14,9 +16,9 @@ public class MineLayer extends Ship {
 		aRadarRangeWidth = 5;
 		aCannonRangeLength = 4;
 		aCannonRangeWidth = 5;
-		aTurnPoint = 1;	
+		aTurn180 = false; 
 		
-		initializeShip();
+		initializeShip(pPlayer);
 		
 		aMineSupply = 5;		//A mine layer starts with 5 mines
 	}

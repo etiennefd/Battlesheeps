@@ -1,8 +1,10 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
+
 public class Destroyer extends Ship {
 
-	public Destroyer() {
+	public Destroyer(Account pPlayer) {
 		
 		super();
 		aSize = 4;
@@ -12,8 +14,8 @@ public class Destroyer extends Ship {
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 12;
 		aCannonRangeWidth = 9;
-		aTurnPoint = 3;	
+		aTurn180 = false; 
 		
-		initializeShip();
+		initializeShip(pPlayer);
 	}
 }

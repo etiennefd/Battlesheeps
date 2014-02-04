@@ -32,4 +32,14 @@ public class Coordinate {
 		int rY = pYmin + (int) (Math.random() * ((pYmax - pYmin) + 1));
 		return new Coordinate(rX, rY);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		if (o == this) return true; 
+		if (!(o instanceof Coordinate)) return false;
+		Coordinate c = (Coordinate) o;
+		if (c.x == this.x && c.y == this.y) return true;
+		else return false;
+	}
 }

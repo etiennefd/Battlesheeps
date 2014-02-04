@@ -1,8 +1,10 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
+
 public class Cruiser extends Ship {
 
-	public Cruiser() {
+	public Cruiser(Account pPlayer) {
 		
 		super();
 		aSize = 5;
@@ -12,8 +14,8 @@ public class Cruiser extends Ship {
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 15;
 		aCannonRangeWidth = 11;
-		aTurnPoint = 4;	
+		aTurn180 = false; 
 		
-		initializeShip();
+		initializeShip(pPlayer);
 	}
 }

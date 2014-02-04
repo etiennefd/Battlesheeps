@@ -66,28 +66,28 @@ public class Game {
 		
 		//Generating the ships for both players
 		aShipListP1 = new ArrayList<Ship>();
-		aShipListP1.add(new Cruiser());
-		aShipListP1.add(new Cruiser());
-		aShipListP1.add(new Destroyer());
-		aShipListP1.add(new Destroyer());
-		aShipListP1.add(new Destroyer());
-		aShipListP1.add(new TorpedoBoat());
-		aShipListP1.add(new TorpedoBoat());
-		aShipListP1.add(new MineLayer());
-		aShipListP1.add(new MineLayer());
-		aShipListP1.add(new RadarBoat());
+		aShipListP1.add(new Cruiser(aPlayer1));
+		aShipListP1.add(new Cruiser(aPlayer1));
+		aShipListP1.add(new Destroyer(aPlayer1));
+		aShipListP1.add(new Destroyer(aPlayer1));
+		aShipListP1.add(new Destroyer(aPlayer1));
+		aShipListP1.add(new TorpedoBoat(aPlayer1));
+		aShipListP1.add(new TorpedoBoat(aPlayer1));
+		aShipListP1.add(new MineLayer(aPlayer1));
+		aShipListP1.add(new MineLayer(aPlayer1));
+		aShipListP1.add(new RadarBoat(aPlayer1));
 		
 		aShipListP2 = new ArrayList<Ship>();
-		aShipListP2.add(new Cruiser());
-		aShipListP2.add(new Cruiser());
-		aShipListP2.add(new Destroyer());
-		aShipListP2.add(new Destroyer());
-		aShipListP2.add(new Destroyer());
-		aShipListP2.add(new TorpedoBoat());
-		aShipListP2.add(new TorpedoBoat());
-		aShipListP2.add(new MineLayer());
-		aShipListP2.add(new MineLayer());
-		aShipListP2.add(new RadarBoat());
+		aShipListP2.add(new Cruiser(aPlayer2));
+		aShipListP2.add(new Cruiser(aPlayer2));
+		aShipListP2.add(new Destroyer(aPlayer2));
+		aShipListP2.add(new Destroyer(aPlayer2));
+		aShipListP2.add(new Destroyer(aPlayer2));
+		aShipListP2.add(new TorpedoBoat(aPlayer2));
+		aShipListP2.add(new TorpedoBoat(aPlayer2));
+		aShipListP2.add(new MineLayer(aPlayer2));
+		aShipListP2.add(new MineLayer(aPlayer2));
+		aShipListP2.add(new RadarBoat(aPlayer2));
 		
 	}
 	
@@ -266,8 +266,9 @@ public class Game {
 	 * port or starboard of the head, or somewhere in front of the head depending on the ship's speed. 
 	 * Inputs will be validated in the GUI itself.)
 	 * 
-	 * Important note: pDestination represents the square where the HEAD of the ship will be after the move, 
-	 * except when going backwards. Then, pDestination represents where the TAIL will be. 
+	 * Important note: When moving forward, pDestination represents the square where the HEAD of the ship will be 
+	 * after the move. When going backwards pDestination represents where the TAIL will be.
+	 * When moving to the side, pDestination may be any of the squares the ship will occupy after the move. 
 	 * 
 	 * TODO recompute visibility at the end of the move
 	 * 
@@ -322,14 +323,15 @@ public class Game {
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
+					//We also have to check whether the square next to the head of the ship is a mine. 
+					Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() - 1];
+					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+						mineExplode();
+						//TODO log entry
+					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX(), finalDestinationHead.getY() + pShip.getSize() - 1);
-				//We also have to check whether the square next to the head of the ship is a mine. 
-				Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() - 1];
-				if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-					mineExplode();
-					//TODO log entry
-				}
+				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getY() > tailY) {
@@ -470,14 +472,15 @@ public class Game {
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
+					//We also have to check whether the square next to the head of the ship is a mine. 
+					Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
+					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+						mineExplode();
+						//TODO log entry
+					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX(), finalDestinationHead.getY() - pShip.getSize() + 1);
-				//We also have to check whether the square next to the head of the ship is a mine. 
-				Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
-				if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-					mineExplode();
-					//TODO log entry
-				}
+				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getY() < tailY) {
@@ -616,14 +619,15 @@ public class Game {
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
+					//We also have to check whether the square next to the head of the ship is a mine. 
+					Square sf = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
+					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+						mineExplode();
+						//TODO log entry
+					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX() + pShip.getSize() - 1, finalDestinationHead.getY());
-				//We also have to check whether the square next to the head of the ship is a mine. 
-				Square sf = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
-				if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-					mineExplode();
-					//TODO log entry
-				}
+				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getX() > tailX) {
@@ -764,14 +768,15 @@ public class Game {
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
+					//We also have to check whether the square next to the head of the ship is a mine. 
+					Square sf = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
+					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+						mineExplode();
+						//TODO log entry
+					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX() - pShip.getSize() + 1, finalDestinationHead.getY());
-				//We also have to check whether the square next to the head of the ship is a mine. 
-				Square sf = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
-				if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-					mineExplode();
-					//TODO log entry
-				}
+				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getX() < tailX) {
@@ -879,8 +884,115 @@ public class Game {
 		setShipPosition(pShip, finalDestinationHead, finalDestinationTail);
 	}
 	
-	private void turnShip(Ship pShip, Coordinate pCoord) {
-
+	/**
+	 * Changes the position of a ship by rotating it. 
+	 * Assumes the pCoord input is valid (given the type of ship) and represents the new position of the head. 
+	 * (Validity check should be performed by the client before sending the move to the game.)  
+	 * @param pShip
+	 * @param pCoord
+	 */
+	private void turnShip(Ship pShip, Coordinate pDestination) {
+		//Compute the turn area
+		//Check for obstacles in it
+		//If any, resolve collision and cancel movement
+		//Otherwise, compute new position of ship
+		
+		int headX = pShip.getHead().getX();
+		int headY = pShip.getHead().getY();
+		int tailX = pShip.getTail().getX();
+		int tailY = pShip.getTail().getY();
+		Direction direction = pShip.getDirection();
+		
+		boolean turnSuccess = true;
+		
+		//Here we look at 180 degrees turn
+		if (pShip.canTurn180() && pDestination.equals(pShip.getTail())) {
+			
+		}
+		else if (pShip.canTurn180()) {
+			//Turning 90 degrees but over center square
+		}
+		else /*Some other ship turning over its tail*/{
+			switch (direction) {
+			case NORTH: 
+				//Case turning left/port 
+				if (pDestination.getX() < tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = pShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX-1; x > tailX-pShip.getSize()+1 && i>0; x--) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y > tailY-i; y--) {
+							Square s = aBoard[x][y];
+							//Looking for non-exploding obstacles
+							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
+								turnSuccess = false;
+								//TODO log entry
+								System.out.println("Obstacle found");
+								broke = true;
+								break; 
+							}
+							//Looking for mines
+							if (s instanceof MineSquare) {
+								turnSuccess = false;
+								mineExplode();
+								//TODO log entry
+								broke = true;
+								break; 
+							}
+						}
+						if (broke) {
+							break;
+						}
+					}
+				}
+				//Case turning right/starboard 
+				if (pDestination.getX() > tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = pShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX+1; x < tailX+pShip.getSize()-1 && i>0; x++) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y > tailY-i; y--) {
+							Square s = aBoard[x][y];
+							//Looking for non-exploding obstacles
+							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
+								turnSuccess = false;
+								//TODO log entry
+								System.out.println("Obstacle found");
+								broke = true;
+								break; 
+							}
+							//Looking for mines
+							if (s instanceof MineSquare) {
+								turnSuccess = false;
+								mineExplode();
+								//TODO log entry
+								broke = true;
+								break; 
+							}
+						}
+						if (broke) {
+							break;
+						}
+					}
+				}
+				break; //from case NORTH
+			case SOUTH: //same as north, but change the y's signs
+				break;
+			case WEST: //same as north, but swap x and y
+				break; 
+			case EAST: //same as west, but change the x's signs
+				break;
+			}
+			
+			if (turnSuccess) {
+				//A ship turning 90 degrees will have its head on the destination coordinate and its tail on the same square as before
+				setShipPosition(pShip, pDestination, pShip.getTail());
+			}
+		}
 	}
 	
 	private void fireCannon(Ship pShip, Coordinate pCoord) {
@@ -926,7 +1038,7 @@ public class Game {
 	private void mineExplode() {
 		//TODO
 		System.out.println("BOOOOOOOM!!!!!");
-		//Note: mineExplode should 
+		//Note: mineExplode should remove the mine in addition to damaging a ship
 	}
 
 	/**
@@ -934,20 +1046,7 @@ public class Game {
 	 * @return
 	 */
 	public String printBoard() {
-		String s = "Legend: \n" +
-				"~  - Empty sea square\n" +
-				"XX - Coral reef\n" +
-				"B  - Base\n" +
-				"C  - Cruiser\n" +
-				"D  - Destroyer\n" +
-				"T  - Torpedo boat\n" +
-				"M  - Mine layer\n" +
-				"R  - Radar boat\n" +
-				"## - Mine\n" +
-				" 2 - Undamaged\n" +
-				" 1 - Damaged (heavy armored ships only)\n" +
-				" 0 - Destroyed\n" +
-				"Lower case indicates the head of a ship\n";
+		String s = "Turn number: " + aTurnNum + "\n";
 		s = s + "                       1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2\n";
 		s = s + "   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 x\n";
 		for (int y = 0; y<aBoard.length; y++) {

@@ -1,5 +1,6 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
 import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.game.Coordinate;
 import battlesheeps.game.Game.Direction;
@@ -18,6 +19,8 @@ public abstract class Ship {
 
 	private Coordinate aLocationHead;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
 	private Coordinate aLocationTail;	//x and y coordinates of the stern of the ship
+	
+	private Account aPlayer; 
 		
 	protected int aSize;					//Length of the ship, in squares. 
 	protected int aMaxSpeed;				//Number of squares the ship can move forward when undamaged
@@ -26,7 +29,7 @@ public abstract class Ship {
 	protected int aRadarRangeWidth;			//Width of radar (perpendicular to ship)
 	protected int aCannonRangeLength;		//Length of cannon range (parallel to ship)
 	protected int aCannonRangeWidth;		//Width of cannon range (perpendicular to ship)
-	protected int aTurnPoint;				//int between 0 and aSize-1. Represents the square that doesn't move when turning, 0 being the head.
+	protected boolean aTurn180;				//True if ship can rotate 180 degrees over its center; false if the ship can only rotate 90 degrees over its tail.
 	
 	protected int aActualSpeed;				//Number of squares the ship can move forward, given current amount of damage
 	protected Damage[] aDamage;				//Array of the length of the ship providing information on the damage status of every square
@@ -35,7 +38,8 @@ public abstract class Ship {
 	/**
 	 * This method should be called by the subclass after the construction of a ship
 	 */
-	public void initializeShip() {
+	public void initializeShip(Account pPlayer) {
+		aPlayer = pPlayer;
 		aLocationHead = null;
 		aLocationTail = null;
 		
@@ -51,6 +55,10 @@ public abstract class Ship {
 		aLocationTail = pTail;
 	}
 	
+	/*
+	 * GETTERS
+	 */
+	
 	public int getSize() {
 		return aSize;
 	}
@@ -65,6 +73,10 @@ public abstract class Ship {
 	
 	public Coordinate getTail() {
 		return aLocationTail;
+	}
+	
+	public boolean canTurn180() {
+		return aTurn180;
 	}
 	
 	/**
