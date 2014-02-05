@@ -901,24 +901,178 @@ public class Game {
 		//If any, resolve collision and cancel movement
 		//Otherwise, compute new position of ship
 		
+		int headX = pShip.getHead().getX();
+		int headY = pShip.getHead().getY();
 		int tailX = pShip.getTail().getX();
 		int tailY = pShip.getTail().getY();
 		Direction direction = pShip.getDirection();
 		
 		boolean turnSuccess = true;
 		
-		//Here we look at 180 degrees turn
+		//Here we look at 180 degrees turn. We assume ships able to do that are 3 squares long. 
 		if (pShip.canTurn180() && pDestination.equals(pShip.getTail())) {
+			ArrayList<Square> listOfSquares = new ArrayList<Square>();
 			switch (direction) {
 			case NORTH: 
-				
+				listOfSquares.add(aBoard[headX-1][headY]);
+				listOfSquares.add(aBoard[headX-1][headY+1]);
+				listOfSquares.add(aBoard[headX-1][headY+2]);
+				listOfSquares.add(aBoard[tailX+1][tailY]);
+				listOfSquares.add(aBoard[tailX+1][tailY-1]);
+				listOfSquares.add(aBoard[tailX+1][tailY-2]);
+				break; 
+			case SOUTH: 
+				listOfSquares.add(aBoard[headX-1][headY]);
+				listOfSquares.add(aBoard[headX-1][headY-1]);
+				listOfSquares.add(aBoard[headX-1][headY-2]);
+				listOfSquares.add(aBoard[tailX+1][tailY]);
+				listOfSquares.add(aBoard[tailX+1][tailY+1]);
+				listOfSquares.add(aBoard[tailX+1][tailY+2]);
+				break;
+			case EAST: 
+				listOfSquares.add(aBoard[headX][headY-1]);
+				listOfSquares.add(aBoard[headX-1][headY-1]);
+				listOfSquares.add(aBoard[headX-2][headY-1]);
+				listOfSquares.add(aBoard[tailX][tailY+1]);
+				listOfSquares.add(aBoard[tailX+1][tailY+1]);
+				listOfSquares.add(aBoard[tailX+2][tailY+1]);
+				break; 
+			case WEST: 
+				listOfSquares.add(aBoard[headX][headY-1]);
+				listOfSquares.add(aBoard[headX+1][headY-1]);
+				listOfSquares.add(aBoard[headX+2][headY-1]);
+				listOfSquares.add(aBoard[tailX][tailY+1]);
+				listOfSquares.add(aBoard[tailX-1][tailY+1]);
+				listOfSquares.add(aBoard[tailX-2][tailY+1]);
+				break; 
+			}
+			//Now we iterate over the list of squares we built
+			for (Square s : listOfSquares) {
+				if (s instanceof ShipSquare) {
+					turnSuccess = false;
+					//TODO log entry
+					System.out.println("Obstacle found");
+				}
+				else if (s instanceof MineSquare) {
+					turnSuccess = false;
+					mineExplode();
+					//TODO log entry
+				}
 			}
 			
+			//If the rotation was successful: 
+			if (turnSuccess) {
+				//The head and tail of the ship have been swapped
+				setShipPosition(pShip, pShip.getTail(), pShip.getHead());
+			}
 		}
+		
+		//Turning 90 degrees but over center square
 		else if (pShip.canTurn180()) {
-			//Turning 90 degrees but over center square
+			ArrayList<Square> listOfSquares = new ArrayList<Square>();
+			Coordinate destinationTail = null;
+			switch (direction) {
+			case NORTH: 
+				//Case turning left/port (west)
+				if (pDestination.getX() < tailX) {
+					listOfSquares.add(aBoard[headX-1][headY]);
+					listOfSquares.add(aBoard[tailX+1][tailY]);
+					listOfSquares.add(aBoard[headX-1][headY+1]);
+					listOfSquares.add(aBoard[tailX+1][tailY-1]);
+					destinationTail = new Coordinate(pDestination.getX() + 2, pDestination.getY());
+				}
+				//Case turning right/starboard (east)
+				else if (pDestination.getX() > tailX) {
+					listOfSquares.add(aBoard[headX+1][headY]);
+					listOfSquares.add(aBoard[tailX-1][tailY]);
+					listOfSquares.add(aBoard[headX+1][headY+1]);
+					listOfSquares.add(aBoard[tailX-1][tailY-1]);
+					destinationTail = new Coordinate(pDestination.getX() - 2, pDestination.getY());
+				}
+				break; 
+			case SOUTH: 
+				//Case turning right/starboard (west)
+				if (pDestination.getX() < tailX) {
+					listOfSquares.add(aBoard[headX-1][headY]);
+					listOfSquares.add(aBoard[tailX+1][tailY]);
+					listOfSquares.add(aBoard[headX-1][headY-1]);
+					listOfSquares.add(aBoard[tailX+1][tailY+1]);
+					destinationTail = new Coordinate(pDestination.getX() + 2, pDestination.getY());
+				}
+				//Case turning left/port (east)
+				else if (pDestination.getX() > tailX) {
+					listOfSquares.add(aBoard[headX+1][headY]);
+					listOfSquares.add(aBoard[tailX-1][tailY]);
+					listOfSquares.add(aBoard[headX+1][headY-1]);
+					listOfSquares.add(aBoard[tailX-1][tailY+1]);
+					destinationTail = new Coordinate(pDestination.getX() - 2, pDestination.getY());
+				}
+				break;
+			case EAST: 
+				//Case turning left/port (north)
+				if (pDestination.getY() < tailY) {
+					listOfSquares.add(aBoard[headX][headY-1]);
+					listOfSquares.add(aBoard[tailX][tailY+1]);
+					listOfSquares.add(aBoard[headX-1][headY-1]);
+					listOfSquares.add(aBoard[tailX+1][tailY+1]);
+					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() + 2);
+				}
+				//Case turning right/starboard (south)
+				else if (pDestination.getY() > tailY) {
+					listOfSquares.add(aBoard[headX][headY+1]);
+					listOfSquares.add(aBoard[tailX][tailY-1]);
+					listOfSquares.add(aBoard[headX-1][headY+1]);
+					listOfSquares.add(aBoard[tailX+1][tailY-1]);
+					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() - 2);
+				}
+				break; 
+			case WEST: 
+				//Case turning right/starboard (north)
+				if (pDestination.getY() < tailY) {
+					listOfSquares.add(aBoard[headX][headY-1]);
+					listOfSquares.add(aBoard[tailX][tailY+1]);
+					listOfSquares.add(aBoard[headX+1][headY-1]);
+					listOfSquares.add(aBoard[tailX-1][tailY+1]);
+					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() + 2);
+				}
+				//Case turning left/port (south)
+				else if (pDestination.getY() > tailY) {
+					listOfSquares.add(aBoard[headX][headY+1]);
+					listOfSquares.add(aBoard[tailX][tailY-1]);
+					listOfSquares.add(aBoard[headX+1][headY+1]);
+					listOfSquares.add(aBoard[tailX-1][tailY-1]);
+					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() - 2);
+				}
+				break; 
+			}
+			//Now we iterate over the list of squares we built
+			for (Square s : listOfSquares) {
+				if (s instanceof ShipSquare) {
+					turnSuccess = false;
+					//TODO log entry
+					System.out.println("Obstacle found");
+				}
+				else if (s instanceof MineSquare) {
+					turnSuccess = false;
+					mineExplode();
+					//TODO log entry
+				}
+			}
+			
+			//If the rotation was successful: 
+			if (turnSuccess) {
+				if (destinationTail == null) {
+					throw new InvalidCoordinateException();
+				}
+				else {
+					//The head is on pDestination while the tail is on the destinationTail computed depending on direction
+					setShipPosition(pShip, pDestination, destinationTail);
+				}
+			}
 		}
-		else /*Some other ship turning over its tail*/{
+
+		//90 degrees turn by a regular ship (the pivot is the tail)
+		else {
 			switch (direction) {
 			case NORTH: 
 				//Case turning left/port (west)
@@ -956,7 +1110,7 @@ public class Game {
 					}
 				}
 				//Case turning right/starboard (east)
-				if (pDestination.getX() > tailX) {
+				else if (pDestination.getX() > tailX) {
 					//i remembers how far we have to go along the length of a ship when looking at the turn area
 					int i = pShip.getSize() - 1;
 					boolean broke = false;
@@ -1025,7 +1179,7 @@ public class Game {
 					}
 				}
 				//Case turning left/port (east) 
-				if (pDestination.getX() > tailX) {
+				else if (pDestination.getX() > tailX) {
 					//i remembers how far we have to go along the length of a ship when looking at the turn area
 					int i = pShip.getSize() - 1;
 					boolean broke = false;
@@ -1095,7 +1249,7 @@ public class Game {
 					}
 				}
 				//Case turning right/starboard (south)
-				if (pDestination.getY() > tailY) {
+				else if (pDestination.getY() > tailY) {
 					//i remembers how far we have to go along the length of a ship when looking at the turn area
 					int i = pShip.getSize() - 1;
 					boolean broke = false;
@@ -1165,7 +1319,7 @@ public class Game {
 					}
 				}
 				//Case turning left/port (south)
-				if (pDestination.getY() > tailY) {
+				else if (pDestination.getY() > tailY) {
 					//i remembers how far we have to go along the length of a ship when looking at the turn area
 					int i = pShip.getSize() - 1;
 					boolean broke = false;
@@ -1206,170 +1360,172 @@ public class Game {
 			}
 		}
 		
-		//Checking for mines next to the ship after its rotation. 
-		direction = pShip.getDirection();
-		Square s; 
-		int x, y;
-		switch (direction) {
-		case NORTH: 
-			x = pShip.getHead().getX();
-			y = pShip.getHead().getY() - 1;
-			//Looking in front of head
-			if (y >= 0) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
-				}
-			}
-			//Looking behind the tail
-			y = pShip.getTail().getY() + 1;
-			if (y < aBoard.length) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
-				}
-			}
-			//Looking on both sides of the ship
-			y = pShip.getHead().getY();
-			for (int i = y; i <= pShip.getTail().getY(); i++) {
-				if (x-1 >= 0) {
-					s = aBoard[x-1][i];
+		//After completing rotation, we check for mines next to the ship
+		if (turnSuccess) {
+			direction = pShip.getDirection();
+			Square s; 
+			int x, y;
+			switch (direction) {
+			case NORTH: 
+				x = pShip.getHead().getX();
+				y = pShip.getHead().getY() - 1;
+				//Looking in front of head
+				if (y >= 0) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-				if (x+1 < aBoard.length) {
-					s = aBoard[x+1][i];
+				//Looking behind the tail
+				y = pShip.getTail().getY() + 1;
+				if (y < aBoard.length) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-			}
-			break;
-			
-		case SOUTH: 
-			x = pShip.getHead().getX();
-			y = pShip.getHead().getY() + 1;
-			//Looking in front of head
-			if (y < aBoard.length) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
+				//Looking on both sides of the ship
+				y = pShip.getHead().getY();
+				for (int i = y; i <= pShip.getTail().getY(); i++) {
+					if (x-1 >= 0) {
+						s = aBoard[x-1][i];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
+					if (x+1 < aBoard.length) {
+						s = aBoard[x+1][i];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
 				}
-			}
-			//Looking behind the tail
-			y = pShip.getTail().getY() - 1;
-			if (y > 0) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
-				}
-			}
-			//Looking on both sides of the ship
-			y = pShip.getHead().getY();
-			for (int i = y; i >= pShip.getTail().getY(); i--) {
-				if (x-1 >= 0) {
-					s = aBoard[x-1][i];
+				break;
+
+			case SOUTH: 
+				x = pShip.getHead().getX();
+				y = pShip.getHead().getY() + 1;
+				//Looking in front of head
+				if (y < aBoard.length) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-				if (x+1 < aBoard.length) {
-					s = aBoard[x+1][i];
+				//Looking behind the tail
+				y = pShip.getTail().getY() - 1;
+				if (y > 0) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-			}
-			break;
-			
-		case WEST: 
-			y = pShip.getHead().getY();
-			x = pShip.getHead().getX() - 1;
-			//Looking in front of head
-			if (x >= 0) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
+				//Looking on both sides of the ship
+				y = pShip.getHead().getY();
+				for (int i = y; i >= pShip.getTail().getY(); i--) {
+					if (x-1 >= 0) {
+						s = aBoard[x-1][i];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
+					if (x+1 < aBoard.length) {
+						s = aBoard[x+1][i];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
 				}
-			}
-			//Looking behind the tail
-			x = pShip.getTail().getX() + 1;
-			if (x < aBoard.length) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
-				}
-			}
-			//Looking on both sides of the ship
-			x = pShip.getHead().getX();
-			for (int i = x; i <= pShip.getTail().getX(); i++) {
-				if (y-1 >= 0) {
-					s = aBoard[i][y-1];
+				break;
+
+			case WEST: 
+				y = pShip.getHead().getY();
+				x = pShip.getHead().getX() - 1;
+				//Looking in front of head
+				if (x >= 0) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-				if (y+1 < aBoard.length) {
-					s = aBoard[i][y+1];
+				//Looking behind the tail
+				x = pShip.getTail().getX() + 1;
+				if (x < aBoard.length) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-			}
-			break;
-			
-		case EAST: 
-			y = pShip.getHead().getY();
-			x = pShip.getHead().getX() + 1;
-			//Looking in front of head
-			if (x < aBoard.length) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
+				//Looking on both sides of the ship
+				x = pShip.getHead().getX();
+				for (int i = x; i <= pShip.getTail().getX(); i++) {
+					if (y-1 >= 0) {
+						s = aBoard[i][y-1];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
+					if (y+1 < aBoard.length) {
+						s = aBoard[i][y+1];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
 				}
-			}
-			//Looking behind the tail
-			x = pShip.getTail().getX() - 1;
-			if (x > 0) {
-				s = aBoard[x][y];
-				if (s instanceof MineSquare) {
-					mineExplode();
-					//TODO log
-				}
-			}
-			//Looking on both sides of the ship
-			x = pShip.getHead().getX();
-			for (int i = x; i >= pShip.getTail().getX(); i--) {
-				if (y-1 >= 0) {
-					s = aBoard[i][y-1];
+				break;
+
+			case EAST: 
+				y = pShip.getHead().getY();
+				x = pShip.getHead().getX() + 1;
+				//Looking in front of head
+				if (x < aBoard.length) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
-				if (y+1 < aBoard.length) {
-					s = aBoard[i][y+1];
+				//Looking behind the tail
+				x = pShip.getTail().getX() - 1;
+				if (x > 0) {
+					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode();
 						//TODO log
 					}
 				}
+				//Looking on both sides of the ship
+				x = pShip.getHead().getX();
+				for (int i = x; i >= pShip.getTail().getX(); i--) {
+					if (y-1 >= 0) {
+						s = aBoard[i][y-1];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
+					if (y+1 < aBoard.length) {
+						s = aBoard[i][y+1];
+						if (s instanceof MineSquare) {
+							mineExplode();
+							//TODO log
+						}
+					}
+				}
+				break;
 			}
-			break;
 		}
 	}
 	

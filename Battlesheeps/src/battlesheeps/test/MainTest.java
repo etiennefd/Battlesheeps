@@ -56,6 +56,10 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(d, MoveType.TURN_SHIP, new Coordinate(4, 28));
 		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.TURN_SHIP, new Coordinate(1, 2));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.TURN_SHIP, new Coordinate(1, 4));
+		System.out.println(game.printBoard());
 	}
 
 }
