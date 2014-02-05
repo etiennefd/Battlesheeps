@@ -64,6 +64,12 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(m, MoveType.PICKUP_MINE, new Coordinate(5, 1));
 		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(3, 1));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(c, MoveType.FIRE_CANNON, new Coordinate(4, 1));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(3, 1));
+		System.out.println(game.printBoard());
 	}
 
 }

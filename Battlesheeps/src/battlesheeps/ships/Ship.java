@@ -72,6 +72,78 @@ public abstract class Ship {
 		aLocationTail = pTail;
 	}
 	
+	/**
+	 * Matches a Coordinate target to a cell in the damage array of this ship. Then, changes the value of that 
+	 * cell to Damaged/Destroyed (affected by heavy cannons and heavy armour). 
+	 * @param pTarget
+	 * @param pHeavyCannons
+	 */
+	public void setDamage(Coordinate pTarget, boolean pHeavyCannons) {
+		int targetX = pTarget.getX();
+		int targetY = pTarget.getY();
+		Direction direction = this.getDirection();
+		int damageIndex = 0; 
+		int x, y;
+		
+		switch (direction) {
+		case NORTH: 
+			x = aLocationHead.getX();
+			for (y = aLocationHead.getY(); y <= aLocationTail.getY(); y++, damageIndex++) {
+				if (targetY == y && targetX == x) {
+					break;
+				}
+			}
+			break;
+		case SOUTH: 
+			x = aLocationHead.getX();
+			for (y = aLocationHead.getY(); y >= aLocationTail.getY(); y--, damageIndex++) {
+				if (targetY == y && targetX == x) {
+					break;
+				}
+			}
+			break;
+		case WEST: 
+			y = aLocationHead.getY();
+			for (x = aLocationHead.getX(); x <= aLocationTail.getX(); x++, damageIndex++) {
+				if (targetY == y && targetX == x) {
+					break;
+				}
+			}
+			break;
+		case EAST: 
+			y = aLocationHead.getY();
+			for (x = aLocationHead.getX(); x >= aLocationTail.getX(); x--, damageIndex++) {
+				if (targetY == y && targetX == x) {
+					break;
+				}
+			}
+			break;
+		}
+		//Here we change the Damage value of the computed cell. 
+		if (aDamage[damageIndex] == Damage.DAMAGED) {
+			aDamage[damageIndex] = Damage.DESTROYED;
+		}
+		else if (aDamage[damageIndex] == Damage.UNDAMAGED) {
+			if (aHeavyArmour && !pHeavyCannons) {
+				aDamage[damageIndex] = Damage.DAMAGED;
+			}
+			else {
+				aDamage[damageIndex] = Damage.DESTROYED;
+			}
+		}
+		//else no effect, as the square is already destroyed. 
+	}
+	
+	public boolean isSunk() {
+		boolean sunk = true;
+		for (int i = 0; i < aDamage.length; i++) {
+			if (aDamage[i] != Damage.DESTROYED) {
+				sunk = false;
+			}
+		}
+		return sunk;
+	}
+	
 	/*
 	 * GETTERS
 	 */
@@ -99,6 +171,11 @@ public abstract class Ship {
 	public String getUsername() {
 		return aPlayer.getUsername();
 	}
+	
+	public Damage getDamage(int pIndex) {
+		return aDamage[pIndex];
+	}
+	
 	/**
 	 * Returns one of North, South, East, or West, depending on the position of the ship's head and tail.  
 	 * @return

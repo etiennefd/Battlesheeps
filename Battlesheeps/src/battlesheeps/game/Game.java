@@ -119,53 +119,75 @@ public class Game {
 	 */
 	public void setShipPosition(Ship pShip, Coordinate pHead, Coordinate pTail) {
 		
+		
+		
 		//Are the head and the tail on the same X column? Do they correspond to the length of the ship? 
+		//Case NORTH or SOUTH
 		if (pHead.getX() == pTail.getX() && Math.abs(pHead.getY() - pTail.getY()) == pShip.getSize() - 1) {
-			
+
+			//We remove the ship from the board and set its location parameters to new values
 			removeShip(pShip);
 			pShip.setLocation(pHead, pTail);
 			
-			//Updating the board. First, the head
-			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, true);
-			//Then everything that is between the head and the tail
+			//This index is used to keep track of the damage array
+			int damageIndex = 0;
+			
+			//We put the head of the ship on the board
+			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), true);
+			
+			//We add everything that is between the head and the tail to the board
 			//We must check whether to increase or decrease y (does the head have a higher Y position than the tail?)
 			if (pHead.getY() > pTail.getY()) {
 				for (int y = pHead.getY() - 1; y > pTail.getY(); y--) {
-					aBoard[pHead.getX()][y] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+					damageIndex++;
+					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
 				}
 			}
 			else if (pHead.getY() < pTail.getY()) {
 				for (int y = pHead.getY() + 1; y < pTail.getY(); y++) {
-					aBoard[pHead.getX()][y] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+					damageIndex++;
+					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
 				}
 			}
-			//Finally, the tail
-			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+			
+			//And we add the tail
+			damageIndex++;
+			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+			
 		} 
 		
 		//Are the head and the tail on the same Y row? Do they correspond to the length of the ship? 
 		else if (pHead.getY() == pTail.getY() && Math.abs(pHead.getX() - pTail.getX()) == pShip.getSize() - 1) {
 			
+			//We remove the ship from the board and set its location parameters to new values
 			removeShip(pShip);
 			pShip.setLocation(pHead, pTail);
 			
-			//Updating the board. First, the head
-			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, true);
+			//This index is used to keep track of the damage array
+			int damageIndex = 0;
+			
+			//We put the head of the ship on the board
+			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), true);
+			
 			//Then everything that is between the head and the tail
-			//We must check whether to increase or decrease y (does the head have a higher Y position than the tail?)
+			//We must check whether to increase or decrease x (does the head have a higher X position than the tail?)
 			if (pHead.getX() > pTail.getX()) {
 				for (int x = pHead.getX() - 1; x > pTail.getX(); x--) {
-					aBoard[x][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+					damageIndex++;
+					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
 				}
 			}
 			else if (pHead.getX() < pTail.getX()) {
 				for (int x = pHead.getX() + 1; x < pTail.getX(); x++) {
-					aBoard[x][pHead.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+					damageIndex++;
+					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
 				}
 			}
 			//Finally, the tail
-			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, Damage.UNDAMAGED, false);
+			damageIndex++;
+			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
 		}
+		
 		else {
 			throw new InvalidCoordinateException();
 		}
@@ -234,8 +256,8 @@ public class Game {
 	
 	
 	/**
-	 * Called from the GameManager to process a move on the board. 
-	 * A private method will be called depending on which kind of move it is. 
+	 * Called from the GameManager to process a move on the board. This is a server-side method. 
+	 * A private method will be called depending on which kind of move is sent. 
 	 * 
 	 * Important: this method does not check for the validity of inputs. It is assumed that the move has 
 	 * already been checked by the client before sending it to the server. This method and the related private
@@ -1559,13 +1581,42 @@ public class Game {
 			//TODO Log entry
 		}
 		else if (s instanceof ShipSquare) {
-			//some method to set ship damage; need to get which ship is affected though. Hopefully the reference to a ship in ShipSquare class is sufficient
-			//TODO Log entry
+			if (((ShipSquare) s).getDamage() == Damage.DESTROYED) {
+				//No effect
+				//TODO log entry
+			}
+			else {
+				boolean heavyCannons = false; 
+				if (pShip instanceof Cruiser) {
+					heavyCannons = true;
+				}
+				Ship target = ((ShipSquare) s).getShip();
+				//Damage the ship
+				target.setDamage(pCoord, heavyCannons);
+				//Check if it sank
+				if (target.isSunk()) {
+					this.removeShip(target);
+					//TODO Log entry
+					//Also do stuff like checking if game ends
+				}
+				else {
+					this.setShipPosition(target, target.getHead(), target.getTail());
+					//TODO Log entry
+				}
+			}
 		}
 	}
+	
 	private void fireTorpedo(Ship pShip, Coordinate pCoord) {
 
 	}
+	
+	/**
+	 * Adds a mine to the specified square, but only if the ship is a mine layer and has mines in its supply. 
+	 * Although this should be unnecessary since only valid input should be received. 
+	 * @param pShip
+	 * @param pCoord
+	 */
 	private void dropMine(Ship pShip, Coordinate pCoord) {
 		if (pShip instanceof MineLayer) {
 			MineLayer ml = (MineLayer) pShip;
@@ -1576,6 +1627,11 @@ public class Game {
 		}
 	}
 	
+	/**
+	 * Removes a mine and adds one to the mine layer's supply. 
+	 * @param pShip
+	 * @param pCoord
+	 */
 	private void pickupMine(Ship pShip, Coordinate pCoord) {
 		if (pShip instanceof MineLayer) {
 			MineLayer ml = (MineLayer) pShip;
@@ -1587,6 +1643,10 @@ public class Game {
 		}
 	}
 	
+	/**
+	 * Activates or deactivates the radar boat's long radar. 
+	 * @param pShip
+	 */
 	private void triggerRadar(Ship pShip) {
 		if (pShip instanceof RadarBoat) {
 			RadarBoat rb = (RadarBoat) pShip; 
