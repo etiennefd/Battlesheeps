@@ -236,6 +236,16 @@ public class Game {
 	/**
 	 * Called from the GameManager to process a move on the board. 
 	 * A private method will be called depending on which kind of move it is. 
+	 * 
+	 * Important: this method does not check for the validity of inputs. It is assumed that the move has 
+	 * already been checked by the client before sending it to the server. This method and the related private
+	 * methods simply compute the outcome of the move given a ship and a location. 
+	 * (For instance, fire cannon simply affects the target square, but does not take into account the 
+	 * range of the ship that fired.)
+	 * 
+	 * In many cases, the move will do nothing if the inputs are wrong (e.g. trying to pickup a mine where there is none). 
+	 * This can be changed (to throw exceptions or some other error message) if it would help debugging. 
+	 * 
 	 * @param pShip
 	 * @param pMove
 	 */
@@ -247,8 +257,8 @@ public class Game {
 		case FIRE_TORPEDO: fireTorpedo(pShip, pCoord); break;
 		case DROP_MINE: dropMine(pShip, pCoord); break;
 		case PICKUP_MINE: pickupMine(pShip, pCoord); break;
-		case TRIGGER_RADAR: triggerRadar(pShip, pCoord); break;
-		case REPAIR_SHIP: repairShip(pShip, pCoord); break;
+		case TRIGGER_RADAR: triggerRadar(pShip); break;
+		case REPAIR_SHIP: pShip.repair(); break;
 		}
 	}
 	
@@ -1536,7 +1546,7 @@ public class Game {
 			//Miss
 			//TODO Log entry
 		}
-		else if (s instanceof CoralReef) {
+		else if (s instanceof CoralReef) { //Might not be needed if client doesn't accept reefs as a valid target
 			//Hit coral reef (no effect)
 			//TODO Log entry
 		}
@@ -1557,17 +1567,34 @@ public class Game {
 
 	}
 	private void dropMine(Ship pShip, Coordinate pCoord) {
-
+		if (pShip instanceof MineLayer) {
+			MineLayer ml = (MineLayer) pShip;
+			boolean success = ml.layMine();
+			if (success) {
+				aBoard[pCoord.getX()][pCoord.getY()] = new MineSquare();
+			}
+		}
 	}
+	
 	private void pickupMine(Ship pShip, Coordinate pCoord) {
-
+		if (pShip instanceof MineLayer) {
+			MineLayer ml = (MineLayer) pShip;
+			Square s = aBoard[pCoord.getX()][pCoord.getY()];
+			if (s instanceof MineSquare) {
+				aBoard[pCoord.getX()][pCoord.getY()] = new Sea();
+				ml.retrieveMine();
+			}
+		}
 	}
-	private void triggerRadar(Ship pShip, Coordinate pCoord) {
-
+	
+	private void triggerRadar(Ship pShip) {
+		if (pShip instanceof RadarBoat) {
+			RadarBoat rb = (RadarBoat) pShip; 
+			rb.triggerRadar();
+			//Recompute visibility
+		}
 	}
-	private void repairShip(Ship pShip, Coordinate pCoord) {
 
-	}
 	
 	private void mineExplode() {
 		//TODO

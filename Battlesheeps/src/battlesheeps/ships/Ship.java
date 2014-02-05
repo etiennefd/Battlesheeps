@@ -32,7 +32,7 @@ public abstract class Ship {
 	protected boolean aTurn180;				//True if ship can rotate 180 degrees over its center; false if the ship can only rotate 90 degrees over its tail.
 	
 	protected int aActualSpeed;				//Number of squares the ship can move forward, given current amount of damage
-	protected Damage[] aDamage;				//Array of the length of the ship providing information on the damage status of every square
+	protected Damage[] aDamage;				//Array of the length of the ship providing information on the damage status of every square (head == 0)
 	
 	
 	/**
@@ -47,6 +47,23 @@ public abstract class Ship {
 		aDamage = new Damage[aSize];
 		for (int i = 0; i<aDamage.length; i++) {
 			aDamage[i] = Damage.UNDAMAGED;
+		}
+	}
+	
+	/**
+	 * Repairs one square of the ship. The repaired square is the first one (starting at the head and moving toward the tail)
+	 * that is not "undamaged". Whether the square is "damaged" or "destroyed" is irrelevant. 
+	 * 
+	 * Note: there is no check to see if the base is still intact. However, the action of repairing will be available
+	 * only if the ship is docked to an undamaged square of the base, so once they are all destroyed no ships will 
+	 * be reparable. 
+	 */
+	public void repair() {
+		for (int i = 0; i < aDamage.length; i++) {
+			if (aDamage[i] != Damage.UNDAMAGED) {
+				aDamage[i] = Damage.UNDAMAGED;
+				break;
+			}
 		}
 	}
 	

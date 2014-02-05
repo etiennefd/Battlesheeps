@@ -26,6 +26,14 @@ public class RadarBoat extends Ship {
 	public void triggerRadar() {
 		aExtendedRadar = !aExtendedRadar;
 	}
-	
 	//Somewhere in the compute radar range method: if(aExtendedRadar) {multiply radarRangeLength by 2}
+
+	public int getActualSpeed() {
+		if (aExtendedRadar) {
+			return 0;
+		}
+		else {
+			return aActualSpeed;
+		}
+	}
 }

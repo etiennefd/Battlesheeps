@@ -60,6 +60,10 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(r, MoveType.TURN_SHIP, new Coordinate(1, 4));
 		System.out.println(game.printBoard());
+		game.computeMoveResult(d, MoveType.FIRE_CANNON, new Coordinate(3, 27));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(m, MoveType.PICKUP_MINE, new Coordinate(5, 1));
+		System.out.println(game.printBoard());
 	}
 
 }
