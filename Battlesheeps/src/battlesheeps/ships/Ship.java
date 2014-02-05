@@ -79,6 +79,9 @@ public abstract class Ship {
 		return aTurn180;
 	}
 	
+	public String getUsername() {
+		return aPlayer.getUsername();
+	}
 	/**
 	 * Returns one of North, South, East, or West, depending on the position of the ship's head and tail.  
 	 * @return
