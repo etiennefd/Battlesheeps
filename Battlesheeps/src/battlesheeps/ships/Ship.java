@@ -1,9 +1,9 @@
 package battlesheeps.ships;
 
 import battlesheeps.accounts.Account;
+import battlesheeps.board.Coordinate;
 import battlesheeps.exceptions.InvalidCoordinateException;
-import battlesheeps.game.Coordinate;
-import battlesheeps.game.Game.Direction;
+import battlesheeps.server.ServerGame.Direction;
 
 /**
  * Ship is an abstract class containing the common functionality of actual ships such as 

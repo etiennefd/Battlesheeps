@@ -1,7 +1,8 @@
 package battlesheeps.test;
 
-import battlesheeps.game.*;
-import battlesheeps.game.Game.MoveType;
+import battlesheeps.board.Coordinate;
+import battlesheeps.server.*;
+import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
 
 public class MainTest {
@@ -26,7 +27,7 @@ public class MainTest {
 				"Lower case indicates the head of a ship\n";
 		System.out.println(s);
 		
-		Game game = new Game(0, null, null);
+		ServerGame game = new ServerGame(0, null, null);
 		
 		//Add some ships and set their position
 		Cruiser c = new Cruiser(null);

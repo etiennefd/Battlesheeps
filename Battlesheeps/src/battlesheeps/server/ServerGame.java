@@ -1,4 +1,4 @@
-package battlesheeps.game;
+package battlesheeps.server;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.ships.*;
 import battlesheeps.ships.Ship.Damage;
 
-public class Game {
+public class ServerGame {
 
 	public enum Visible {
 		COVERED_BY_RADAR, COVERED_BY_SONAR, NOT_COVERED
@@ -40,7 +40,7 @@ public class Game {
 	 * @param pPlayer1
 	 * @param pPlayer2
 	 */
-	public Game(int pGameID, Account pPlayer1, Account pPlayer2) {
+	public ServerGame(int pGameID, Account pPlayer1, Account pPlayer2) {
 		
 		aGameID = pGameID;
 		aPlayer1 = pPlayer1;
@@ -118,8 +118,6 @@ public class Game {
 	 * @param pTail
 	 */
 	public void setShipPosition(Ship pShip, Coordinate pHead, Coordinate pTail) {
-		
-		
 		
 		//Are the head and the tail on the same X column? Do they correspond to the length of the ship? 
 		//Case NORTH or SOUTH
