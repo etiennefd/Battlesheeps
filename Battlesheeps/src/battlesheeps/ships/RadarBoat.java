@@ -1,10 +1,12 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
+
 public class RadarBoat extends Ship {
 	
 	private boolean aExtendedRadar;
 	
-	public RadarBoat() {
+	public RadarBoat(Account pPlayer) {
 		
 		super();
 		aSize = 3;
@@ -14,9 +16,9 @@ public class RadarBoat extends Ship {
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 5;
 		aCannonRangeWidth = 3;
-		aTurnPoint = 1;	
+		aTurn180 = true; 
 		
-		initializeShip();
+		initializeShip(pPlayer);
 		
 		aExtendedRadar = false;
 	}
@@ -24,6 +26,14 @@ public class RadarBoat extends Ship {
 	public void triggerRadar() {
 		aExtendedRadar = !aExtendedRadar;
 	}
-	
 	//Somewhere in the compute radar range method: if(aExtendedRadar) {multiply radarRangeLength by 2}
+
+	public int getActualSpeed() {
+		if (aExtendedRadar) {
+			return 0;
+		}
+		else {
+			return aActualSpeed;
+		}
+	}
 }

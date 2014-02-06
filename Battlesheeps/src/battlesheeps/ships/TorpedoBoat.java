@@ -1,9 +1,11 @@
 package battlesheeps.ships;
 
+import battlesheeps.accounts.Account;
+
 public class TorpedoBoat extends Ship {
 
 
-	public TorpedoBoat() {
+	public TorpedoBoat(Account pPlayer) {
 		
 		super();
 		aSize = 3;
@@ -13,8 +15,8 @@ public class TorpedoBoat extends Ship {
 		aRadarRangeWidth = 3;
 		aCannonRangeLength = 5;
 		aCannonRangeWidth = 5;
-		aTurnPoint = 1;	
+		aTurn180 = true; 
 		
-		initializeShip();
+		initializeShip(pPlayer);
 	}
 }

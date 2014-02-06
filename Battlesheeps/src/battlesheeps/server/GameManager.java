@@ -1,4 +1,4 @@
-package battlesheeps.game;
+package battlesheeps.server;
 
 public class GameManager {
 

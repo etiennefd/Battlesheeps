@@ -41,5 +41,16 @@ public class ShipSquare implements Square {
 		
 		return s;
 	}
+	
+	public Ship getShip() {
+		return aShip;
+	}
+	
+	public boolean isHead() {
+		return aHead;
+	}
 
+	public Damage getDamage() {
+		return aDamage;
+	}
 }
