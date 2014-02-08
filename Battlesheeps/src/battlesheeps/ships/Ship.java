@@ -73,67 +73,102 @@ public abstract class Ship {
 	}
 	
 	/**
-	 * Matches a Coordinate target to a cell in the damage array of this ship. Then, changes the value of that 
-	 * cell to Damaged/Destroyed (affected by heavy cannons and heavy armour). 
+	 * Matches a Coordinate target to a cell in the damage array of this ship.
+	 * Will throw an InvalidCoordinateException if the Coordinate doesn't match the ship's position. 
 	 * @param pTarget
 	 * @param pHeavyCannons
 	 */
-	public void setDamage(Coordinate pTarget, boolean pHeavyCannons) {
+	public int getDamageIndex(Coordinate pTarget) {
 		int targetX = pTarget.getX();
 		int targetY = pTarget.getY();
 		Direction direction = this.getDirection();
-		int damageIndex = 0; 
+		int tempIndex = 0; 
+		int damageIndex = -1;
 		int x, y;
 		
 		switch (direction) {
 		case NORTH: 
 			x = aLocationHead.getX();
-			for (y = aLocationHead.getY(); y <= aLocationTail.getY(); y++, damageIndex++) {
+			for (y = aLocationHead.getY(); y <= aLocationTail.getY(); y++, tempIndex++) {
 				if (targetY == y && targetX == x) {
+					damageIndex = tempIndex;
 					break;
 				}
 			}
 			break;
 		case SOUTH: 
 			x = aLocationHead.getX();
-			for (y = aLocationHead.getY(); y >= aLocationTail.getY(); y--, damageIndex++) {
+			for (y = aLocationHead.getY(); y >= aLocationTail.getY(); y--, tempIndex++) {
 				if (targetY == y && targetX == x) {
+					damageIndex = tempIndex;
 					break;
 				}
 			}
 			break;
 		case WEST: 
 			y = aLocationHead.getY();
-			for (x = aLocationHead.getX(); x <= aLocationTail.getX(); x++, damageIndex++) {
+			for (x = aLocationHead.getX(); x <= aLocationTail.getX(); x++, tempIndex++) {
 				if (targetY == y && targetX == x) {
+					damageIndex = tempIndex;
 					break;
 				}
 			}
 			break;
 		case EAST: 
 			y = aLocationHead.getY();
-			for (x = aLocationHead.getX(); x >= aLocationTail.getX(); x--, damageIndex++) {
+			for (x = aLocationHead.getX(); x >= aLocationTail.getX(); x--, tempIndex++) {
 				if (targetY == y && targetX == x) {
+					damageIndex = tempIndex;
 					break;
 				}
 			}
 			break;
 		}
-		//Here we change the Damage value of the computed cell. 
-		if (aDamage[damageIndex] == Damage.DAMAGED) {
-			aDamage[damageIndex] = Damage.DESTROYED;
+		if (damageIndex >= 0) {
+			return damageIndex;
 		}
-		else if (aDamage[damageIndex] == Damage.UNDAMAGED) {
-			if (aHeavyArmour && !pHeavyCannons) {
-				aDamage[damageIndex] = Damage.DAMAGED;
-			}
-			else {
-				aDamage[damageIndex] = Damage.DESTROYED;
-			}
+		else {
+			throw new InvalidCoordinateException();
 		}
-		//else no effect, as the square is already destroyed. 
 	}
 	
+	/**
+	 * Changes the value of the specified cell in the damage array of the ship. 
+	 * Returns true if some damage was done, and false otherwise (index out of array bounds, or square already destroyed). 
+	 * 
+	 * The proper way of dealing damage to a ship is to call: 
+	 * ship.setDamageAtIndex(ship.getDamageIndex(*some coordinate*), *heavyCannons*);
+	 * @param pIndex
+	 * @param pHeavyCannons
+	 */
+	public boolean setDamageAtIndex(int pIndex, boolean pHeavyCannons) {
+		if (pIndex < 0 || pIndex >= aDamage.length) {
+			return false;
+		}
+		
+		if (aDamage[pIndex] == Damage.DESTROYED) {
+			return false;
+		}
+		
+		if (aDamage[pIndex] == Damage.DAMAGED) {
+			aDamage[pIndex] = Damage.DESTROYED;
+		}
+		else if (aDamage[pIndex] == Damage.UNDAMAGED) {
+			if (aHeavyArmour && !pHeavyCannons) {
+				aDamage[pIndex] = Damage.DAMAGED;
+			}
+			else {
+				aDamage[pIndex] = Damage.DESTROYED;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Tests whether all the squares of the ship have been destroyed. 
+	 * Should be called immediately after dealing damage to the ship. 
+	 * @return
+	 */
 	public boolean isSunk() {
 		boolean sunk = true;
 		for (int i = 0; i < aDamage.length; i++) {
@@ -172,7 +207,7 @@ public abstract class Ship {
 		return aPlayer.getUsername();
 	}
 	
-	public Damage getDamage(int pIndex) {
+	public Damage getDamageAtIndex(int pIndex) {
 		return aDamage[pIndex];
 	}
 	

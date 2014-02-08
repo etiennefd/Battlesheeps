@@ -23,15 +23,21 @@ public class ServerGame {
 		NORTH, SOUTH, EAST, WEST
 	}
 	
+	//Fields related to the identity of the game
 	private int aGameID;
 	private Account aPlayer1;
 	private Account aPlayer2;
 	private int aTurnNum;
 	private String aDateLastPlayed;
 	
+	//Fields related to the contents of the game
 	private Square[][] aBoard;
 	private ArrayList<Ship> aShipListP1;
 	private ArrayList<Ship> aShipListP2;
+	
+	//Fields related to the ending of the game
+	private boolean aGameComplete;
+	private Account aWinner;
 	
 	/**
 	 * Constructor for Games. Accepts an ID and the two players. 
@@ -47,6 +53,9 @@ public class ServerGame {
 		aPlayer2 = pPlayer2;
 		aTurnNum = 0;
 		aDateLastPlayed = "never";
+		
+		aGameComplete = false; 
+		aWinner = null;
 		
 		aBoard = new Square[30][30];
 		//Filling the board with sea and base squares
@@ -93,6 +102,7 @@ public class ServerGame {
 	
 	/**
 	 * Adds 24 coral reef squares to the board within the central 10*24 area. 
+	 * Can be called repeatedly in case of disagreement between players. 
 	 */
 	public void generateCoralReefs() {
 		for (int i = 0; i<24; i++) {
@@ -131,26 +141,26 @@ public class ServerGame {
 			int damageIndex = 0;
 			
 			//We put the head of the ship on the board
-			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), true);
+			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), true);
 			
 			//We add everything that is between the head and the tail to the board
 			//We must check whether to increase or decrease y (does the head have a higher Y position than the tail?)
 			if (pHead.getY() > pTail.getY()) {
 				for (int y = pHead.getY() - 1; y > pTail.getY(); y--) {
 					damageIndex++;
-					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 				}
 			}
 			else if (pHead.getY() < pTail.getY()) {
 				for (int y = pHead.getY() + 1; y < pTail.getY(); y++) {
 					damageIndex++;
-					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+					aBoard[pHead.getX()][y] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 				}
 			}
 			
 			//And we add the tail
 			damageIndex++;
-			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 			
 		} 
 		
@@ -165,25 +175,25 @@ public class ServerGame {
 			int damageIndex = 0;
 			
 			//We put the head of the ship on the board
-			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), true);
+			aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), true);
 			
 			//Then everything that is between the head and the tail
 			//We must check whether to increase or decrease x (does the head have a higher X position than the tail?)
 			if (pHead.getX() > pTail.getX()) {
 				for (int x = pHead.getX() - 1; x > pTail.getX(); x--) {
 					damageIndex++;
-					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 				}
 			}
 			else if (pHead.getX() < pTail.getX()) {
 				for (int x = pHead.getX() + 1; x < pTail.getX(); x++) {
 					damageIndex++;
-					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+					aBoard[x][pHead.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 				}
 			}
 			//Finally, the tail
 			damageIndex++;
-			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamage(damageIndex), false);
+			aBoard[pTail.getX()][pTail.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(damageIndex), false);
 		}
 		
 		else {
@@ -266,20 +276,26 @@ public class ServerGame {
 	 * In many cases, the move will do nothing if the inputs are wrong (e.g. trying to pickup a mine where there is none). 
 	 * This can be changed (to throw exceptions or some other error message) if it would help debugging. 
 	 * 
+	 * The method returns true if the move triggered the end of the game. 
+	 * 
 	 * @param pShip
 	 * @param pMove
 	 */
-	public void computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
+	public boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
+		
 		switch (pMove) {
 		case TRANSLATE_SHIP: translateShip(pShip, pCoord); break;
 		case TURN_SHIP: turnShip(pShip, pCoord); break;
 		case FIRE_CANNON: fireCannon(pShip, pCoord); break;
-		case FIRE_TORPEDO: fireTorpedo(pShip, pCoord); break;
+		case FIRE_TORPEDO: fireTorpedo(pShip); break;
 		case DROP_MINE: dropMine(pShip, pCoord); break;
 		case PICKUP_MINE: pickupMine(pShip, pCoord); break;
 		case TRIGGER_RADAR: triggerRadar(pShip); break;
 		case REPAIR_SHIP: pShip.repair(); break;
 		}
+		
+		return aGameComplete; //Eventually we might want to return the winner instead (Null if game still going on). 
+							  //Then we would probably not need the field aGameComplete
 	}
 	
 	/**
@@ -1589,24 +1605,134 @@ public class ServerGame {
 					heavyCannons = true;
 				}
 				Ship target = ((ShipSquare) s).getShip();
-				//Damage the ship
-				target.setDamage(pCoord, heavyCannons);
-				//Check if it sank
-				if (target.isSunk()) {
-					this.removeShip(target);
-					//TODO Log entry
-					//Also do stuff like checking if game ends
-				}
-				else {
-					this.setShipPosition(target, target.getHead(), target.getTail());
-					//TODO Log entry
-				}
+				//Here we call the method to damage the target
+				damageShip(target, pCoord, heavyCannons);
 			}
 		}
 	}
 	
-	private void fireTorpedo(Ship pShip, Coordinate pCoord) {
-
+	private void fireTorpedo(Ship pShip) {
+		Direction torpedoDirection = pShip.getDirection(); 
+		int headX = pShip.getHead().getX();
+		int headY = pShip.getHead().getY();
+		int x, y;
+		
+		switch (torpedoDirection) {
+		case NORTH: 
+			x = headX;
+			for (y = headY - 1; y >= 0 && y >= headY - 10; y--) {
+				boolean hitSomething = torpedoCheck(x, y, torpedoDirection);
+				if (hitSomething) break;
+			}
+			break;
+		case SOUTH: 
+			x = headX;
+			for (y = headY + 1; y < aBoard.length && y <= headY + 10; y++) {
+				boolean hitSomething = torpedoCheck(x, y, torpedoDirection);
+				if (hitSomething) break;
+			}
+			break;
+		case WEST: 
+			y = headY;
+			for (x = headX - 1; x >= 0 && x >= headX - 10; x--) {
+				boolean hitSomething = torpedoCheck(x, y, torpedoDirection);
+				if (hitSomething) break;
+			}
+			break;
+		case EAST: 
+			y = headY;
+			for (x = headX + 1; x < aBoard.length && x <= headX + 10; x++) {
+				boolean hitSomething = torpedoCheck(x, y, torpedoDirection);
+				if (hitSomething) break;
+			}
+			break;
+		}
+	}
+	
+	/**
+	 * Returns true if the torpedo hit a non-sea square at position (pX, pY). 
+	 * Also performs necessary operations upon hit (e.g. damaging a ship). 
+	 * This method is called repeatedly as the torpedo moves forward. 
+	 * @param pX
+	 * @param pY
+	 * @return
+	 */
+	private boolean torpedoCheck(int pX, int pY, Direction pTorpedoDirection) {
+		Square s = aBoard[pX][pY];
+		if (s instanceof Sea) {
+			return false; //Didn't hit anything
+		}
+		else {
+			if (s instanceof CoralReef) {
+				//nothing happens, except notify the player I guess
+			}
+			else if (s instanceof MineSquare) {
+				removeMine(new Coordinate (pX, pY));
+			}
+			else if (s instanceof ShipSquare) {
+				boolean heavyCannons = false; //Torpedoes are never heavy, but presumably they could be with some rule changes
+				Ship targetShip = ((ShipSquare) s).getShip();
+				
+				//Damage the targeted square
+				damageShip(targetShip, new Coordinate(pX, pY), heavyCannons);
+				
+				//Damage another square, but only if target is hit from the side
+				
+				//leftOrTop is the coordinate one less in X (if ship is horizontal) or one less in Y (if ship is vertical)
+				//rightOrBottom is the coordinate one more in X (if ship is horizontal) or one more in Y (if ship is vertical)
+				Coordinate leftOrTop = null;
+				Coordinate rightOrBottom = null; 
+				Direction targetDirection = targetShip.getDirection();
+				//If the torpedo was going North or South, there is side damage only if the target ship was facing East or West. 
+				if ((pTorpedoDirection == Direction.NORTH || pTorpedoDirection == Direction.SOUTH) && 
+						(targetDirection == Direction.WEST || targetDirection == Direction.EAST)) {
+					leftOrTop = new Coordinate (pX-1, pY);
+					rightOrBottom = new Coordinate (pX+1, pY); 
+				}
+				//If the torpedo was going East or West, there is side damage only if the target ship was facing South or North. 
+				else if ((pTorpedoDirection == Direction.WEST || pTorpedoDirection == Direction.EAST) && 
+						(targetDirection == Direction.NORTH || targetDirection == Direction.SOUTH)) {
+					leftOrTop = new Coordinate (pX, pY-1);
+					rightOrBottom = new Coordinate (pX+1, pY+1); 
+				}
+					int leftDamageIndex = -1, rightDamageIndex = -1;
+					try {
+						leftDamageIndex = targetShip.getDamageIndex(leftOrTop);
+					}
+					catch (InvalidCoordinateException e) {
+						leftOrTop = null;
+					}
+					try {
+						rightDamageIndex = targetShip.getDamageIndex(rightOrBottom);
+					}
+					catch (InvalidCoordinateException e) {
+						rightOrBottom = null;
+					}
+					//This is the part where we select the side square to be destroyed. 
+					//That square needs to exist and not be destroyed
+					if (leftOrTop != null && (rightOrBottom == null || targetShip.getDamageAtIndex(rightDamageIndex) == Damage.DESTROYED)) {
+						damageShip(targetShip, leftOrTop, heavyCannons);
+					}
+					else if (rightOrBottom != null && (leftOrTop == null || targetShip.getDamageAtIndex(leftDamageIndex) == Damage.DESTROYED)) {
+						damageShip(targetShip, rightOrBottom, heavyCannons);
+					}
+					else if (leftOrTop != null && rightOrBottom != null) {
+						//Both leftOrTop and rightOrBottom squares are intact, so choose one at random. 
+						boolean chooseLeft = (Math.random() < 0.5);
+						if (chooseLeft) {
+							damageShip(targetShip, leftOrTop, heavyCannons);
+						}
+						else {
+							damageShip(targetShip, rightOrBottom, heavyCannons);
+						}
+					} 
+					//else if (leftOrTop == null && rightOrBottom == null) should never happen	
+			}
+			else if (s instanceof BaseSquare) {
+				//TODO
+			}
+			return true; //because we hit something
+		}
 	}
 	
 	/**
@@ -1658,6 +1784,53 @@ public class ServerGame {
 		//TODO
 		System.out.println("BOOOOOOOM!!!!!");
 		//Note: mineExplode should remove the mine in addition to damaging a ship
+	}
+	
+	
+	/**
+	 * Deal damage to the square of a ship determined by a Coordinate. 
+	 * After, checks whether the ship
+	 * @param pAttackedShip
+	 * @param pCoord
+	 * @param pHeavyCannons
+	 */
+	private void damageShip(Ship pAttackedShip, Coordinate pCoord, boolean pHeavyCannons) {
+		
+		//Damage the ship
+		boolean damageDealt = pAttackedShip.setDamageAtIndex(pAttackedShip.getDamageIndex(pCoord), pHeavyCannons);
+		
+		if (damageDealt) {
+			//Check if it sank
+			if (pAttackedShip.isSunk()) {
+				removeShip(pAttackedShip);
+				//TODO Log entry
+				//Check if all ships in a team are sunk
+				boolean p1Lost = true;
+				for (Ship ship : aShipListP1) {
+					if (!(ship.isSunk())) {
+						p1Lost = false;
+					}
+				}
+				boolean p2Lost = true;
+				for (Ship ship : aShipListP2) {
+					if (!(ship.isSunk())) {
+						p2Lost = false;
+					}
+				}
+				if (p1Lost) {
+					aWinner = aPlayer2;
+					aGameComplete = true;
+				}
+				else if (p2Lost) {
+					aWinner = aPlayer1; 
+					aGameComplete = true;
+				}
+			}
+			else {
+				setShipPosition(pAttackedShip, pAttackedShip.getHead(), pAttackedShip.getTail());
+				//TODO Log entry
+			}
+		}
 	}
 
 	/**
