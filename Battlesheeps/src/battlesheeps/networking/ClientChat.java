@@ -23,13 +23,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class ClientChat {
-	private static final String INIT = "INIT";
+	/* Host to connect to. This can be "localhost" if running both client/server 
+	 * on your computer, or the IP address of the host. 
+	 */
+	private static final String HOST = "localhost"; 
+	private static final String INIT = "INIT"; // This requires that no username be INIT
     private static final int PORT = 5000; /* port to connect to */
     
-    /* Host to connect to. This can be "localhost" if running both client/server 
-     * on your computer, or the IP address of the host. 
-     */
-    private static final String HOST = "localhost"; 
     private ObjectOutputStream aOutput = null;
     private String aOpponentUsername = null;
     /**
