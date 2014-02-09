@@ -55,9 +55,12 @@ import org.minueto.window.MinuetoPanel;
  */
 public class LaunchGame {
 
-	private JDesktopPane desktop; //outer window
-	private JFrame mainFrame; //main 
-	private GameBoard boardPanel;
+	private JDesktopPane aDesktop; //outer window
+	private JFrame aMainFrame; //main 
+	private GameBoard aBoardPanel;
+//	private MessagePanel aMessagePanel;
+	private LogPanel aLogPanel;
+//	private ChatMessagePanel aChatPanel;
 
 	private boolean open = true;
 	private int one = 1;
@@ -78,37 +81,67 @@ public class LaunchGame {
 //
 //		this.mainFrame = new JFrame(grcConfiguration); 
 		
-		this.mainFrame = new JFrame();
-		this.mainFrame.setPreferredSize(new Dimension(1000,700));
+		this.aMainFrame = new JFrame();
+		this.aMainFrame.setPreferredSize(new Dimension(1000,700));
 		
-		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.mainFrame.setResizable(true);
-		this.mainFrame.setFocusTraversalKeysEnabled(false); //what?? 
-		this.mainFrame.setSize(MinuetoTool.getDisplayWidth() - 100, 
+		this.aMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.aMainFrame.setResizable(true);
+		this.aMainFrame.setFocusTraversalKeysEnabled(false); //what?? 
+		this.aMainFrame.setSize(MinuetoTool.getDisplayWidth() - 100, 
 				MinuetoTool.getDisplayHeight() - 100);
 
-		this.mainFrame.setJMenuBar(createMenu()); //yay! a menu!
+		this.aMainFrame.setJMenuBar(createMenu()); //yay! a menu!
 
-		this.desktop = new JDesktopPane();
-		this.desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
-		desktop.setBackground(new Color(126, 175, 152));
+		this.aDesktop = new JDesktopPane();
+		this.aDesktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+		aDesktop.setBackground(new Color(126, 175, 152));
 
-		this.mainFrame.setContentPane(desktop);
-		this.mainFrame.setTitle("Battlesheeps");
+		this.aMainFrame.setContentPane(aDesktop);
+		this.aMainFrame.setTitle("Battlesheeps");
 		
-		boardPanel = new GameBoard(600, "player1");
-		this.desktop.add(boardPanel);
+		//aBoardPanel = new GameBoard(600, "player1");
+		//this.aDesktop.add(aBoardPanel);
 		
-		//create Ship Messages Panel
+		this.aMainFrame.setLayout(new GridLayout(0, 1, 0, 0));
 		
-		//create Log Entries Panel
+		JPanel background = new JPanel();
+		background.setLayout(new BoxLayout(background, BoxLayout.X_AXIS));
 		
-		//create Chat Messages Panel
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setResizeWeight(0.7);
+		background.add(splitPane);
 		
-		this.mainFrame.pack();
-		this.mainFrame.setVisible(true);
-		boardPanel.setVisible(true);
-	
+		JSplitPane sidePanel = new JSplitPane();
+		sidePanel.setResizeWeight(0.5);
+		sidePanel.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setRightComponent(sidePanel);
+		
+		JSplitPane sideBottom = new JSplitPane();
+		sideBottom.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		sideBottom.setResizeWeight(0.5);
+		sidePanel.setRightComponent(sideBottom);
+		
+		//LOG
+		LogPanel aLogPanel = new LogPanel();
+		sideBottom.setLeftComponent(aLogPanel);
+		
+		//CHAT
+		JScrollPane chat = new JScrollPane();
+		sideBottom.setRightComponent(chat);
+		
+		//MESSAGES
+		JPanel messageBoard = new JPanel();
+		sidePanel.setLeftComponent(messageBoard);
+		
+		GameBoard aBoardPanel = new GameBoard(600, "Player 1");
+		aBoardPanel.setPreferredSize(new Dimension(600, 600));
+		splitPane.setLeftComponent(aBoardPanel);
+		
+		this.aMainFrame.add(background);
+		
+		this.aMainFrame.pack();
+		this.aMainFrame.setVisible(true);
+		aBoardPanel.setVisible(true);
 	}
 
 	/*
@@ -179,7 +212,7 @@ public class LaunchGame {
 		JMenuItem aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(mainFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", "About", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(aMainFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", "About", JOptionPane.PLAIN_MESSAGE);
 			}		
 		});
 		helpMenu.add(aboutItem);
