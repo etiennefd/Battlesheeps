@@ -38,9 +38,16 @@ public class MainTest {
 		game.setShipPosition(r, new Coordinate(0, 3), new Coordinate(2, 3));
 		Destroyer d = new Destroyer(null);
 		game.setShipPosition(d, new Coordinate(7, 25), new Coordinate(4, 25));
+		TorpedoBoat t = new TorpedoBoat(null);
+		game.setShipPosition(t, new Coordinate(26, 25), new Coordinate(26, 27));
+		Cruiser c2 = new Cruiser(null);
+		game.setShipPosition(c2, new Coordinate(24, 5), new Coordinate(24, 1));
+		MineLayer m2 = new MineLayer(null);
+		game.setShipPosition(m2, new Coordinate(5, 0), new Coordinate(5, 1));
 		//Add some mines
-		game.addMine(new Coordinate(5, 1));
+		game.addMine(new Coordinate(7, 5));
 		game.addMine(new Coordinate(3, 27));
+		game.addMine(new Coordinate(22, 1));
 		
 		System.out.println(game.printBoard());
 		
@@ -52,8 +59,6 @@ public class MainTest {
 		game.computeMoveResult(m, MoveType.TRANSLATE_SHIP, new Coordinate(3, 2));
 		System.out.println(game.printBoard());
 		game.computeMoveResult(m, MoveType.TRANSLATE_SHIP, new Coordinate(4, 1));
-		System.out.println(game.printBoard());
-		game.computeMoveResult(c, MoveType.TURN_SHIP, new Coordinate(1, 6));
 		System.out.println(game.printBoard());
 		game.computeMoveResult(d, MoveType.TURN_SHIP, new Coordinate(4, 28));
 		System.out.println(game.printBoard());
@@ -71,7 +76,11 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(3, 1));
 		System.out.println(game.printBoard());
-		game.computeMoveResult(r, MoveType.FIRE_TORPEDO, null);
+		game.computeMoveResult(t, MoveType.TRANSLATE_SHIP, new Coordinate(25, 25));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(c2, MoveType.TURN_SHIP, new Coordinate(20, 1));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(c, MoveType.TURN_SHIP, new Coordinate(9, 6));
 		System.out.println(game.printBoard());
 	}
 

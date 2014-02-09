@@ -1,5 +1,22 @@
 package battlesheeps.server;
 
-public interface LogEntry {
+import battlesheeps.board.Coordinate;
 
+public class LogEntry {
+
+	private Coordinate aCoordinate;
+	private String aMessage;
+	
+	public LogEntry(String pMessage, Coordinate pCoordinate){
+		aCoordinate = pCoordinate;
+		aMessage = pMessage;
+	}
+	
+	public Coordinate getCoordinate(){
+		return aCoordinate;
+	}
+	
+	public String getMessage(){
+		return aMessage;
+	}
 }
