@@ -17,7 +17,7 @@ import battlesheeps.accounts.Account;
 public class MessagePanel extends JPanel {
 	
 	private static final long serialVersionUID = 5567892L;
-	private ClientGame aClient;
+	private ClientGame aClient; /*change to proper client later*/
 	private String aPlayer;
 	private String aOpponent;
 	
