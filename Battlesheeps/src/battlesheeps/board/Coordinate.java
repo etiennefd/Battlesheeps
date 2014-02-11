@@ -18,6 +18,19 @@ public class Coordinate {
 		return y;
 	}
 
+	/*
+	 * Returns true if X and Y are between 0 and 29, inclusive. 
+	 */
+	public boolean inBounds() {
+	
+		if (this.x >= 0 && this.x <= 29) {
+			if (this.y >= 0 && this.y <= 29) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	/**
 	 * Generates a new Coordinate whose x and y components are randomly selected within a range. 
 	 * There is a range for x and a range for y. 
