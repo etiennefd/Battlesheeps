@@ -1,5 +1,8 @@
 package battlesheeps.ships;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.exceptions.InvalidCoordinateException;
@@ -17,7 +20,7 @@ public abstract class Ship {
 		UNDAMAGED, DAMAGED, DESTROYED
 	}
 
-	private Coordinate aLocationHead;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
+	private Coordinate head;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
 	private Coordinate aLocationTail;	//x and y coordinates of the stern of the ship
 	
 	private Account aPlayer; 
@@ -40,7 +43,7 @@ public abstract class Ship {
 	 */
 	public void initializeShip(Account pPlayer) {
 		aPlayer = pPlayer;
-		aLocationHead = null;
+		head = null;
 		aLocationTail = null;
 		
 		aActualSpeed = aMaxSpeed;
@@ -68,7 +71,7 @@ public abstract class Ship {
 	}
 	
 	public void setLocation(Coordinate pHead, Coordinate pTail) {
-		aLocationHead = pHead;
+		head = pHead;
 		aLocationTail = pTail;
 	}
 	
@@ -88,8 +91,8 @@ public abstract class Ship {
 		
 		switch (direction) {
 		case NORTH: 
-			x = aLocationHead.getX();
-			for (y = aLocationHead.getY(); y <= aLocationTail.getY(); y++, tempIndex++) {
+			x = head.getX();
+			for (y = head.getY(); y <= aLocationTail.getY(); y++, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -97,8 +100,8 @@ public abstract class Ship {
 			}
 			break;
 		case SOUTH: 
-			x = aLocationHead.getX();
-			for (y = aLocationHead.getY(); y >= aLocationTail.getY(); y--, tempIndex++) {
+			x = head.getX();
+			for (y = head.getY(); y >= aLocationTail.getY(); y--, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -106,8 +109,8 @@ public abstract class Ship {
 			}
 			break;
 		case WEST: 
-			y = aLocationHead.getY();
-			for (x = aLocationHead.getX(); x <= aLocationTail.getX(); x++, tempIndex++) {
+			y = head.getY();
+			for (x = head.getX(); x <= aLocationTail.getX(); x++, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -115,8 +118,8 @@ public abstract class Ship {
 			}
 			break;
 		case EAST: 
-			y = aLocationHead.getY();
-			for (x = aLocationHead.getX(); x >= aLocationTail.getX(); x--, tempIndex++) {
+			y = head.getY();
+			for (x = head.getX(); x >= aLocationTail.getX(); x--, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -187,12 +190,16 @@ public abstract class Ship {
 		return aSize;
 	}
 	
+	public int getMaxSpeed() {
+		return aMaxSpeed;
+	}
+	
 	public int getActualSpeed() {
 		return aActualSpeed;
 	}
 	
 	public Coordinate getHead() {
-		return aLocationHead;
+		return head;
 	}
 	
 	public Coordinate getTail() {
@@ -216,14 +223,14 @@ public abstract class Ship {
 	 * @return
 	 */
 	public Direction getDirection() {
-		if (aLocationHead.getX() == aLocationTail.getX()) {
+		if (head.getX() == aLocationTail.getX()) {
 			//Both head and tail in same column: either facing North or South
-			if (aLocationHead.getY() > aLocationTail.getY()) return Direction.SOUTH;
+			if (head.getY() > aLocationTail.getY()) return Direction.SOUTH;
 			else return Direction.NORTH;
 		}
-		else if (aLocationHead.getY() == aLocationTail.getY()){
+		else if (head.getY() == aLocationTail.getY()){
 			//Both head and tail in same row: either facing East or West
-			if (aLocationHead.getX() > aLocationTail.getX()) return Direction.EAST;
+			if (head.getX() > aLocationTail.getX()) return Direction.EAST;
 			else return Direction.WEST;
 		}
 		else {
@@ -231,5 +238,82 @@ public abstract class Ship {
 		}
 	}
 	
+	/**
+	 *Returns a list of ALL coordinates which fall within the ship's radar range 
+	 *(Note that this includes coordinates of the ship itself which are in radar range)  
+	 */
+	public List<Coordinate> getRadarRange() {
+		List<Coordinate> list = new ArrayList<Coordinate>();
+		int startX;
+		int startY;
+		
+		Direction shipDirection = this.getDirection();
+		
+		if (shipDirection == Direction.WEST) {
+			startX = aLocationTail.getX() - 1;
+			startY = aLocationTail.getY() - (aRadarRangeWidth/2);
+			int minX = startX - aRadarRangeLength;
+			int maxY = startY + aRadarRangeWidth;
+
+			for (int i = startX; i > minX ; i--) {
+				for (int j = startY; j < maxY; j++) {
+					Coordinate coord = new Coordinate(i,j);
+					if (coord.inBounds()){
+						list.add(coord);
+					}
+				}
+			}
+		}
+		else if (shipDirection == Direction.EAST) {
+
+			startX = aLocationTail.getX() + 1;
+			startY = aLocationTail.getY() - (aRadarRangeWidth/2);
+			int maxX = startX + aRadarRangeLength;
+			int maxY = startY + aRadarRangeWidth;
+
+			for (int i = startX; i < maxX ; i++) {
+				for (int j = startY; j < maxY; j++) {
+					Coordinate coord = new Coordinate(i,j);
+					if (coord.inBounds()){
+						list.add(coord);
+					}
+				}
+			}
+		}
+		else if (shipDirection == Direction.NORTH) {
+
+			startX = aLocationTail.getX() - (aRadarRangeWidth/2);
+			startY = aLocationTail.getY() - 1;
+			int maxX = startX + aRadarRangeWidth; 
+			int minY = startY - aRadarRangeLength; 
+
+			for (int i = startX; i < maxX ; i++) {
+				for (int j = startY; j > minY; j--) {
+					Coordinate coord = new Coordinate(i,j);
+					if (coord.inBounds()){
+						list.add(coord);
+					}
+				}
+			}
+		}
+		else /*SOUTH*/{
+
+			startX = aLocationTail.getX() - (aRadarRangeWidth/2);
+			startY = aLocationTail.getY() + 1;
+			int maxX = startX + aRadarRangeWidth; 
+			int maxY = startY + aRadarRangeLength; 
+
+			for (int i = startX; i < maxX ; i++) {
+				for (int j = startY; j < maxY; j++) {
+					Coordinate coord = new Coordinate(i,j);
+					if (coord.inBounds()){
+						list.add(coord);
+					}
+				}
+			}				
+		}
+
+		return list;
+	}	
 	
 }
