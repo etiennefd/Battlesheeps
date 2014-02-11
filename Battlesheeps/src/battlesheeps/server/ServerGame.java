@@ -344,8 +344,6 @@ public class ServerGame {
 				//Check for every Y between head and destination
 				for (int y = headY - 1; y >= pDestination.getY(); y--) {
 					Square s = aBoard[headX][y];
-					Square sl = aBoard[headX - 1][y]; //sl and sr are the squares immediately beside square s. 
-					Square sr = aBoard[headX + 1][y]; //They are checked for mines (which explode if the ship is next to them)
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(headX, y+1); //One square before the obstacle
 						//TODO Create log entry/notify players
@@ -354,20 +352,27 @@ public class ServerGame {
 					else if (s instanceof MineSquare) {
 						finalDestinationHead = new Coordinate(headX, y+1); 
 						mineExplode(new Coordinate(headX, y), headCoord, pShip);
-						//TODO Log entry (possibly in mineExplode())
 						break;
 					}
-					else if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
-						mineExplode(new Coordinate(headX-1, y), headCoord, pShip);
-						//TODO log entry
-						break;
-					}
-					else if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
-						mineExplode(new Coordinate(headX+1, y), headCoord, pShip);
-						//TODO log entry
-						break;
+					//sl and sr are the squares immediately beside square s.
+					//They are checked for mines (which explode if the ship is next to them)
+					else {
+						if (headX - 1 >=0) {
+							Square sl = aBoard[headX - 1][y]; 
+							if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
+								mineExplode(new Coordinate(headX-1, y), headCoord, pShip);
+								break;
+							}
+						}
+						if (headX + 1 < aBoard.length){
+							Square sr = aBoard[headX + 1][y]; 
+							if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
+								mineExplode(new Coordinate(headX+1, y), headCoord, pShip);
+								break;
+							}
+						}
 					}
 				}
 				if (finalDestinationHead == null) {
@@ -378,7 +383,6 @@ public class ServerGame {
 						Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() - 1];
 						if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
 							mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() - 1), headCoord, pShip);
-							//TODO log entry
 						}
 					}
 					
@@ -393,14 +397,12 @@ public class ServerGame {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
-					//TODO Create log entry/notify players
 				}
 				else if (s instanceof MineSquare) {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
 					mineExplode(pDestination, tailCoord, pShip);
-					//TODO Log entry
 				} 
 				else {
 					//Successful movement
@@ -409,21 +411,25 @@ public class ServerGame {
 				}
 				//We also have to check whether any square next to the tail of the ship is a mine. 
 				if (!(pShip instanceof MineLayer)) {
-					Square sf = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1];
-					Square sfl = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()]; 
-					Square sfr = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()]; 
-					if (sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() + 1 < aBoard.length) {
+						Square sf = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1];
+						if (sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
+						}
 					}
-					if (sfl instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() - 1 >= 0) {
+						Square sfl = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()]; 
+						if (sfl instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
-					if (sfr instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() + 1 < aBoard.length) {
+						Square sfr = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()]; 
+						if (sfr instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
+					
 				}
 			}
 			//***Case port or starboard (both can use the same code)
@@ -439,20 +445,6 @@ public class ServerGame {
 						break;
 					}
 				}
-//				//Now if there wasn't an obstacle, we look for mines in the same area
-//				if (finalDestinationHead == null) {
-//					for (int i = headY; i <= tailY; i++) {
-//						Square s = aBoard[pDestination.getX()][i];
-//						if (s instanceof MineSquare) {
-//							//movement fails
-//							finalDestinationTail = tailCoord;
-//							finalDestinationHead = headCoord;
-//							mineExplode();
-//							//Log entry
-//							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
-//						}
-//					}
-//				}
 				//If there still is no final destination, no obstacle/mine was found and movement succeeds. 
 				if (finalDestinationHead == null) {
 					finalDestinationTail = new Coordinate (pDestination.getX(), tailY);
@@ -461,31 +453,34 @@ public class ServerGame {
 				//After movement it is possible that the ship has come in contact with a mine
 				if (!(pShip instanceof MineLayer)) {
 					for (int i = headY; i <= tailY; i++) {
-						Square s1 = aBoard[pDestination.getX() - 1][i];
-						Square s2 = aBoard[pDestination.getX() + 1][i];
-						if (s1 instanceof MineSquare) {
-							mineExplode(new Coordinate(pDestination.getX() - 1, i), new Coordinate(headX, i), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getX() - 1 >= 0) {
+							Square s1 = aBoard[pDestination.getX() - 1][i];
+							if (s1 instanceof MineSquare) {
+								mineExplode(new Coordinate(pDestination.getX() - 1, i), new Coordinate(headX, i), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
-						if (s2 instanceof MineSquare) {
-							mineExplode(new Coordinate(pDestination.getX() + 1, i), new Coordinate(headX, i), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getX() + 1 < aBoard.length) {
+							Square s2 = aBoard[pDestination.getX() + 1][i];
+							if (s2 instanceof MineSquare) {
+								mineExplode(new Coordinate(pDestination.getX() + 1, i), new Coordinate(headX, i), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
 					}
-					Square sf1 = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() - 1];
-					Square sf2 = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1];
-					if (sf1 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() - 1), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getY() - 1 >= 0) {
+						Square sf1 = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() - 1];
+						if (sf1 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() - 1), headCoord, pShip);
+						}
 					}
-					if (sf2 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() + 1 < aBoard.length) {
+						Square sf2 = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1];
+						if (sf2 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
+						}
 					}
 				}
-				
 			}
 			break; //from case NORTH
 			
@@ -496,8 +491,6 @@ public class ServerGame {
 				//Check for every Y between head and destination
 				for (int y = headY + 1; y <= pDestination.getY(); y++) {
 					Square s = aBoard[headX][y];
-					Square sl = aBoard[headX + 1][y]; //sl and sr are the squares immediately beside square s. 
-					Square sr = aBoard[headX - 1][y]; //They are checked for mines (which explode if the ship is next to them)
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(headX, y-1); //One square before the obstacle
 						//TODO Create log entry/notify players
@@ -506,30 +499,38 @@ public class ServerGame {
 					else if (s instanceof MineSquare) {
 						finalDestinationHead = new Coordinate(headX, y-1);
 						mineExplode(new Coordinate(headX, y), headCoord, pShip);
-						//TODO Log entry
 						break;
 					}
-					else if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
-						mineExplode(new Coordinate(headX+1, y), headCoord, pShip);
-						//TODO log entry
-						break;
-					}
-					else if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
-						mineExplode(new Coordinate(headX-1, y), headCoord, pShip);
-						//TODO log entry
-						break;
+					else {
+						//sl and sr are the squares immediately beside square s
+						//They are checked for mines (which explode if the ship is next to them)
+						if (headX + 1 < aBoard.length) {
+							Square sl = aBoard[headX + 1][y];  
+							if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
+								mineExplode(new Coordinate(headX+1, y), headCoord, pShip);
+								break;
+							}
+						}
+						if (headX - 1 >= 0) {
+							Square sr = aBoard[headX - 1][y]; 
+							if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(headX, y); //The square next to the mine
+								mineExplode(new Coordinate(headX-1, y), headCoord, pShip);
+								break;
+							}
+						}
 					}
 				}
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
 					//We also have to check whether the square next to the head of the ship is a mine. 
-					Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
-					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() + 1), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getY() + 1 < aBoard.length) {
+						Square sf = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
+						if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() + 1), headCoord, pShip);
+						}
 					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX(), finalDestinationHead.getY() - pShip.getSize() + 1);
@@ -549,7 +550,6 @@ public class ServerGame {
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
 					mineExplode(pDestination, tailCoord, pShip);
-					//TODO Log entry
 				} 
 				else {
 					//Successful movement
@@ -558,23 +558,25 @@ public class ServerGame {
 				}
 				//We also have to check whether any square next to the tail of the ship is a mine. 
 				if (!(pShip instanceof MineLayer)) {
-					Square sf = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1];
-					Square sfl = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()]; 
-					Square sfr = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()]; 
-					if (sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() - 1 >= 0) {
+						Square sf = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1];
+						if (sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
+						}
 					}
-					if (sfl instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX()+1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() + 1 < aBoard.length) {
+						Square sfl = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()]; 
+						if (sfl instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX()+1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
-					if (sfr instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX()-1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() - 1 >= 0) {
+						Square sfr = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()]; 
+						if (sfr instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX()-1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
 				}
-				
 			}
 			//***Case port or starboard (both can use the same code)
 			else if (pDestination.getX() < headX || pDestination.getX() > headX) {
@@ -584,23 +586,10 @@ public class ServerGame {
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationTail = tailCoord;
 						finalDestinationHead = headCoord;
-						//Log entry
+						//TODO Log entry
 						break;
 					}
 				}
-//				//Now if there wasn't an obstacle, we look for mines in the same area
-//				if (finalDestinationHead == null) {
-//					for (int i = headY; i >= tailY; i--) {
-//						Square s = aBoard[pDestination.getX()][i];
-//						if (s instanceof MineSquare) {
-//							finalDestinationTail = tailCoord;
-//							finalDestinationHead = headCoord;
-//							mineExplode();
-//							//Log entry
-//							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
-//						}
-//					}
-//				}
 				//If there still is no final destination, no obstacle/mine was found and movement succeeds. 
 				if (finalDestinationHead == null) {
 					finalDestinationTail = new Coordinate (pDestination.getX(), tailY);
@@ -609,29 +598,35 @@ public class ServerGame {
 				//After movement it is possible that the ship has come in contact with a mine
 				if (!(pShip instanceof MineLayer)) {
 					for (int i = headY; i >= tailY; i--) {
-						Square s1 = aBoard[pDestination.getX() - 1][i];
-						Square s2 = aBoard[pDestination.getX() + 1][i];
-						if (s1 instanceof MineSquare) {
-							mineExplode(new Coordinate(pDestination.getX() - 1, i), new Coordinate(headX, i), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getX() - 1 >= 0) {
+							Square s1 = aBoard[pDestination.getX() - 1][i];
+							if (s1 instanceof MineSquare) {
+								mineExplode(new Coordinate(pDestination.getX() - 1, i), new Coordinate(headX, i), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
-						if (s2 instanceof MineSquare) {
-							mineExplode(new Coordinate(pDestination.getX() + 1, i), new Coordinate(headX, i), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getX() + 1 < aBoard.length) {
+							Square s2 = aBoard[pDestination.getX() + 1][i];
+							if (s2 instanceof MineSquare) {
+								mineExplode(new Coordinate(pDestination.getX() + 1, i), new Coordinate(headX, i), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
 					}
-					Square sf1 = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
-					Square sf2 = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1];
-					if (sf1 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() + 1), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getY() + 1 < aBoard.length) {
+						Square sf1 = aBoard[finalDestinationHead.getX()][finalDestinationHead.getY() + 1];
+						if (sf1 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() + 1), headCoord, pShip);
+						}
 					}
-					if (sf2 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getY() - 1 >= 0) {
+						Square sf2 = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1];
+						if (sf2 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
+						}
 					}
+					
+					
 				}
 			}
 			break; //from case SOUTH
@@ -643,8 +638,6 @@ public class ServerGame {
 				//Check for every X between head and destination
 				for (int x = headX - 1; x >= pDestination.getX(); x--) {
 					Square s = aBoard[x][headY];
-					Square sl = aBoard[x][headY - 1]; //sl and sr are the squares immediately beside square s. 
-					Square sr = aBoard[x][headY + 1]; //They are checked for mines (which explode if the ship is next to them)
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(x+1, headY); //One square before the obstacle
 						//TODO Create log entry/notify players
@@ -653,30 +646,39 @@ public class ServerGame {
 					else if (s instanceof MineSquare) {
 						finalDestinationHead = new Coordinate(x+1, headY); 
 						mineExplode(new Coordinate(x, headY), headCoord, pShip);
-						//TODO Log entry (possibly in mineExplode())
 						break;
 					}
-					else if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
-						mineExplode(new Coordinate(x, headY-1), headCoord, pShip);
-						//TODO log entry
-						break;
+					//sl and sr are the squares immediately beside square s.
+					//They are checked for mines (which explode if the ship is next to them)
+					else {
+						if (headY - 1 >= 0) {
+							Square sl = aBoard[x][headY - 1]; 
+							if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
+								mineExplode(new Coordinate(x, headY-1), headCoord, pShip);
+								break;
+							}
+						}
+						if (headY + 1 < aBoard.length) {
+							Square sr = aBoard[x][headY + 1]; 
+							if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
+								mineExplode(new Coordinate(x, headY+1), headCoord, pShip);
+								break;
+							}
+						}
 					}
-					else if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
-						mineExplode(new Coordinate(x, headY+1), headCoord, pShip);
-						//TODO log entry
-						break;
-					}
+					
 				}
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
 					//We also have to check whether the square next to the head of the ship is a mine. 
-					Square sf = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
-					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX() - 1, finalDestinationHead.getY()), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getX() - 1 >= 0) {
+						Square sf = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
+						if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX() - 1, finalDestinationHead.getY()), headCoord, pShip);
+						}
 					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX() + pShip.getSize() - 1, finalDestinationHead.getY());
@@ -696,7 +698,6 @@ public class ServerGame {
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
 					mineExplode(pDestination, tailCoord, pShip);
-					//TODO Log entry
 				} 
 				else {
 					//Successful movement
@@ -705,20 +706,24 @@ public class ServerGame {
 				}
 				//We also have to check whether any square next to the tail of the ship is a mine. 
 				if (!(pShip instanceof MineLayer)) {
-					Square sf = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()];
-					Square sfl = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1]; 
-					Square sfr = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1]; 
-					if (sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() + 1 < aBoard.length) {
+						Square sf = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()];
+						if (sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
-					if (sfl instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() - 1 >= 0) {
+						Square sfl = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1]; 
+						if (sfl instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
+						}
 					}
-					if (sfr instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
-						//TODO log entry
+					
+					if (finalDestinationTail.getY() + 1 < aBoard.length) {
+						Square sfr = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1]; 
+						if (sfr instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() + 1), tailCoord, pShip);
+						}
 					}
 				}
 			}
@@ -735,20 +740,6 @@ public class ServerGame {
 						break;
 					}
 				}
-				//Now if there wasn't an obstacle, we look for mines in the same area
-//				if (finalDestinationHead == null) {
-//					for (int i = headX; i <= tailX; i++) {
-//						Square s = aBoard[i][pDestination.getY()];
-//						if (s instanceof MineSquare) {
-//							//movement fails
-//							finalDestinationTail = tailCoord;
-//							finalDestinationHead = headCoord;
-//							mineExplode();
-//							//Log entry
-//							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
-//						}
-//					}
-//				}
 				//If there still is no final destination, no obstacle/mine was found and movement succeeds. 
 				if (finalDestinationHead == null) {
 					finalDestinationTail = new Coordinate (tailX, pDestination.getY());
@@ -757,31 +748,34 @@ public class ServerGame {
 				//After movement it is possible that the ship has come in contact with a mine
 				if (!(pShip instanceof MineLayer)) {
 					for (int i = headX; i <= tailX; i++) {
-						Square s1 = aBoard[i][pDestination.getY() - 1];
-						Square s2 = aBoard[i][pDestination.getY() + 1];
-						if (s1 instanceof MineSquare) {
-							mineExplode(new Coordinate(i, pDestination.getY() - 1), new Coordinate(i, headY), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getY() - 1 >= 0) {
+							Square s1 = aBoard[i][pDestination.getY() - 1];
+							if (s1 instanceof MineSquare) {
+								mineExplode(new Coordinate(i, pDestination.getY() - 1), new Coordinate(i, headY), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
-						if (s2 instanceof MineSquare) {
-							mineExplode(new Coordinate(i, pDestination.getY() + 1), new Coordinate(i, headY), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getY() + 1 < aBoard.length) {
+							Square s2 = aBoard[i][pDestination.getY() + 1];
+							if (s2 instanceof MineSquare) {
+								mineExplode(new Coordinate(i, pDestination.getY() + 1), new Coordinate(i, headY), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
 					}
-					Square sf1 = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
-					Square sf2 = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()];
-					if (sf1 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX() - 1, finalDestinationHead.getY()), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getX() - 1 >= 0) {
+						Square sf1 = aBoard[finalDestinationHead.getX() - 1][finalDestinationHead.getY()];
+						if (sf1 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX() - 1, finalDestinationHead.getY()), headCoord, pShip);
+						}
 					}
-					if (sf2 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getX() + 1 < aBoard.length) {
+						Square sf2 = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()];
+						if (sf2 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
 				}
-				
 			}
 			break; //from case WEST
 			
@@ -792,8 +786,6 @@ public class ServerGame {
 				//Check for every X between head and destination
 				for (int x = headX + 1; x <= pDestination.getX(); x++) {
 					Square s = aBoard[x][headY];
-					Square sl = aBoard[x][headY + 1]; //sl and sr are the squares immediately beside square s. 
-					Square sr = aBoard[x][headY - 1]; //They are checked for mines (which explode if the ship is next to them)
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(x-1, headY); //One square before the obstacle
 						//TODO Create log entry/notify players
@@ -802,30 +794,41 @@ public class ServerGame {
 					else if (s instanceof MineSquare) {
 						finalDestinationHead = new Coordinate(x-1, headY);
 						mineExplode(new Coordinate(x, headY), headCoord, pShip);
-						//TODO Log entry
 						break;
 					}
-					else if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
-						mineExplode(new Coordinate(x, headY+1), headCoord, pShip);
-						//TODO log entry
-						break;
+					//sl and sr are the squares immediately beside square s. 
+					//They are checked for mines (which explode if the ship is next to them)
+					else {
+						if (headY + 1 < aBoard.length) {
+							Square sl = aBoard[x][headY + 1]; 
+							if (!(pShip instanceof MineLayer) && sl instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
+								mineExplode(new Coordinate(x, headY+1), headCoord, pShip);
+								break;
+							}
+						}
+						if (headY - 1 >= 0) {
+							Square sr = aBoard[x][headY - 1]; 
+							if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
+								finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
+								mineExplode(new Coordinate(x, headY-1), headCoord, pShip);
+								//TODO log entry
+								break;
+							}
+						}
 					}
-					else if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
-						finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
-						mineExplode(new Coordinate(x, headY-1), headCoord, pShip);
-						//TODO log entry
-						break;
-					}
+					
+					
 				}
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
 					finalDestinationHead = pDestination;
-					//We also have to check whether the square next to the head of the ship is a mine. 
-					Square sf = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
-					if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX() + 1, finalDestinationHead.getY()), headCoord, pShip);
-						//TODO log entry
+					//We also have to check whether the square next to the head of the ship is a mine.
+					if (finalDestinationHead.getX() + 1 < aBoard.length) {
+						Square sf = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
+						if (!(pShip instanceof MineLayer) && sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX() + 1, finalDestinationHead.getY()), headCoord, pShip);
+						}
 					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX() - pShip.getSize() + 1, finalDestinationHead.getY());
@@ -845,7 +848,6 @@ public class ServerGame {
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
 					mineExplode(pDestination, tailCoord, pShip);
-					//TODO Log entry
 				} 
 				else {
 					//Successful movement
@@ -854,23 +856,25 @@ public class ServerGame {
 				}
 				//We also have to check whether any square next to the tail of the ship is a mine. 
 				if (!(pShip instanceof MineLayer)) {
-					Square sf = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()];
-					Square sfl = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1]; 
-					Square sfr = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1]; 
-					if (sf instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getX() - 1 >= 0) {
+						Square sf = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()];
+						if (sf instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
-					if (sfl instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY()+1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() + 1 < aBoard.length) {
+						Square sfl = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() + 1]; 
+						if (sfl instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY()+1), tailCoord, pShip);
+						}
 					}
-					if (sfr instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY()-1), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationTail.getY() - 1 >= 0) {
+						Square sfr = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1]; 
+						if (sfr instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY()-1), tailCoord, pShip);
+						}
 					}
 				}
-				
 			}
 			//***Case port or starboard (both can use the same code)
 			else if (pDestination.getY() < headY || pDestination.getY() > headY) {
@@ -884,19 +888,6 @@ public class ServerGame {
 						break;
 					}
 				}
-//				//Now if there wasn't an obstacle, we look for mines in the same area
-//				if (finalDestinationHead == null) {
-//					for (int i = headX; i >= tailX; i--) {
-//						Square s = aBoard[i][pDestination.getY()];
-//						if (s instanceof MineSquare) {
-//							finalDestinationTail = tailCoord;
-//							finalDestinationHead = headCoord;
-//							mineExplode();
-//							//Log entry
-//							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
-//						}
-//					}
-//				}
 				//If there still is no final destination, no obstacle/mine was found and movement succeeds. 
 				if (finalDestinationHead == null) {
 					finalDestinationTail = new Coordinate (tailX, pDestination.getY());
@@ -905,28 +896,32 @@ public class ServerGame {
 				//After movement it is possible that the ship has come in contact with a mine
 				if (!(pShip instanceof MineLayer)) {
 					for (int i = headX; i >= tailX; i--) {
-						Square s1 = aBoard[i][pDestination.getY() - 1];
-						Square s2 = aBoard[i][pDestination.getY() + 1];
-						if (s1 instanceof MineSquare) {
-							mineExplode(new Coordinate(i, pDestination.getY()-1), new Coordinate(i, headY), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getY() - 1 >= 0) {
+							Square s1 = aBoard[i][pDestination.getY() - 1];
+							if (s1 instanceof MineSquare) {
+								mineExplode(new Coordinate(i, pDestination.getY()-1), new Coordinate(i, headY), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
-						if (s2 instanceof MineSquare) {
-							mineExplode(new Coordinate(i, pDestination.getY()+1), new Coordinate(i, headY), pShip);
-							//Log entry
-							//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+						if (pDestination.getY() + 1 < aBoard.length) {
+							Square s2 = aBoard[i][pDestination.getY() + 1];
+							if (s2 instanceof MineSquare) {
+								mineExplode(new Coordinate(i, pDestination.getY()+1), new Coordinate(i, headY), pShip);
+								//Note: we do not break: it is possible that the ships triggers more than one mine explosion
+							}
 						}
 					}
-					Square sf1 = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
-					Square sf2 = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()];
-					if (sf1 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationHead.getX() + 1, finalDestinationHead.getY()), headCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getX() + 1 < aBoard.length) {
+						Square sf1 = aBoard[finalDestinationHead.getX() + 1][finalDestinationHead.getY()];
+						if (sf1 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationHead.getX() + 1, finalDestinationHead.getY()), headCoord, pShip);
+						}
 					}
-					if (sf2 instanceof MineSquare) {
-						mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
-						//TODO log entry
+					if (finalDestinationHead.getX() - 1 >= 0) {
+						Square sf2 = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()];
+						if (sf2 instanceof MineSquare) {
+							mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
+						}
 					}
 				}
 			}
@@ -1007,12 +1002,8 @@ public class ServerGame {
 					//TODO log entry
 					System.out.println("Obstacle found");
 				}
-//There can't be a mine in the turning area of the ship, otherwise it would have exploded already!
-//				else if (s instanceof MineSquare) {
-//					turnSuccess = false;
-//					mineExplode(c, );
-//					//TODO log entry
-//				}
+				//There can't be a mine in the turning area of the ship, otherwise it would have exploded already. 
+				//So we don't need to check for that. 
 			}
 			
 			//If the rotation was successful: 
@@ -1107,12 +1098,7 @@ public class ServerGame {
 					//TODO log entry
 					System.out.println("Obstacle found");
 				}
-//Again, there can't be a mine in that area
-//				else if (s instanceof MineSquare) {
-//					turnSuccess = false;
-//					mineExplode();
-//					//TODO log entry
-//				}
+				//Again, there can't be a mine in that area, so we don't check for that. 
 			}
 			
 			//If the rotation was successful: 
@@ -1164,7 +1150,6 @@ public class ServerGame {
 									squareHit = new Coordinate(headX,  y - (headX-x) + 1);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1207,7 +1192,6 @@ public class ServerGame {
 									squareHit = new Coordinate(headX,  y - (x - headX) + 1);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1253,7 +1237,6 @@ public class ServerGame {
 									squareHit = new Coordinate(headX,  y + (headX-x) - 1);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1296,7 +1279,6 @@ public class ServerGame {
 									squareHit = new Coordinate(headX, y + (x-headX) - 1);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1343,7 +1325,6 @@ public class ServerGame {
 									squareHit = new Coordinate(x + (headY-y) - 1, headY);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1386,7 +1367,6 @@ public class ServerGame {
 									squareHit = new Coordinate(x + (y-headY) - 1, headY);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1433,7 +1413,6 @@ public class ServerGame {
 									squareHit = new Coordinate(x - (headY-y) + 1, headY);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1476,7 +1455,6 @@ public class ServerGame {
 									squareHit = new Coordinate(x - (y-headY) + 1, headY);
 								}
 								mineExplode(new Coordinate(x, y), squareHit, pShip);
-								//TODO log entry
 								broke = true;
 								break; 
 							}
@@ -1510,7 +1488,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getHead(), pShip);
-						//TODO log
 					}
 				}
 				//Looking behind the tail
@@ -1519,7 +1496,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getTail(), pShip);
-						//TODO log
 					}
 				}
 				//Looking on both sides of the ship
@@ -1529,14 +1505,12 @@ public class ServerGame {
 						s = aBoard[x-1][i];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(x-1, i), new Coordinate(x, i), pShip);
-							//TODO log
 						}
 					}
 					if (x+1 < aBoard.length) {
 						s = aBoard[x+1][i];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(x+1, i), new Coordinate(x, i), pShip);
-							//TODO log
 						}
 					}
 				}
@@ -1550,7 +1524,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getHead(), pShip);
-						//TODO log
 					}
 				}
 				//Looking behind the tail
@@ -1559,7 +1532,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getTail(), pShip);
-						//TODO log
 					}
 				}
 				//Looking on both sides of the ship
@@ -1569,14 +1541,12 @@ public class ServerGame {
 						s = aBoard[x-1][i];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(x-1, i), new Coordinate(x, i), pShip);
-							//TODO log
 						}
 					}
 					if (x+1 < aBoard.length) {
 						s = aBoard[x+1][i];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(x+1, i), new Coordinate(x, i), pShip);
-							//TODO log
 						}
 					}
 				}
@@ -1590,7 +1560,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getHead(), pShip);
-						//TODO log
 					}
 				}
 				//Looking behind the tail
@@ -1599,7 +1568,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getTail(), pShip);
-						//TODO log
 					}
 				}
 				//Looking on both sides of the ship
@@ -1609,14 +1577,12 @@ public class ServerGame {
 						s = aBoard[i][y-1];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(i, y-1), new Coordinate(i, y), pShip);
-							//TODO log
 						}
 					}
 					if (y+1 < aBoard.length) {
 						s = aBoard[i][y+1];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(i, y+1), new Coordinate(i, y), pShip);
-							//TODO log
 						}
 					}
 				}
@@ -1630,7 +1596,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getHead(), pShip);
-						//TODO log
 					}
 				}
 				//Looking behind the tail
@@ -1639,7 +1604,6 @@ public class ServerGame {
 					s = aBoard[x][y];
 					if (s instanceof MineSquare) {
 						mineExplode(new Coordinate(x, y), pShip.getTail(), pShip);
-						//TODO log
 					}
 				}
 				//Looking on both sides of the ship
@@ -1649,14 +1613,12 @@ public class ServerGame {
 						s = aBoard[i][y-1];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(i, y-1), new Coordinate(i, y), pShip);
-							//TODO log
 						}
 					}
 					if (y+1 < aBoard.length) {
 						s = aBoard[i][y+1];
 						if (s instanceof MineSquare) {
 							mineExplode(new Coordinate(i, y+1), new Coordinate(i, y), pShip);
-							//TODO log
 						}
 					}
 				}
@@ -1883,7 +1845,6 @@ public class ServerGame {
 	 * The mine also disappears forever. 
 	 */
 	private void mineExplode(Coordinate pMineCoord, Coordinate pDamagedCoord, Ship pDamagedShip) {
-		System.out.println("BOOOOOOOM!!!!!");
 		removeMine(pMineCoord);
 		boolean heavy = true;	//Mines always destroy heavy armor
 		
@@ -1941,6 +1902,8 @@ public class ServerGame {
 				damageShip(pDamagedShip, rightOrBottom, heavy);
 			}
 		}
+		
+		//TODO log entry for mines
 	}
 	
 	
@@ -1985,7 +1948,7 @@ public class ServerGame {
 			}
 			else {
 				setShipPosition(pAttackedShip, pAttackedShip.getHead(), pAttackedShip.getTail());
-				//TODO Log entry
+				//TODO Log entry? Or rather it should be in the cannon/torpedo/mine method. 
 			}
 		}
 	}

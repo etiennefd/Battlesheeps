@@ -64,8 +64,6 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(r, MoveType.TURN_SHIP, new Coordinate(1, 2));
 		System.out.println(game.printBoard());
-		game.computeMoveResult(r, MoveType.TURN_SHIP, new Coordinate(1, 4));
-		System.out.println(game.printBoard());
 		game.computeMoveResult(d, MoveType.FIRE_CANNON, new Coordinate(3, 27));
 		System.out.println(game.printBoard());
 		game.computeMoveResult(m, MoveType.PICKUP_MINE, new Coordinate(5, 1));
@@ -81,6 +79,14 @@ public class MainTest {
 		game.computeMoveResult(c2, MoveType.TURN_SHIP, new Coordinate(20, 1));
 		System.out.println(game.printBoard());
 		game.computeMoveResult(c, MoveType.TURN_SHIP, new Coordinate(9, 6));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(d, MoveType.TRANSLATE_SHIP, new Coordinate(4, 29));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(c2, MoveType.TRANSLATE_SHIP, new Coordinate(24, 0));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.TRANSLATE_SHIP, new Coordinate(0, 2));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.TRANSLATE_SHIP, new Coordinate(0, 1));
 		System.out.println(game.printBoard());
 	}
 
