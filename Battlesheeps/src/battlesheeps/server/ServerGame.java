@@ -61,8 +61,13 @@ public class ServerGame {
 		//Filling the board with sea and base squares
 		for (int x = 0; x<aBoard.length; x++) {
 			for (int y = 0 ; y<aBoard[x].length; y++) {
-				if (y >= 10 && y < 20 && (x==0 || x==29)) {
-					aBoard[x][y] = new BaseSquare(Damage.UNDAMAGED);
+				if (y >= 10 && y < 20 && x==0) {
+					//Creating player 1's base squares (at the far left of the board)
+					aBoard[x][y] = new BaseSquare(Damage.UNDAMAGED, aPlayer1);
+				}
+				else if (y >= 10 && y < 20 && x==29) {
+					//Creating player 2's base squares (at the far right of the board)
+					aBoard[x][y] = new BaseSquare(Damage.UNDAMAGED, aPlayer2);
 				}
 				else {
 					aBoard[x][y] = new Sea();
@@ -317,8 +322,6 @@ public class ServerGame {
 	 * Important note: When moving forward, pDestination represents the square where the HEAD of the ship will be 
 	 * after the move. When going backwards pDestination represents where the TAIL will be.
 	 * When moving to the side, pDestination may be any of the squares the ship will occupy after the move. 
-	 * 
-	 * TODO recompute visibility at the end of the move
 	 * 
 	 * @param pShip
 	 * @param pDestination
@@ -1648,8 +1651,7 @@ public class ServerGame {
 			//TODO Log entry
 		}
 		else if (s instanceof BaseSquare) {
-			//some method to SetBaseDamage
-			//TODO Log entry
+			damageBase(pCoord);
 		}
 		else if (s instanceof ShipSquare) {
 			if (((ShipSquare) s).getDamage() == Damage.DESTROYED) {
@@ -1789,7 +1791,7 @@ public class ServerGame {
 				//else if (leftOrTop == null && rightOrBottom == null) should never happen	
 			}
 			else if (s instanceof BaseSquare) {
-				//TODO
+				damageBase(new Coordinate(pX, pY));
 			}
 			return true; //because we hit something
 		}
@@ -1951,6 +1953,42 @@ public class ServerGame {
 				//TODO Log entry? Or rather it should be in the cannon/torpedo/mine method. 
 			}
 		}
+	}
+	
+	private void damageBase(Coordinate pCoord) {
+		Square s = aBoard[pCoord.getX()][pCoord.getY()];
+		if (s instanceof BaseSquare) {
+			BaseSquare bs = (BaseSquare) s;
+			if (bs.getDamage()==Damage.UNDAMAGED || bs.getDamage()==Damage.DAMAGED) {
+				aBoard[pCoord.getX()][pCoord.getY()] = new BaseSquare(Damage.DESTROYED, bs.getOwner());
+				//TODO Log entry
+			}
+			//else the base square is already destroyed; nothing happens. 
+		}
+	}
+	
+	/*
+	 * GETTERS
+	 */
+	
+	public Square[][] getBoard() {
+		return aBoard;
+	}
+	
+	public ArrayList<Ship> getP1ShipList(){
+		return aShipListP1;
+	}
+	
+	public ArrayList<Ship> getP2ShipList(){
+		return aShipListP2;
+	}
+	
+	public String getP1Username() {
+		return aPlayer1.getUsername();
+	}
+	
+	public String getP2Username() {
+		return aPlayer2.getUsername();
 	}
 
 	/**

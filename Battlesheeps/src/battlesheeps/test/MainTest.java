@@ -88,6 +88,8 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(r, MoveType.TRANSLATE_SHIP, new Coordinate(0, 1));
 		System.out.println(game.printBoard());
+		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(0, 11));
+		System.out.println(game.printBoard());
 	}
 
 }
