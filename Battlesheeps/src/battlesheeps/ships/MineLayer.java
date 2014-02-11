@@ -48,7 +48,7 @@ public class MineLayer extends Ship {
 	}
 	
 	/*
-	 * Getter for the number of mines. 
+	 * Getter for the number of mines  
 	 */
 	public int getMineSupply() {
 		return aMineSupply;
