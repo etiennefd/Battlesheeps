@@ -190,6 +190,10 @@ public abstract class Ship {
 		return aSize;
 	}
 	
+	public int getMaxSpeed() {
+		return aMaxSpeed;
+	}
+	
 	public int getActualSpeed() {
 		return aActualSpeed;
 	}
