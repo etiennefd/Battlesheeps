@@ -36,4 +36,11 @@ public class RadarBoat extends Ship {
 			return aActualSpeed;
 		}
 	}
+	/**
+	 * Getter for extended radar
+	 * @return true if radar is on 
+	 */
+	public boolean isExtendedRadarOn() {
+		return aExtendedRadar;
+	}
 }

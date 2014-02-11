@@ -47,6 +47,13 @@ public class MineLayer extends Ship {
 		aMineSupply++;
 	}
 	
+	/*
+	 * Getter for the number of mines. 
+	 */
+	public int getMineSupply() {
+		return aMineSupply;
+	}
+	
 	@Override 
 	public List<Coordinate> getRadarRange() {
 		
