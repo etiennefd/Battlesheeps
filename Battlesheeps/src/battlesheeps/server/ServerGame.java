@@ -1967,6 +1967,7 @@ public class ServerGame {
 		}
 	}
 	
+	
 	/*
 	 * GETTERS
 	 */
