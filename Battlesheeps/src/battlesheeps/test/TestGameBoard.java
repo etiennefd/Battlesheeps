@@ -6,7 +6,6 @@ import org.minueto.handlers.MinuetoKeyboardHandler;
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
-import battlesheeps.client.LaunchGame;
 import battlesheeps.server.ServerGame;
 import battlesheeps.ships.*;
 import battlesheeps.ships.Ship.Damage;
