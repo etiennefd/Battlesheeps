@@ -1992,6 +1992,11 @@ public class ServerGame {
 		return aPlayer2.getUsername();
 	}
 
+	public String getTurnPlayer() {
+		if ((aTurnNum%2) == 0) {
+			return aPlayer2.getUsername(); //even
+		} else return aPlayer1.getUsername(); //odd 
+	}
 	/**
 	 * Creates, as a string, an ASCII representation of the board. 
 	 * @return
