@@ -46,7 +46,8 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private int boardSize;
 	private int increment;
 	private boolean aMyTurn; //true if player's turn
-	private List<Coordinate> aGreenList;
+	private List<Coordinate> aGreenList; //available squares to be moved to/fired at/etc
+	private boolean aMovePhase; //true if aGreenList is not empty
 	
 	/**
 	 * Creates a Minueto Panel which acts as the game board. 
@@ -83,7 +84,6 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 		boardFrame.setResizable(false); //cannot resize the board
 		boardFrame.setMaximizable(false);//or maximize it
-		
 		boardFrame.setLayout(new FlowLayout());
 		boardFrame.setSize(new Dimension(boardSize, boardSize)); //should make the window a bit bigger?? 
 	
@@ -106,27 +106,12 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	}
 	
 	public void run() {
-		aBoard = new MinuetoRectangle(boardSize, boardSize, MinuetoColor.WHITE, true);
-		
-		//Adding the base (10 squares)
-		MinuetoRectangle base = new MinuetoRectangle(increment, 10*increment, MinuetoColor.WHITE, true);
-		aBoard.draw(base, 0, (aBoard.getHeight()/3)); //Enemy base
-		aBoard.draw(base, (aBoard.getWidth()-increment), (aBoard.getHeight()/3));//Your base
-		
-		//Note that (0,0) is the top left corner
-		//Drawing on the squares
-		for (int i = increment; i < boardSize; i = i + increment) {
-			aBoard.drawLine(MinuetoColor.BLACK, i, 0, i, boardSize);
-		}
-		
-		for (int j = increment; j < boardSize; j = j + increment) {
-			aBoard.drawLine(MinuetoColor.BLACK, 0, j, boardSize, j);
-		}
+		aBoard = new MinuetoRectangle(boardSize, boardSize, new MinuetoColor(new Color(53, 106, 172)), true);
 		
 		this.drawBoard();
 		
 		while(open) {
-			synchronized (aMinuetoPanel) {
+			//synchronized (aMinuetoPanel) {
 				if (aMinuetoPanel.isVisible()) {
 					
 					// Handle all the events in the event queue.
@@ -146,7 +131,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						e.printStackTrace();
 					}
 				}
-			}
+		//	}
 			Thread.yield();
 		}
 		aMinuetoPanel.close(); //not sure if I should be closing it? 
@@ -166,6 +151,17 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		//and redraw the board
 		drawBoard();
 	}
+	
+	/**
+	 * The Client asks the GUI to display the available squares to be clicked on.
+	 * E.g. if the player chose "Move" off the ship menu, the Client calculates
+	 * where the ship can move to, and sends these coordinates to GUI. 
+	 * @param pGreenList : available coordinates 
+	 */
+	public void displayGreenSquares(List<Coordinate> pGreenList) {
+		
+	}
+	
 	/**
 	 * The GUI will display the given coordinates in green, 
 	 * which means the player may click on it to activate move. 
@@ -190,7 +186,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		//Coral Reef 
 		MinuetoRectangle coralReef = new MinuetoRectangle(increment, increment, MinuetoColor.YELLOW, true);
 		//Ocean
-		MinuetoRectangle ocean = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(14, 57, 92)), true);
+		MinuetoRectangle ocean = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(53, 106, 172)), true);
 		//Mine
 		MinuetoRectangle mine = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(32, 28, 31)), true);
 
@@ -203,6 +199,17 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 				else aBoard.draw(ocean,  i*increment, j*increment);
 			}
 		}
+		
+		//Note that (0,0) is the top left corner
+		//Drawing on the squares
+		for (int i = increment; i < boardSize; i = i + increment) {
+			aBoard.drawLine(MinuetoColor.BLACK, i, 0, i, boardSize);
+		}
+		
+		for (int j = increment; j < boardSize; j = j + increment) {
+			aBoard.drawLine(MinuetoColor.BLACK, 0, j, boardSize, j);
+		}
+		
 				
 	}
 	/**
@@ -295,13 +302,13 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		int[] points = new int[6];
 		//corner
 		points[0] = pX*increment;
-		points[1] = pY*increment;
+		points[1] = (pY+1)*increment;
 		//upper middle
 		points[2] = (pX*increment)+(increment/2);
-		points[3] = (pY*increment)-increment;
+		points[3] = ((pY+1)*increment)-increment ;
 		//corner
 		points[4] = (pX*increment)+increment;
-		points[5] = pY*increment;
+		points[5] = (pY+1)*increment;
 		aBoard.drawPolygon(pColor, points);
 	}
 
@@ -371,26 +378,34 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 	@Override
 	public void handleMouseMove(int arg0, int arg1) {
-		//we only allow key presses if it's this player's turn! 
-		if (aMyTurn) {
-			Coordinate coord = convertToSquare(arg0, arg1);
-			
-			if (aVisibleBoard[coord.getX()][coord.getY()] instanceof ShipSquare) {
-				ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
-				Ship ship = shipSquare.getShip();
-				//if the ship is this player's ship, then display menu
-				if (ship.getUsername().compareTo(aUsername) == 0) {
-					aMyClient.showShipMenu(ship);
-				}
-			}
-		} 
 		
 	}
 
 	@Override
 	public void handleMousePress(int arg0, int arg1, int arg2) {
 		// TODO Auto-generated method stub
-		
+		//we only allow key presses if it's this player's turn! 
+		if (aMyTurn) {
+			Coordinate coord = convertToSquare(arg0, arg1);
+
+			if (coord.inBounds()) {
+				
+				Square currentSquare = aVisibleBoard[coord.getX()][coord.getY()];
+				
+				if (currentSquare instanceof ShipSquare) {
+					ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
+					Ship ship = shipSquare.getShip();
+					//if the ship is this player's ship, then display menu
+					if (ship.getUsername().compareTo(aUsername) == 0) {
+						aMyClient.showShipMenu(ship);
+					}
+				}
+				
+				if (aMovePhase) {
+					//TODO
+				}
+			}
+		} 
 		
 		
 	}
