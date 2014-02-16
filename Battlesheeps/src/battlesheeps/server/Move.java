@@ -10,6 +10,12 @@ public class Move {
 	private Ship aShip;
 	private MoveType aMoveType;
 	
+	public Move(Coordinate pCoord, Ship pShip, MoveType pMoveType){
+		this.aCoord = pCoord;
+		this.aShip = pShip;
+		this.aMoveType = pMoveType;
+	}
+	
 	/**
 	 * Getter for this move's coordinate. 
 	 * @return coordinate 
