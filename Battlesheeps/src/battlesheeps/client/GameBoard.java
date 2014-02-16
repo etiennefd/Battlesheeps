@@ -20,8 +20,10 @@ import battlesheeps.board.BaseSquare;
 import battlesheeps.board.Coordinate;
 import battlesheeps.board.CoralReef;
 import battlesheeps.board.MineSquare;
+import battlesheeps.board.RadarSquare;
 import battlesheeps.board.Sea;
 import battlesheeps.board.ShipSquare;
+import battlesheeps.board.SonarSquare;
 import battlesheeps.board.Square;
 import battlesheeps.server.ServerGame;
 import battlesheeps.server.ServerGame.Direction;
@@ -47,7 +49,9 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private int increment;
 	private boolean aMyTurn; //true if player's turn
 	private List<Coordinate> aGreenList; //available squares to be moved to/fired at/etc
-	private boolean aMovePhase; //true if aGreenList is not empty
+	private boolean aGreenPhase; //true if aGreenList is not empty
+	private boolean aChosenMove; //true if player has chosen a move this turn
+								//this is to stop the player from choosing more than one
 	
 	/**
 	 * Creates a Minueto Panel which acts as the game board. 
@@ -67,6 +71,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aVisibleBoard = pVisibleBoard;
 		aMyTurn = pTurn;
 		aMyClient = pClient;
+		aChosenMove = false;
 		
 		createBoard();
 		
@@ -147,19 +152,9 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		
 		aMyTurn = pTurn;
 		aVisibleBoard = pVisibleBoard;
-		
+		aChosenMove = false;
 		//and redraw the board
 		drawBoard();
-	}
-	
-	/**
-	 * The Client asks the GUI to display the available squares to be clicked on.
-	 * E.g. if the player chose "Move" off the ship menu, the Client calculates
-	 * where the ship can move to, and sends these coordinates to GUI. 
-	 * @param pGreenList : available coordinates 
-	 */
-	public void displayGreenSquares(List<Coordinate> pGreenList) {
-		
 	}
 	
 	/**
@@ -170,6 +165,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	public void showAvailableMoves(List<Coordinate> pList) {
 		
 		aGreenList = pList;
+		aGreenPhase = true;
 		
 		MinuetoRectangle greenRectangle = new MinuetoRectangle(increment, increment, MinuetoColor.GREEN, true);
 		for (Coordinate c : aGreenList) {
@@ -189,6 +185,10 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		MinuetoRectangle ocean = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(53, 106, 172)), true);
 		//Mine
 		MinuetoRectangle mine = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(32, 28, 31)), true);
+		//Radar
+		MinuetoRectangle radar = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(88, 166, 203)), true);
+		//Sonar
+		MinuetoRectangle sonar = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(128, 102, 232)), true);
 
 		for (int i = 0; i < aVisibleBoard.length; i++) {
 			for (int j = 0; j < aVisibleBoard.length; j++) {
@@ -196,6 +196,8 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 				else if (aVisibleBoard[i][j] instanceof ShipSquare) this.addShip(i, j);
 				else if (aVisibleBoard[i][j] instanceof BaseSquare) this.addBase(i,j);
 				else if (aVisibleBoard[i][j] instanceof MineSquare) aBoard.draw(mine, i*increment, j*increment);
+				else if (aVisibleBoard[i][j] instanceof RadarSquare) aBoard.draw(radar, i*increment, j*increment);
+				else if (aVisibleBoard[i][j] instanceof SonarSquare) aBoard.draw(sonar, i*increment, j*increment);
 				else aBoard.draw(ocean,  i*increment, j*increment);
 			}
 		}
@@ -218,7 +220,6 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	 * @param pSquareY : the y-coordinate of the square 
 	 */
 	private void addBase (int pSquareX, int pSquareY) {
-		//personalize based on which player?
 		//need to determine damage
 		BaseSquare baseSquare = (BaseSquare) aVisibleBoard[pSquareX][pSquareY];
 		Damage baseDamage = baseSquare.getDamage();
@@ -366,13 +367,11 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	
 	@Override
 	public void handleGetFocus() {
-		// TODO Auto-generated method stub
-		//not sure how to handle focus... 
+		
 	}
 
 	@Override
 	public void handleLostFocus() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -383,7 +382,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 	@Override
 	public void handleMousePress(int arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
+
 		//we only allow key presses if it's this player's turn! 
 		if (aMyTurn) {
 			Coordinate coord = convertToSquare(arg0, arg1);
@@ -401,8 +400,25 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 					}
 				}
 				
-				if (aMovePhase) {
-					//TODO
+				if (aGreenPhase) {
+					if (aGreenList.contains(coord) && !aChosenMove){
+						//tell Client about choice
+						aChosenMove = true;
+						aMyClient.greenSelected(coord); 
+					}
+					else if (aChosenMove){
+						//should we do anything here?
+						//how long will it take for the Server to get back to the client? 
+						
+					}
+					else {
+						//Otherwise, resetting the green list
+						aGreenList = new ArrayList<Coordinate>();
+						aGreenPhase = false;
+						//and redrawing the board 
+						drawBoard();
+					}
+					
 				}
 			}
 		} 
@@ -412,7 +428,6 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 	@Override
 	public void handleMouseRelease(int arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
 		
 	}
 }

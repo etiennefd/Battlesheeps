@@ -3,9 +3,9 @@ package battlesheeps.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import battlesheeps.board.Coordinate;
 import battlesheeps.board.*;
 import battlesheeps.server.ServerGame.Direction;
+import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
 
 /**
@@ -77,10 +77,11 @@ import org.minueto.window.MinuetoPanel;
 
 /* This will open a window with the following panels:
  * 1) the board game (fixed square, width a multiple of 30) 
- * 2) the ship info panel 
+ * 2) the ship message panel 
  * 3) a scrollable log entries (displays log entries)
  * 4) a scrollable chat panel (displays chat messages and allows user to enter one)
  * 
+ * It also holds the game logic on the Client side. 
  */
 public class ClientGame {
 
@@ -89,13 +90,18 @@ public class ClientGame {
 	private GameBoard aBoardPanel;
 	private MessagePanel aMessagePanel;
 	private LogPanel aLogPanel;
-//	private ChatPanel aChatPanel;
+	private JPanel aChatPanel;
 
 	private boolean open = true;
 	private int one = 1;
 	
 	//should know who it's player is 
 	private String aMyUser;
+	private String aMyOpponent;
+	private boolean aPlayer1; //if true, base is on WEST, else EAST
+	
+	private Ship aCurrentClickedShip; 
+	private MoveType aCurrentClickedMove;
 	
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
@@ -103,8 +109,25 @@ public class ClientGame {
 	public ClientGame(String pPlayer, ServerGame pGame) {
 
 		aMyUser = pPlayer;
+		if (pPlayer.compareTo(pGame.getP1Username()) == 0) {
+			aPlayer1 = true;
+			aMyOpponent = pGame.getP2Username();
+		}
+		else{
+			aPlayer1 = false;
+			aMyOpponent = pGame.getP1Username();
+		}
 		
-		this.aMainFrame = new JFrame();
+		GraphicsDevice grdDevice;
+		GraphicsConfiguration grcConfiguration;
+		GraphicsEnvironment greEnvironment;
+
+		greEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		grdDevice = greEnvironment.getDefaultScreenDevice();
+		grcConfiguration = grdDevice.getDefaultConfiguration();
+
+		this.aMainFrame = new JFrame(grcConfiguration); 
+
 		this.aMainFrame.setPreferredSize(new Dimension(1000,700));
 		
 		this.aMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -128,7 +151,7 @@ public class ClientGame {
 		background.setLayout(new BoxLayout(background, BoxLayout.X_AXIS));
 		
 		JSplitPane splitPane = new JSplitPane();
-		splitPane.setResizeWeight(0.7);
+		splitPane.setResizeWeight(0.8);
 		background.add(splitPane);
 		
 		JSplitPane sidePanel = new JSplitPane();
@@ -146,30 +169,29 @@ public class ClientGame {
 		sideBottom.setLeftComponent(aLogPanel);
 		
 		//CHAT
-//		aChatPanel = new ChatPanel();
-//		sideBottom.setRightComponent(aChatPanel);
+		JPanel chat = new JPanel();
+		sideBottom.setRightComponent(chat);
 		
 		String opponent;
-		if (pPlayer.compareTo(pGame.getP1Username()) == 0) {
-			opponent = pGame.getP2Username();
-		} else opponent = pGame.getP1Username();
+		if (aPlayer1) opponent = pGame.getP2Username();
+		else opponent = pGame.getP1Username();
 		
 		//MESSAGES
 		aMessagePanel = new MessagePanel(this, pPlayer, opponent);
 		sidePanel.setLeftComponent(aMessagePanel);
 		
-		boolean turn;
+		boolean isTurn;
 		
 		if (pPlayer.compareTo(pGame.getTurnPlayer()) == 0) {
-			turn = true;
+			isTurn = true;
 			aMessagePanel.setYourTurn();
 		} else {
-			turn = false;
+			isTurn = false;
 			
 			List<Ship> myList;
 			List<Ship> oppList;
 			
-			if (aMyUser.compareTo(pGame.getP1Username()) == 0) {
+			if (aPlayer1) {
 				myList = pGame.getP1ShipList();
 				oppList = pGame.getP2ShipList();
 			}
@@ -181,7 +203,15 @@ public class ClientGame {
 			aMessagePanel.setNotYourTurn(myList, oppList);
 		}
 		
-		aBoardPanel = new GameBoard(600, pPlayer, pGame.getBoard(), turn, this);
+		//computing the visible board to send the GUI
+		List<Ship> shipList;
+		if (aPlayer1) shipList = pGame.getP1ShipList();
+		else shipList = pGame.getP2ShipList();
+		Square[][] visibleBoard = computeVisibility(pGame.getBoard(), shipList);
+	
+		//and creating the board panel 
+		aBoardPanel = new GameBoard(600, pPlayer, visibleBoard, isTurn, this);
+		
 		aBoardPanel.setPreferredSize(new Dimension(600, 600));
 		splitPane.setLeftComponent(aBoardPanel);
 		
@@ -275,12 +305,13 @@ public class ClientGame {
 	 * 3. a message may be displayed  
 	 */
 	public void updateGame (ServerGame pGame) {
+		
 		String turnPlayer = pGame.getTurnPlayer(); 
 		
 		List<Ship> myList;
 		List<Ship> oppList;
 		
-		if (aMyUser.compareTo(pGame.getP1Username()) == 0) {
+		if (aPlayer1) {
 			myList = pGame.getP1ShipList();
 			oppList = pGame.getP2ShipList();
 		}
@@ -309,7 +340,15 @@ public class ClientGame {
 	 * @param pShip
 	 */
 	public void showShipMenu(Ship pShip) {
-		aMessagePanel.displayShipMenu(pShip);
+		
+		aCurrentClickedShip = pShip;
+		
+		String p1;
+		if (aPlayer1) p1 = aMyUser;
+		else p1 = aMyOpponent;
+		
+		boolean atBase = pShip.isAtHomeBase(p1);
+		aMessagePanel.displayShipMenu(pShip, atBase);
 		//TODO: figure out base repair 
 	}
 	
@@ -317,10 +356,28 @@ public class ClientGame {
 
 		//at the start everything is visible 
 		Square[][] visibleBoard = pBoard; 
-		//a list to hold the visible squares
+		//a list to hold the visible squares by radar
 		List<Coordinate> visibleRadarList = new ArrayList<Coordinate>();
+	
+		//plus need to add area around player's base to list
+		int baseX;
+		if (aPlayer1) {
+			baseX = 1;
+			visibleRadarList.add(new Coordinate(0, 9));
+			visibleRadarList.add(new Coordinate(0, 20));
+		}
+		else {
+			baseX = 28;
+			visibleRadarList.add(new Coordinate(29, 9));
+			visibleRadarList.add(new Coordinate(29, 20));
+		}
+		
+		for (int i = 9; i < 21; i++){
+			visibleRadarList.add(new Coordinate(baseX, i));
+		}
+		
+		//and a list to hold the visible squares by sonar
 		List<Coordinate> visibleSonarList = new ArrayList<Coordinate>();
-		//add area around player's base to list
 
 		//now calculate
 		for (Ship ship : pShipList) {
@@ -328,43 +385,126 @@ public class ClientGame {
 			List<Coordinate> radarRange = ship.getRadarRange();
 
 			for (Coordinate c : radarRange) {
-
-				if (!visibleRadarList.contains(c)) {
-
+				//if the list doesn't already contain this coordinate
+				if (!(visibleRadarList.contains(c))) {
+					//then add it
 					visibleRadarList.add(c);
-
-					//the sonar of a mineLayer is equal to its radar 
-					if (ship instanceof MineLayer) visibleSonarList.add(c);
-
+				}
+				
+				//and if the ship is a Mine Layer
+				//we need to add it to the sonar list (sonar = radar)
+				if (ship instanceof MineLayer) {
+					if (!(visibleSonarList.contains(c))) {
+						visibleSonarList.add(c);
+					}
 				}
 			}
 		}
 
 		Sea seaSquare = new Sea();
+	
 		for (int i = 0; i < 30; i++) {
 			for (int j = 0; j <30; j++) {
 
 				//covering up any mines that shouldn't be visible 
 				if (visibleBoard[i][j] instanceof MineSquare) {
-					if (!visibleSonarList.contains(new Coordinate(i,j))){
+					//if the sonar list doesn't contain this coordinate 
+					if (!(visibleSonarList.contains(new Coordinate(i,j)))){
+						//then cover it with sea 
 						visibleBoard[i][j] = seaSquare;
 					}
 				}
-				//and covering all enemy ships which are not in the radar
-				if (!visibleRadarList.contains(new Coordinate(i,j))) {
-
-					if (visibleBoard[i][j] instanceof ShipSquare) {
-
-						//and it's not your own ship! 
+				//and covering all enemy ships which aren't in the radar
+				if (visibleBoard[i][j] instanceof ShipSquare) {
+					//if the radar list doesn't contain this coordinate 
+					if (!(visibleRadarList.contains(new Coordinate(i,j)))) {
+						//and it's not your own ship 
 						String user = (((ShipSquare)visibleBoard[i][j]).getShip()).getUsername();
-						if (user != aMyUser) visibleBoard[i][j] = seaSquare;
+						//then cover it with sea
+						if (!(user.compareTo(aMyUser)== 0)) visibleBoard[i][j] = seaSquare;
 
 					}
 				}
 			}
 		}
+
+		//and some for sonar (which trumps radar) 
+		SonarSquare sonar = new SonarSquare();
+		for (Coordinate c : visibleSonarList) {
+			if (visibleBoard[c.getX()][c.getY()] instanceof Sea) {
+				visibleBoard[c.getX()][c.getY()] = sonar;
+			}
+		}
+		
+		//and turning all the sea squares into radar squares if they're in the list
+		RadarSquare radar = new RadarSquare();
+		for (Coordinate c : visibleRadarList) {
+			if (visibleBoard[c.getX()][c.getY()] instanceof Sea) {
+				visibleBoard[c.getX()][c.getY()] = radar;
+			}
+		}
+
 		return visibleBoard;
 
 	}
+	//the Message Panel sends the chosen move to the Client
+	//the Client then calculates where the move could occur on the board
+	//and sends this info to the Game Board
+	//or it sends the info straight to the Server in the case of radar changes 
+	protected void translateSelected(Ship pShip) {
+		
+		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
+		
+		int speed = pShip.getActualSpeed();
+		
+	}
+	
+	protected void turnSelected (Ship pShip) {
+		
+		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
+		
+		
+	}
+	
+	protected void cannonSelected(Ship pShip) {
+		
+		aCurrentClickedMove = MoveType.FIRE_CANNON;
+		
+	}
+	
+	protected void layMineSelected(Ship pShip) {
+		aCurrentClickedMove = MoveType.DROP_MINE;
+	}
+	
+	protected void retrieveMineSelected(Ship pShip) {
+		aCurrentClickedMove = MoveType.PICKUP_MINE;
+	}
+	
+	protected void torpedoSelected(Ship pShip) {
+		aCurrentClickedMove = MoveType.FIRE_TORPEDO;
+	}
+	
+	protected void turnExtendedRadarOn (Ship pShip) {
+		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
+	}
 
+	protected void turnExtendedRadarOff (Ship pShip) {
+		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
+	}
+	
+	protected void baseRepairSelected(Ship pShip) {
+		aCurrentClickedMove = MoveType.REPAIR_SHIP;
+	}
+	
+	/**
+	 * GUI tells Client that a green square was selected. 
+	 * This indicates that the Player wants to move/fire/whatever in that square,
+	 * so Client sends the info to the Server. 
+	 * @param pCoord
+	 */
+	protected void greenSelected(Coordinate pCoord) {
+		//Will send move type, coordinate & ship to Server
+		//send as Move Object??? 
+		
+	}
 }

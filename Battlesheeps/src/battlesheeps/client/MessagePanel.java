@@ -1,5 +1,7 @@
 package battlesheeps.client;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -10,16 +12,13 @@ import javax.swing.JTable;
 
 import battlesheeps.ships.*;
 
-import java.util.ArrayList;
-import javax.swing.JFrame;
-import battlesheeps.accounts.Account;
-
 public class MessagePanel extends JPanel {
 	
 	private static final long serialVersionUID = 5567892L;
 	private ClientGame aClient; /*change to proper client later*/
 	private String aPlayer;
 	private String aOpponent;
+	private Ship aCurrentShip;
 	
 	public MessagePanel(ClientGame client, String pPlayer, String pOpponent) {
 		super();
@@ -48,7 +47,9 @@ public class MessagePanel extends JPanel {
 		
 		this.add(yourTurn);
 		this.add(makeMove);
+		
 		//and lastly validate the changes
+		this.repaint();
 		this.validate();
 		
 	}
@@ -134,7 +135,9 @@ public class MessagePanel extends JPanel {
 	 * Displays a menu for the given ship.  TODO : addActionListeners
 	 * @param pShip
 	 */
-	public void displayShipMenu(Ship pShip){
+	public void displayShipMenu(Ship pShip, boolean pTouchingBase){
+		
+		aCurrentShip = pShip;
 		
 		//first removing all prior components
 		this.removeAll();
@@ -186,10 +189,37 @@ public class MessagePanel extends JPanel {
 		//the client will then tell the game board to display the move options 
 		
 		JButton moveButton = new JButton("Move");
-		JButton turnButton = new JButton("Turn");
-		JButton cannonButton = new JButton("Fire cannon");
+		moveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.translateSelected(aCurrentShip);
+			}
+		});
 		
-		this.add(moveButton);
+		JButton turnButton = new JButton("Turn");
+		turnButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//tell Client that turn was selected for this ship
+				aClient.turnSelected(aCurrentShip);
+			}
+		});
+		
+		JButton cannonButton = new JButton("Fire cannon");
+		cannonButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//tell Client that fire cannon was selected for this ship
+				aClient.cannonSelected(aCurrentShip);
+			}
+		});
+		
+		boolean moveAllowed = true;
+		if (pShip instanceof RadarBoat) {
+			if (((RadarBoat)pShip).isExtendedRadarOn()) {
+				moveAllowed = false;
+			}
+		}
+		
+		if (moveAllowed) this.add(moveButton);
+		
 		this.add(turnButton);
 		this.add(cannonButton);
 		
@@ -197,26 +227,91 @@ public class MessagePanel extends JPanel {
 		if (pShip instanceof MineLayer) {
 			//you can only lay a mine if you have at least 1
 			if (((MineLayer)pShip).getMineSupply() > 0) {
+				
 				JButton layMineButton = new JButton("Lay mine");
+				layMineButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						//tell Client that lay mine was selected for this ship
+						aClient.layMineSelected(aCurrentShip);
+					}
+				});
+				
 				this.add(layMineButton);
 			}
+			//but you can always retrieve a mine... 
+			//well, the client will determine if that's possible, not the message panel 
 			JButton retrieveMineButton = new JButton("Retrieve mine in vicinity");
+			retrieveMineButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//tell Client that retrieve mine was selected for this ship
+					aClient.retrieveMineSelected(aCurrentShip);
+				}
+			});
+			
 			this.add(retrieveMineButton);
 		} //Radar Boats can extend its radar 
 		else if (pShip instanceof RadarBoat){
 			if (((RadarBoat)pShip).isExtendedRadarOn()) {
+				
 				JButton turnOffButton = new JButton("Turn off extended radar");
+				turnOffButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						//tell Client that radar-off was selected for this ship
+						aClient.turnExtendedRadarOff(aCurrentShip);
+					}
+				});
+				
 				this.add(turnOffButton);
+				
 			}else {
 				JButton turnOnButton = new JButton("Turn on extended radar");
+				turnOnButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						//tell Client that radar-on was selected for this ship
+						aClient.turnExtendedRadarOn(aCurrentShip);
+					}
+				});
+				
 				this.add(turnOnButton);
 			}
 		} //Torpedo boats can fire torpedos 
 		else if (pShip instanceof TorpedoBoat) {
 			JButton torpedoButton = new JButton("Fire torpedo");
+			torpedoButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//tell Client that torpedo was selected for this ship
+					aClient.torpedoSelected(aCurrentShip);
+				}
+			});
+			
 			this.add(torpedoButton);
 		}
+		
+		//finally, if the ship is damaged and touching it's own base, repair ship is an option
+		if (pShip.isDamaged() && pTouchingBase) {
+			JButton baseButton = new JButton("Fire torpedo");
+			baseButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//tell Client that torpedo was selected for this ship
+					aClient.baseRepairSelected(aCurrentShip);
+				}
+			});
+			
+			this.add(baseButton);
+		}
+		
+		
 		//and revalidating 
+		this.repaint();
+		this.validate();
+	}
+	
+	public void displayMessage(String pMessage) {
+		this.removeAll();
+		
+		JLabel message = new JLabel(pMessage);
+		this.add(message);
+		this.repaint();
 		this.validate();
 	}
 	
