@@ -24,6 +24,15 @@ public class RadarBoat extends Ship {
 	}
 	
 	public void triggerRadar() {
+		
+		if (aExtendedRadar) {
+			//extended radar is on, so turning it off
+			aRadarRangeLength = 6;
+		} else {
+			//extended radar is off, so turning it on
+			aRadarRangeLength = 12;
+		}
+		//and changing the boolean 
 		aExtendedRadar = !aExtendedRadar;
 	}
 	//Somewhere in the compute radar range method: if(aExtendedRadar) {multiply radarRangeLength by 2}
