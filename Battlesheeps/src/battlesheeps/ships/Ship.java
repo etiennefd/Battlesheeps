@@ -20,7 +20,7 @@ public abstract class Ship {
 		UNDAMAGED, DAMAGED, DESTROYED
 	}
 
-	private Coordinate head;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
+	private Coordinate aLocationHead;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
 	private Coordinate aLocationTail;	//x and y coordinates of the stern of the ship
 	
 	private Account aPlayer; 
@@ -43,7 +43,7 @@ public abstract class Ship {
 	 */
 	public void initializeShip(Account pPlayer) {
 		aPlayer = pPlayer;
-		head = null;
+		aLocationHead = null;
 		aLocationTail = null;
 		
 		aActualSpeed = aMaxSpeed;
@@ -71,7 +71,7 @@ public abstract class Ship {
 	}
 	
 	public void setLocation(Coordinate pHead, Coordinate pTail) {
-		head = pHead;
+		aLocationHead = pHead;
 		aLocationTail = pTail;
 	}
 	
@@ -91,8 +91,8 @@ public abstract class Ship {
 		
 		switch (direction) {
 		case NORTH: 
-			x = head.getX();
-			for (y = head.getY(); y <= aLocationTail.getY(); y++, tempIndex++) {
+			x = aLocationHead.getX();
+			for (y = aLocationHead.getY(); y <= aLocationTail.getY(); y++, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -100,8 +100,8 @@ public abstract class Ship {
 			}
 			break;
 		case SOUTH: 
-			x = head.getX();
-			for (y = head.getY(); y >= aLocationTail.getY(); y--, tempIndex++) {
+			x = aLocationHead.getX();
+			for (y = aLocationHead.getY(); y >= aLocationTail.getY(); y--, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -109,8 +109,8 @@ public abstract class Ship {
 			}
 			break;
 		case WEST: 
-			y = head.getY();
-			for (x = head.getX(); x <= aLocationTail.getX(); x++, tempIndex++) {
+			y = aLocationHead.getY();
+			for (x = aLocationHead.getX(); x <= aLocationTail.getX(); x++, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -118,8 +118,8 @@ public abstract class Ship {
 			}
 			break;
 		case EAST: 
-			y = head.getY();
-			for (x = head.getX(); x >= aLocationTail.getX(); x--, tempIndex++) {
+			y = aLocationHead.getY();
+			for (x = aLocationHead.getX(); x >= aLocationTail.getX(); x--, tempIndex++) {
 				if (targetY == y && targetX == x) {
 					damageIndex = tempIndex;
 					break;
@@ -199,7 +199,7 @@ public abstract class Ship {
 	}
 	
 	public Coordinate getHead() {
-		return head;
+		return aLocationHead;
 	}
 	
 	public Coordinate getTail() {
@@ -223,14 +223,14 @@ public abstract class Ship {
 	 * @return
 	 */
 	public Direction getDirection() {
-		if (head.getX() == aLocationTail.getX()) {
+		if (aLocationHead.getX() == aLocationTail.getX()) {
 			//Both head and tail in same column: either facing North or South
-			if (head.getY() > aLocationTail.getY()) return Direction.SOUTH;
+			if (aLocationHead.getY() > aLocationTail.getY()) return Direction.SOUTH;
 			else return Direction.NORTH;
 		}
-		else if (head.getY() == aLocationTail.getY()){
+		else if (aLocationHead.getY() == aLocationTail.getY()){
 			//Both head and tail in same row: either facing East or West
-			if (head.getX() > aLocationTail.getX()) return Direction.EAST;
+			if (aLocationHead.getX() > aLocationTail.getX()) return Direction.EAST;
 			else return Direction.WEST;
 		}
 		else {
@@ -314,6 +314,183 @@ public abstract class Ship {
 		}
 
 		return list;
-	}	
+	}
+	/**
+	 * Returns true if at least one square of the ship is damaged. 
+	 * @return
+	 */
+	public boolean isDamaged(){
+		
+		boolean damaged = false;
+		
+		for (Damage d : aDamage){
+			if (d == Damage.DAMAGED || d == Damage.DESTROYED) {
+				damaged = true;
+				break;
+			}
+		}
+		
+		return damaged;
+	}
+	/**
+	 * Returns true if the ship is docked at its player's base 
+	 * i.e. at least one of its squares is touching the base 
+	 * @param pPlayer1 the player's whose base is WEST
+	 * @return
+	 */
+	public boolean isAtHomeBase(String pPlayer1) {
+		
+		boolean isByHomeBase = false;
+		
+		Coordinate[] shipCoords = shipCoordinates();
+	
+		String myUser = aPlayer.getUsername(); 
+		
+		if (myUser.compareTo(pPlayer1) == 0) {
+			//base is WEST 
+			//base coordinates: (0,9),(0,19),(10,1),...,(19,1)
+			for (int i = 0; i < aSize; i++){
+				Coordinate coord = shipCoords[i];
+				if (coord.equals(new Coordinate(0, 9))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(0, 20))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1,10))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 11))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 12))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 13))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 14))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 15))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 16))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 17))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 18))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(1, 19))) {
+					isByHomeBase = true;
+					break;
+				}
+			}
+			
+		} else { 
+			//base is EAST
+			//base coordinates: (29,9),(29,19),(29,10),...,(28,19)
+			for (int i = 0; i < aSize; i++){
+				
+				Coordinate coord = shipCoords[i];
+			
+				if (coord.equals(new Coordinate(29,9))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(29,20))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28,10))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28,11))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28,12))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 13))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 14))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 15))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 16))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 17))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 18))) {
+					isByHomeBase = true;
+					break;
+				}
+				else if (coord.equals(new Coordinate(28, 19))) {
+					isByHomeBase = true;
+					break;
+				}
+			}
+			
+		}
+		
+		return isByHomeBase;
+		
+	}
+	
+	private Coordinate[] shipCoordinates(){
+		Coordinate[] myCoords = new Coordinate[aSize]; 
+		
+		myCoords[0] = aLocationHead;
+		myCoords[aSize-1] = aLocationTail; 
+		
+		Direction myDirection = this.getDirection();
+		
+		for (int i = 1; i < aSize-1; i++){
+			switch(myDirection) {
+				case NORTH :
+					myCoords[i] = new Coordinate(aLocationHead.getX(), aLocationHead.getY() + i);
+					break;
+				case SOUTH : 
+					myCoords[i] = new Coordinate(aLocationHead.getX(), aLocationHead.getY() - i);
+					break;
+				case WEST : 
+					myCoords[i] = new Coordinate(aLocationHead.getX()- i, aLocationHead.getY());
+					break;
+				default : /*EAST*/
+					myCoords[i] = new Coordinate(aLocationHead.getX()+ i, aLocationHead.getY());
+					break;
+			}
+		}
+		
+		return myCoords;
+		
+	}
 	
 }
