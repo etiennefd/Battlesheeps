@@ -1,5 +1,8 @@
 package battlesheeps.accounts;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class Account {
 
 	public enum Status {
@@ -13,12 +16,15 @@ public class Account {
 	private int aNumGamesWon; 
 	private int aNumGamesLost;
 	
+	private ArrayList<Integer> aCurrentGames;
+	
 	public Account(String pUsername, String pPassword) {
 		aUsername = pUsername; 
 		aPassword = pPassword;
 		aAvailability = Status.OFFLINE;
 		aNumGamesWon = 0; 
 		aNumGamesLost = 0; 
+		aCurrentGames = new ArrayList<Integer>();
 	}
 	
 	/* GETTERS */
@@ -26,29 +32,36 @@ public class Account {
 		return aUsername;
 	}
 	
-	public Status getAvailability()
-	{
+	public Status getAvailability(){
 		return aAvailability;
 	}
 	
-	public String getPassword()
-	{
+	public String getPassword(){
 		return aPassword;
 	}
 	
-	public int getNumGamesWon()
-	{
+	public int getNumGamesWon(){
 		return aNumGamesWon;
 	}
 	
-	public int getNumGamesLost()
-	{
+	public int getNumGamesLost(){
 		return aNumGamesLost;
 	}
 	
+	public Iterator<Integer> getCurrentGames(){
+		return aCurrentGames.iterator();
+	}
+	
 	/* SETTERS */
-	public void setAvailability(Status pAvailability)
-	{
+	public void setAvailability(Status pAvailability){
 		aAvailability = pAvailability;
+	}
+	
+	public boolean addNewGame(int aGame){
+		return aCurrentGames.add(aGame);
+	}
+	
+	public void removeFinishedGame(int aGame){
+		aCurrentGames.remove(aGame);
 	}
 }

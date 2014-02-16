@@ -1,12 +1,24 @@
 package battlesheeps.server;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import battlesheeps.accounts.Account;
-import battlesheeps.board.*;
+import battlesheeps.board.BaseSquare;
+import battlesheeps.board.Coordinate;
+import battlesheeps.board.CoralReef;
+import battlesheeps.board.MineSquare;
+import battlesheeps.board.Sea;
+import battlesheeps.board.ShipSquare;
+import battlesheeps.board.Square;
 import battlesheeps.exceptions.InvalidCoordinateException;
-import battlesheeps.ships.*;
+import battlesheeps.ships.Cruiser;
+import battlesheeps.ships.Destroyer;
+import battlesheeps.ships.MineLayer;
+import battlesheeps.ships.RadarBoat;
+import battlesheeps.ships.Ship;
 import battlesheeps.ships.Ship.Damage;
+import battlesheeps.ships.TorpedoBoat;
 
 public class ServerGame {
 
@@ -28,7 +40,7 @@ public class ServerGame {
 	private Account aPlayer1;
 	private Account aPlayer2;
 	private int aTurnNum;			//Odd -> it is P1's turn. Even -> it is P2's turn.  
-	private String aDateLastPlayed;	//Should be a Date object or something
+	private Date aDateLastPlayed;	//TODO update this when a turn is done.
 	
 	//Fields related to the contents of the game
 	private Square[][] aBoard;
@@ -52,7 +64,7 @@ public class ServerGame {
 		aPlayer1 = pPlayer1;
 		aPlayer2 = pPlayer2;
 		aTurnNum = 1;
-		aDateLastPlayed = "never";
+		aDateLastPlayed = new Date();
 		
 		aGameComplete = false; 
 		aWinner = null;
@@ -1990,6 +2002,18 @@ public class ServerGame {
 	
 	public String getP2Username() {
 		return aPlayer2.getUsername();
+	}
+	
+	public int getGameID()	{
+		return aGameID;
+	}
+
+	public int getTurnNum() {
+		return aTurnNum;
+	}
+
+	public Date getDateLastPlayed() {
+		return aDateLastPlayed;
 	}
 
 	public String getTurnPlayer() {

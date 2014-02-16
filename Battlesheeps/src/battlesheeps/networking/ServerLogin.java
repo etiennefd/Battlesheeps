@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import battlesheeps.accounts.Account;
 import battlesheeps.accounts.Account.Status;
 import battlesheeps.networking.LoginMessage.LoginType;
+import battlesheeps.server.GameManager;
 
 public class ServerLogin
 {
@@ -25,7 +26,7 @@ public class ServerLogin
      * Creates serverSocket on specified port.
      */
     public ServerLogin(){
-    	aAccounts = new Hashtable<String, Account>();
+    	aAccounts = GameManager.getInstance().getAccounts();
     	try {
             SERVER = new ServerSocket(PORT); /* start listening on the port */
         } catch (IOException e) {
