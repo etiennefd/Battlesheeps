@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import battlesheeps.networking.LoginMessage.LoginType;
 
@@ -19,13 +21,13 @@ public class ClientLogin
     private static final int PORT = 5002; /* port to connect to */
     private ObjectOutputStream aOutput = null;
     
-    public ClientLogin(JDialog pDialog) {
+    public ClientLogin(JDialog pLoginDialog, JFrame pLoginFrame) {
         try {
             Socket server = new Socket(HOST, PORT);
             
             // Create a thread to asynchronously read messages from the server
             try {
-            	(new Thread(new ServerConnLogin(server, pDialog))).start();
+            	(new Thread(new ServerConnLogin(server, pLoginDialog))).start();
             }
             catch (IOException e){
             	System.err.println("Error creating server input thread: " + e);
@@ -95,7 +97,11 @@ class ServerConnLogin implements Runnable {
 				{
 					// Creation of account
 					if (msg.getLogin().equals(FAILURE)){
-						// TODO Display failure message, go back to Create Account screen 
+						// Display failure message, go back to Create Account screen 
+						aDialog.setVisible(false);
+						aDialog.dispose();
+						JOptionPane.showMessageDialog(null, "Account creation failed.", 
+								"Invalid Input", JOptionPane.ERROR_MESSAGE);
 					} 
 					else {
 						// TODO Successful creation, go back to login screen.
@@ -106,9 +112,14 @@ class ServerConnLogin implements Runnable {
 					if (msg.getLogin().equals(FAILURE)){
 						// TODO display failure message, either username or password failure.
 						msg.getPassword(); //failure message is here.
+						aDialog.setVisible(false);
+						aDialog.dispose();
+						JOptionPane.showMessageDialog(null, msg.getPassword(), 
+								"Login Failed", JOptionPane.ERROR_MESSAGE);
 					} 
 					else {
 						// TODO Successful login, go to lobby.
+						
 					}
 				}
 			}
