@@ -335,6 +335,9 @@ public abstract class Ship {
 	/**
 	 * Returns true if the ship is docked at its player's base 
 	 * i.e. at least one of its squares is touching the base 
+	 * 
+	 * TODO will have to be changed to take into account destroyed base squares
+	 * 
 	 * @param pPlayer1 the player's whose base is WEST
 	 * @return
 	 */
