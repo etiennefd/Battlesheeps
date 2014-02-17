@@ -20,7 +20,9 @@ public class GameManager {
 	
 	private GameManager()
 	{
+		ALL_GAMES = new Hashtable<Integer, ServerGame>();
 		// TODO create ALL_GAMES from file
+		ALL_ACCOUNTS = new Hashtable<String, Account>();
 		// TODO create ALL_ACCOUNTS from file
 	}
 	/**

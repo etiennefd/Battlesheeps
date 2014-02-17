@@ -16,17 +16,15 @@ public class ServerLogin
 {
 	private static final int PORT = 5002; /* port to listen on */
     private static ServerSocket SERVER;
-    private static Hashtable<String, Account> aAccounts;
     
-//    public static void main (String[] args) {
-//    	(new ServerChat()).acceptClients(); 	/* Example creation of ServerChat */
-//    }
+    public static void main (String[] args) {
+    	(new ServerLogin()).acceptClients();
+    }
     
     /**
      * Creates serverSocket on specified port.
      */
     public ServerLogin(){
-    	aAccounts = GameManager.getInstance().getAccounts();
     	try {
             SERVER = new ServerSocket(PORT); /* start listening on the port */
         } catch (IOException e) {
@@ -45,12 +43,13 @@ public class ServerLogin
         {
             try {
                 client = SERVER.accept();
+                System.out.println("new client accepted");
             } catch (IOException e) {
                 System.err.println("Accept failed.\n" + e);
                 System.exit(1);
             }
             /* start a new thread to handle this client */
-            (new Thread(new ClientConnLogin(client, aAccounts))).start();
+            (new Thread(new ClientConnLogin(client))).start();
         }
     }
 }
@@ -58,24 +57,34 @@ public class ServerLogin
 class ClientConnLogin implements Runnable {
 	private static final String FAILURE = "Failure";
 	private static final String INIT = "INIT"; // Reserved for use in chat feature, no player can have this as username.
+	private static Hashtable<String, Account> aAccounts = GameManager.getInstance().getAccounts();
 
     private ObjectInputStream aInput;
     private ObjectOutputStream aOutput;
-    private Hashtable<String, Account> aAccounts;
 
     /**
      * Client connections on the server side will receive ChatMessage objects and
      * will send out only Strings.
      * @param pClient The client socket accepted by the server.
      */
-    ClientConnLogin(Socket pClient, Hashtable<String, Account> pAccounts) {
-    	aAccounts = pAccounts;
-        try {
+    ClientConnLogin(Socket pClient) {
+    	try {
+    		aOutput = new ObjectOutputStream(pClient.getOutputStream());
             aInput = new ObjectInputStream(pClient.getInputStream());
-            aOutput = new ObjectOutputStream(pClient.getOutputStream());
         } catch (IOException e) {
             System.err.println(e);
         }
+    }
+    private synchronized void addAccount(LoginMessage pMsg){
+		aAccounts.put(pMsg.getLogin(), new Account(pMsg.getLogin(), pMsg.getPassword()));
+    }
+    
+    private synchronized boolean containsKey(String pLogin){
+    	return aAccounts.containsKey(pLogin);
+    }
+    
+    private synchronized Account getAccount(String pLogin){
+    	return aAccounts.get(pLogin);
     }
      
     /**
@@ -89,23 +98,23 @@ class ClientConnLogin implements Runnable {
             	if (msg.getType() == LoginType.CREATE)
             	{
             		// Creating account
-            		if (aAccounts.containsKey(msg.getLogin()) || msg.getLogin().equals(INIT)) { 
+            		if (this.containsKey(msg.getLogin()) || msg.getLogin().equals(INIT)) { 
             			// Username in use
             			aOutput.writeObject(new LoginMessage(LoginType.CREATE, FAILURE, ""));
             		}
             		else { 
             			// Create account
-            			aAccounts.put(msg.getLogin(), new Account(msg.getLogin(), msg.getPassword()));
+            			addAccount(msg);
             			aOutput.writeObject(new LoginMessage(LoginType.CREATE, "", ""));
             		}
             	}
             	else 
             	{
             		// Logging in
-            		if (aAccounts.containsKey(msg.getLogin()))
+            		if (this.containsKey(msg.getLogin()))
             		{ 	
             			// Account exists
-            			Account thisAcct = aAccounts.get(msg.getLogin());
+            			Account thisAcct = getAccount(msg.getLogin());
             			if (thisAcct.getPassword().equals(msg.getPassword()))
             			{
             				// Password correct
