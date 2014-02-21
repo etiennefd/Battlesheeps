@@ -173,6 +173,15 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 			int y = c.getY();
 			aBoard.draw(greenRectangle,x*increment, y*increment);
 		}
+		
+		//And re-drawing on the squares
+		for (int i = increment; i < boardSize; i = i + increment) {
+			aBoard.drawLine(MinuetoColor.BLACK, i, 0, i, boardSize);
+		}
+		
+		for (int j = increment; j < boardSize; j = j + increment) {
+			aBoard.drawLine(MinuetoColor.BLACK, 0, j, boardSize, j);
+		}
 	}
 	/**
 	 * Draws the board 
@@ -392,11 +401,13 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 				Square currentSquare = aVisibleBoard[coord.getX()][coord.getY()];
 				
 				if (currentSquare instanceof ShipSquare) {
-					ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
-					Ship ship = shipSquare.getShip();
-					//if the ship is this player's ship, then display menu
-					if (ship.getUsername().compareTo(aUsername) == 0) {
+					if (!aChosenMove) {
+						ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
+						Ship ship = shipSquare.getShip();
+						//if the ship is this player's ship, then display menu
+						if (ship.getUsername().compareTo(aUsername) == 0) {
 						aMyClient.showShipMenu(ship);
+						}
 					}
 				}
 				
@@ -405,20 +416,14 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						//tell Client about choice
 						aChosenMove = true;
 						aMyClient.greenSelected(coord); 
+						//and getting rid of ship menu
+						aMyClient.displayWaitingMessage();
 					}
-					else if (aChosenMove){
-						//should we do anything here?
-						//how long will it take for the Server to get back to the client? 
-						
-					}
-					else {
-						//Otherwise, resetting the green list
-						aGreenList = new ArrayList<Coordinate>();
-						aGreenPhase = false;
-						//and redrawing the board 
-						drawBoard();
-					}
-					
+					//In any case, resetting the green list
+					aGreenList = new ArrayList<Coordinate>();
+					aGreenPhase = false;
+					//and redrawing the board 
+					drawBoard();		
 				}
 			}
 		} 

@@ -4,20 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import battlesheeps.board.*;
+import battlesheeps.server.Move;
 import battlesheeps.server.ServerGame.Direction;
 import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
 
-/**
- * ClientGame holds the information and methods to be displayed to (and get input from) the user. 
- * It has a reference to a full game state held in the ServerGame class. 
- * 
- * Important methods: 
- * - some way of updating (i.e. getting a new ServerGame reference)
- * - some way of computing the visible area (idea: create a new board matrix but replace invisible squares with sea)
- * - compute the range/valid inputs of various moves
- *
- */
 import battlesheeps.board.Coordinate;
 import battlesheeps.board.MineSquare;
 import battlesheeps.board.Sea;
@@ -29,50 +20,24 @@ import battlesheeps.ships.Ship;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.BevelBorder;
-import javax.swing.event.InternalFrameEvent;
-import javax.swing.event.InternalFrameListener;
-
-import org.minueto.MinuetoColor;
-import org.minueto.MinuetoEventQueue;
-import org.minueto.MinuetoStopWatch;
-import org.minueto.MinuetoTool;
-import org.minueto.handlers.MinuetoFocusHandler;
-import org.minueto.handlers.MinuetoKeyboard;
-import org.minueto.handlers.MinuetoKeyboardHandler;
-import org.minueto.handlers.MinuetoMouseHandler;
-import org.minueto.image.MinuetoFont;
-import org.minueto.image.MinuetoImage;
-import org.minueto.image.MinuetoText;
-import org.minueto.window.MinuetoPanel;
 
 
 /* This will open a window with the following panels:
@@ -92,14 +57,12 @@ public class ClientGame {
 	private LogPanel aLogPanel;
 	private JPanel aChatPanel;
 
-	private boolean open = true;
-	private int one = 1;
-	
 	//should know who it's player is 
 	private String aMyUser;
 	private String aMyOpponent;
 	private boolean aPlayer1; //if true, base is on WEST, else EAST
 	
+	private Square[][] aCurrentVisibleBoard;
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
 	
@@ -207,10 +170,10 @@ public class ClientGame {
 		List<Ship> shipList;
 		if (aPlayer1) shipList = pGame.getP1ShipList();
 		else shipList = pGame.getP2ShipList();
-		Square[][] visibleBoard = computeVisibility(pGame.getBoard(), shipList);
+		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), shipList);
 	
 		//and creating the board panel 
-		aBoardPanel = new GameBoard(600, pPlayer, visibleBoard, isTurn, this);
+		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, isTurn, this);
 		
 		aBoardPanel.setPreferredSize(new Dimension(600, 600));
 		splitPane.setLeftComponent(aBoardPanel);
@@ -320,18 +283,19 @@ public class ClientGame {
 			oppList = pGame.getP1ShipList();
 		}
 		
-		Square[][] visibleBoard = computeVisibility(pGame.getBoard(), myList);
+		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
 				
 		if (turnPlayer.compareTo(aMyUser) == 0){
 			//my turn 
-			aBoardPanel.updateTurn(visibleBoard, true);
+			aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
 			aMessagePanel.setYourTurn();
 		} 
 		else {
-			aBoardPanel.updateTurn(visibleBoard, false);
+			aBoardPanel.updateTurn(aCurrentVisibleBoard, false);
 			aMessagePanel.setNotYourTurn(myList, oppList);
 		}
 		
+		//TODO
 		//aLogPanel.addLogEntry(pLogEntry);
 	}
 	
@@ -349,13 +313,22 @@ public class ClientGame {
 		
 		boolean atBase = pShip.isAtHomeBase(p1);
 		aMessagePanel.displayShipMenu(pShip, atBase);
-		//TODO: figure out base repair 
+	}
+	
+	public void displayWaitingMessage() {
+		aMessagePanel.displayMessage("Waiting for Server");
 	}
 	
 	private Square[][] computeVisibility(Square[][] pBoard, List<Ship> pShipList) {
 
 		//at the start everything is visible 
-		Square[][] visibleBoard = pBoard; 
+		Square[][] visibleBoard = new Square[30][30];
+		
+		for (int i = 0; i <30; i++) {
+			for (int j = 0; j < 30; j++){
+				visibleBoard[i][j] = pBoard[i][j];
+			}
+		}
 		//a list to hold the visible squares by radar
 		List<Coordinate> visibleRadarList = new ArrayList<Coordinate>();
 	
@@ -452,16 +425,177 @@ public class ClientGame {
 	//and sends this info to the Game Board
 	//or it sends the info straight to the Server in the case of radar changes 
 	protected void translateSelected(Ship pShip) {
-		
+		/*Translate ship allows the ship to be moved 
+		 * a) back one square, as long as that square is Sea
+		 * b) to either side, provided the length of the ship is all Sea
+		 * c) to the front, for as far as their actual speed allows, and it's Sea
+		 */
 		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		
+		Direction direction = pShip.getDirection();
+		
+		//MOVING BACKWARDS
+		Coordinate tail = pShip.getTail();
+		int tailX = tail.getX();
+		int tailY = tail.getY();
+		
+		Coordinate behindTail;
+		
+		switch(direction){
+		case NORTH : 
+			behindTail = new Coordinate(tailX,tailY+1);
+			break;
+		case SOUTH : 
+			behindTail = new Coordinate(tailX, tailY-1);
+			break;
+		case WEST : 
+			behindTail = new Coordinate(tailX+1, tailY);
+			break;
+		default : /*EAST*/
+			behindTail = new Coordinate(tailX-1, tailY);
+			break;
+		}
+		
+		//if the coordinate is in bounds and is Sea, then we can move there
+		if (behindTail.inBounds()) {
+			if (clearSquare(aCurrentVisibleBoard[behindTail.getX()][behindTail.getY()])){
+				greenList.add(behindTail);
+			}
+		}
+		
+		//MOVING SIDEWAYS
+		int size = pShip.getSize();
+		//creating a list for each side of the boat
+		//for the boat to move sideways, each of those squares must be clear 
+		Coordinate[] starboard = new Coordinate[size];
+		Coordinate[] port = new Coordinate[size];
+		
+		switch(direction) {
+		case NORTH: 
+			for (int i = 0; i < size; i++) {
+				port[i] = new Coordinate(tailX-1, tailY-i);
+				starboard[i] = new Coordinate(tailX+1, tailY-i);
+			}
+			break;
+		case SOUTH: 
+			for (int i = 0; i < size; i++) {
+				port[i] = new Coordinate(tailX-1, tailY+i);
+				starboard[i] = new Coordinate(tailX+1, tailY+i);
+			}
+			break;
+		case WEST: 
+			for (int i = 0; i < size; i++) {
+				port[i] = new Coordinate(tailX-i, tailY+1);
+				starboard[i] = new Coordinate(tailX-i, tailY-1);
+			}
+			break;
+		default : /*EAST*/
+			for (int i = 0; i < size; i++) {
+				port[i] = new Coordinate(tailX+i, tailY-1);
+				starboard[i] = new Coordinate(tailX+i, tailY+1);
+			}
+			break;
+		}
+		
+		boolean allClearPort = true;
+		boolean allClearStarboard = true;
+		
+		for (Coordinate c : port) {
+			if (c.inBounds()) {
+				Square currentSquare = aCurrentVisibleBoard[c.getX()][c.getY()];
+				//if the square at that coordinate isn't Sea,
+				//then you can't move there 
+				if (!(clearSquare(currentSquare))) {
+					allClearPort = false;
+					break;
+				}
+				//or if the coordinate is out of bounds
+			} else {
+				allClearPort = false;
+				break;
+			}
+		}
+		
+		if (allClearPort) {
+			for (Coordinate c : port) greenList.add(c);
+		}
+		
+		for (Coordinate c : starboard) {
+			if (c.inBounds()) {
+				Square currentSquare = aCurrentVisibleBoard[c.getX()][c.getY()];
+				//if the square at that coordinate isn't Sea,
+				//then you can't move there 
+				if (!(clearSquare(currentSquare))) {
+					allClearStarboard = false;
+					break;
+				}
+				//or if the coordinate is out of bounds
+			} else {
+				allClearStarboard = false;
+				break;
+			}
+		}
+		
+		if (allClearStarboard) {
+			for (Coordinate c : starboard) greenList.add(c);
+		}
+		
+		//MOVING FORWARDS
+		Coordinate head = pShip.getHead();
+		int headX = head.getX();
+		int headY = head.getY();
 		int speed = pShip.getActualSpeed();
+		
+		Coordinate[] forward = new Coordinate[speed];
+		
+		switch(direction) {
+		case NORTH: 
+			for (int i = 0; i<speed; i++){
+				forward[i] = new Coordinate(headX, headY-(i+1));
+			}
+			break;
+		case SOUTH: 
+			for (int i = 0; i<speed; i++){
+				forward[i] = new Coordinate(headX, headY+(i+1));
+			}
+			break;
+		case WEST: 
+			for (int i = 0; i<speed; i++){
+				forward[i] = new Coordinate(headX-(i+1), headY);
+			}
+			break;
+		default : /*EAST*/
+			for (int i = 0; i<speed; i++){
+				forward[i] = new Coordinate(headX+(i+1), headY);
+			}
+			break;
+		}
+		
+		//only allowing you to move forward to Sea 
+		//breaking once you reach either a square which is not Sea or out of bounds
+		for (Coordinate c : forward){
+			if (c.inBounds()){
+				if (clearSquare(aCurrentVisibleBoard[c.getX()][c.getY()])){
+					greenList.add(c);
+				}
+				else break;
+			}
+			else break;
+		}
+		
+		aBoardPanel.showAvailableMoves(greenList);
 		
 	}
 	
 	protected void turnSelected (Ship pShip) {
 		
 		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
 		
 		
 	}
@@ -469,19 +603,39 @@ public class ClientGame {
 	protected void cannonSelected(Ship pShip) {
 		
 		aCurrentClickedMove = MoveType.FIRE_CANNON;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
 		
 	}
 	
 	protected void layMineSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.DROP_MINE;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
 	protected void retrieveMineSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.PICKUP_MINE;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
 	protected void torpedoSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.FIRE_TORPEDO;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
 	protected void turnExtendedRadarOn (Ship pShip) {
@@ -505,6 +659,23 @@ public class ClientGame {
 	protected void greenSelected(Coordinate pCoord) {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object??? 
+		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
 		
+		System.out.println(aCurrentClickedMove.toString() + " move made at [" + pCoord.getX() + "," + pCoord.getY() +"] ");
+	}
+	
+	/**
+	 * returns true if square is of type Sea, Sonar or Radar 
+	 * i.e. Not mine, ship, coral or base 
+	 * @param square
+	 * @return
+	 */
+	private boolean clearSquare(Square square) {
+	
+		if (square instanceof Sea) return true;
+		if (square instanceof RadarSquare) return true;
+		if (square instanceof SonarSquare) return true;
+		
+		return false;
 	}
 }
