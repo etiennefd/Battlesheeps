@@ -14,6 +14,7 @@ import battlesheeps.board.MineSquare;
 import battlesheeps.board.Sea;
 import battlesheeps.board.ShipSquare;
 import battlesheeps.board.Square;
+import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.server.ServerGame;
 import battlesheeps.ships.MineLayer;
 import battlesheeps.ships.Ship;
@@ -344,8 +345,8 @@ public class ClientGame {
 			visibleRadarList.add(new Coordinate(29, 9));
 			visibleRadarList.add(new Coordinate(29, 20));
 		}
-		
-		for (int i = 9; i < 21; i++){
+		//make it 9 to 21 if you want the corners to be in radar
+		for (int i = 10; i < 20; i++){
 			visibleRadarList.add(new Coordinate(baseX, i));
 		}
 		
@@ -420,10 +421,13 @@ public class ClientGame {
 		return visibleBoard;
 
 	}
+	
+	//A Note about Moves: 
 	//the Message Panel sends the chosen move to the Client
 	//the Client then calculates where the move could occur on the board
-	//and sends this info to the Game Board
+	//and sends this list of Coordinates to the Game Board
 	//or it sends the info straight to the Server in the case of radar changes 
+	
 	protected void translateSelected(Ship pShip) {
 		/*Translate ship allows the ship to be moved 
 		 * a) back one square, as long as that square is Sea
@@ -590,10 +594,106 @@ public class ClientGame {
 	
 	protected void turnSelected (Ship pShip) {
 		
-		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
+		aCurrentClickedMove = MoveType.TURN_SHIP;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		
+		//the method canTurn which will return true if you can rotate
+		//to a particular destination square, so we simply need to test all 
+		//turn destinations
+		Direction direction = pShip.getDirection();
+		int size = pShip.getSize();
 		
+		Coordinate head = pShip.getHead();
+		int headX = head.getX();
+		int headY = head.getY();
+		
+		Coordinate tail = pShip.getTail();
+		int tailX = tail.getX();
+		int tailY = tail.getY();
+		
+		if (pShip.canTurn180()) {
+			//two cases: turning 90 and turning 180
+			
+			//Case 1: turning 90
+			boolean canTurnPort;
+			boolean canTurnStarboard;
+			Coordinate port;
+			Coordinate starboard;
+			
+			switch(direction) {
+			case NORTH : 
+				port = new Coordinate(headX-1, headY+1);
+				canTurnPort = canTurn(port);
+				starboard = new Coordinate(headX+1, headY+1);
+				canTurnStarboard = canTurn(starboard);
+				break;
+			case SOUTH : 
+				port = new Coordinate(headX+1, headY-1);
+				canTurnPort = canTurn(port);
+				starboard = new Coordinate(headX-1, headY-1);
+				canTurnStarboard = canTurn(starboard);
+				break;
+			case WEST : 
+				port = new Coordinate(headX+1, headY+1);
+				canTurnPort = canTurn(port);
+				starboard = new Coordinate(headX+1, headY-1);
+				canTurnStarboard = canTurn(starboard);
+				break;
+			default : /*EAST*/ 
+				port = new Coordinate(headX-1, headY-1);
+				canTurnPort = canTurn(port);
+				starboard = new Coordinate(headX-1, headY+1);
+				canTurnStarboard = canTurn(starboard);
+				break;
+			}
+			
+			if (canTurnPort && port.inBounds()) greenList.add(port);
+			if (canTurnStarboard && starboard.inBounds()) greenList.add(starboard);
+			
+			//Case 2: turning 180
+			//i.e. can turn so its head is now its tail
+			boolean canTurn180 = canTurn(tail);
+			if (canTurn180) greenList.add(tail);
+			
+		} else { //one case: turning 90
+			
+			size = size - 1; //since we turn around the last block
+			
+			boolean canTurnPort;
+			boolean canTurnStarboard;
+			Coordinate port;
+			Coordinate starboard;
+			
+			switch(direction) {
+				case NORTH : 
+					port = new Coordinate(tailX - size, tailY);
+					canTurnPort = canTurn(port);
+					starboard = new Coordinate(tailX + size, tailY);
+					canTurnStarboard = canTurn(starboard);
+					break;
+				case SOUTH : 
+					port = new Coordinate(tailX + size, tailY);
+					canTurnPort = canTurn(port);
+					starboard = new Coordinate(tailX - size, tailY);
+					canTurnStarboard = canTurn(starboard);
+					break;
+				case WEST : 
+					port = new Coordinate(tailX, tailY + size);
+					canTurnPort = canTurn(port);
+					starboard = new Coordinate(tailX, tailY - size);
+					canTurnStarboard = canTurn(starboard);
+					break;
+				default : /*EAST*/ 
+					port = new Coordinate(tailX, tailY - size);
+					canTurnPort = canTurn(port);
+					starboard = new Coordinate(tailX, tailY + size);
+					canTurnStarboard = canTurn(starboard);
+					break;
+			}
+			
+			if (canTurnPort && port.inBounds()) greenList.add(port);
+			if (canTurnStarboard && starboard.inBounds()) greenList.add(starboard);
+		} 
 		
 		aBoardPanel.showAvailableMoves(greenList);
 		
@@ -638,16 +738,25 @@ public class ClientGame {
 		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
-	protected void turnExtendedRadarOn (Ship pShip) {
+	protected void turnExtendedRadarOn () {
 		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
+		//we can tell the server right away that this move was selected
+		//coordinate doesn't matter
+		greenSelected(null);
 	}
 
-	protected void turnExtendedRadarOff (Ship pShip) {
+	protected void turnExtendedRadarOff () {
 		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
+		//we can tell the server right away that this move was selected
+		//coordinate doesn't matter
+		greenSelected(null);
 	}
 	
-	protected void baseRepairSelected(Ship pShip) {
+	protected void baseRepairSelected() {
 		aCurrentClickedMove = MoveType.REPAIR_SHIP;
+		//we can tell the server right away that this move was selected
+		//coordinate doesn't matter
+		greenSelected(null);
 	}
 	
 	/**
@@ -658,24 +767,357 @@ public class ClientGame {
 	 */
 	protected void greenSelected(Coordinate pCoord) {
 		//Will send move type, coordinate & ship to Server
-		//send as Move Object??? 
+		//send as Move Object to Server
 		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
-		
-		System.out.println(aCurrentClickedMove.toString() + " move made at [" + pCoord.getX() + "," + pCoord.getY() +"] ");
 	}
 	
 	/**
-	 * returns true if square is of type Sea, Sonar or Radar 
+	 * Returns true if square is of type Sea, Sonar or Radar 
 	 * i.e. Not mine, ship, coral or base 
-	 * @param square
+	 * @param pSquare
 	 * @return
 	 */
-	private boolean clearSquare(Square square) {
+	private boolean clearSquare(Square pSquare) {
 	
-		if (square instanceof Sea) return true;
-		if (square instanceof RadarSquare) return true;
-		if (square instanceof SonarSquare) return true;
+		if (pSquare instanceof Sea) return true;
+		if (pSquare instanceof RadarSquare) return true;
+		if (pSquare instanceof SonarSquare) return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Returns true if there are no obstacles in the turn path to
+	 * the Destination coordinate
+	 * @param pDestination
+	 * @return
+	 */
+	private boolean canTurn(Coordinate pDestination) {
+		//Compute the turn area
+		//Check for obstacles in it
+		//If any return false
+		
+		int headX = aCurrentClickedShip.getHead().getX();
+		int headY = aCurrentClickedShip.getHead().getY();
+		int tailX = aCurrentClickedShip.getTail().getX();
+		int tailY = aCurrentClickedShip.getTail().getY();
+		Direction direction = aCurrentClickedShip.getDirection();
+
+		boolean turnSuccess = true;
+
+		//Here we look at 180 degrees turn. We assume ships able to do that are 3 squares long. 
+		if (aCurrentClickedShip.canTurn180() && pDestination.equals(aCurrentClickedShip.getTail())) {
+			ArrayList<Coordinate> listOfCoords = new ArrayList<Coordinate>();
+			switch (direction) {
+			case NORTH: 
+				listOfCoords.add(new Coordinate(headX-1, headY));
+				listOfCoords.add(new Coordinate(headX-1, headY+1));
+				listOfCoords.add(new Coordinate(headX-1, headY+2));
+				listOfCoords.add(new Coordinate(tailX+1, tailY));
+				listOfCoords.add(new Coordinate(tailX+1, tailY-1));
+				listOfCoords.add(new Coordinate(tailX+1, tailY-2));
+				break; 
+			case SOUTH: 
+				listOfCoords.add(new Coordinate(headX-1, headY));
+				listOfCoords.add(new Coordinate(headX-1, headY-1));
+				listOfCoords.add(new Coordinate(headX-1, headY-2));
+				listOfCoords.add(new Coordinate(tailX+1, tailY));
+				listOfCoords.add(new Coordinate(tailX+1, tailY+1));
+				listOfCoords.add(new Coordinate(tailX+1, tailY+2));
+				break;
+			case EAST: 
+				listOfCoords.add(new Coordinate(headX, headY-1));
+				listOfCoords.add(new Coordinate(headX-1, headY-1));
+				listOfCoords.add(new Coordinate(headX-2, headY-1));
+				listOfCoords.add(new Coordinate(tailX, tailY+1));
+				listOfCoords.add(new Coordinate(tailX+1, tailY+1));
+				listOfCoords.add(new Coordinate(tailX+2, tailY+1));
+				break; 
+			case WEST: 
+				listOfCoords.add(new Coordinate(headX, headY-1));
+				listOfCoords.add(new Coordinate(headX+1, headY-1));
+				listOfCoords.add(new Coordinate(headX+2, headY-1));
+				listOfCoords.add(new Coordinate(tailX, tailY+1));
+				listOfCoords.add(new Coordinate(tailX-1, tailY+1));
+				listOfCoords.add(new Coordinate(tailX-2, tailY+1));
+				break; 
+			}
+			//Now we iterate over the list of coordinates we built
+			for (Coordinate c : listOfCoords) {
+				Square s = aCurrentVisibleBoard[c.getX()][c.getY()];
+				if (!clearSquare(s)) {
+					turnSuccess = false;
+					break;
+				}
+			}
+		}
+
+		//Turning 90 degrees but over center square
+		else if (aCurrentClickedShip.canTurn180()) {
+			ArrayList<Square> listOfSquares = new ArrayList<Square>();
+			switch (direction) {
+			case NORTH: 
+				//Case turning left/port (west)
+				if (pDestination.getX() < tailX) {
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY]);
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY-1]);
+				}
+				//Case turning right/starboard (east)
+				else if (pDestination.getX() > tailX) {
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY]);
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY-1]);
+				}
+				break; 
+			case SOUTH: 
+				//Case turning right/starboard (west)
+				if (pDestination.getX() < tailX) {
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY]);
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY+1]);
+				}
+				//Case turning left/port (east)
+				else if (pDestination.getX() > tailX) {
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY]);
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY+1]);
+				}
+				break;
+			case EAST: 
+				//Case turning left/port (north)
+				if (pDestination.getY() < tailY) {
+					listOfSquares.add(aCurrentVisibleBoard[headX][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY+1]);
+				}
+				//Case turning right/starboard (south)
+				else if (pDestination.getY() > tailY) {
+					listOfSquares.add(aCurrentVisibleBoard[headX][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY-1]);
+				}
+				break; 
+			case WEST: 
+				//Case turning right/starboard (north)
+				if (pDestination.getY() < tailY) {
+					listOfSquares.add(aCurrentVisibleBoard[headX][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY+1]);
+				}
+				//Case turning left/port (south)
+				else if (pDestination.getY() > tailY) {
+					listOfSquares.add(aCurrentVisibleBoard[headX][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY-1]);
+					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY+1]);
+					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY-1]);
+				}
+				break; 
+			}
+			//Now we iterate over the list of squares we built
+			for (Square s : listOfSquares) {
+				if (!clearSquare(s)) {
+					turnSuccess = false;
+					break;
+				}
+			}
+		}
+
+		//90 degrees turn by a regular ship (the pivot is the tail)
+		else {
+			switch (direction) {
+			case NORTH: 
+				//Case turning left/port (west)
+				if (pDestination.getX() < tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area 
+					//(i provides the staircase pattern)
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX-1; x >= tailX-aCurrentClickedShip.getSize()+1 && i>0; x--) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y >= tailY-i; y--) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break; 
+							}
+						}
+						if (broke) break;
+						i--; //The next column will be shorter by 1
+					}
+				}
+				//Case turning right/starboard (east)
+				else if (pDestination.getX() > tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX+1; x <= tailX+aCurrentClickedShip.getSize()-1 && i>0; x++) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y >= tailY-i; y--) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break; 
+							}
+							i--;
+						}
+						if (broke) break;
+					}
+				}
+				break; //from case NORTH
+
+			case SOUTH: //same as north, but change the y's signs
+				//Case turning right/starboard (west)
+				if (pDestination.getX() < tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX-1; x >= tailX-aCurrentClickedShip.getSize()+1 && i>0; x--) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y <= tailY+i; y++) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break; 
+							}
+						i--;
+						}
+						if (broke) break;
+					}
+				}
+				//Case turning left/port (east) 
+				else if (pDestination.getX() > tailX) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int x = tailX+1; x <= tailX+aCurrentClickedShip.getSize()-1 && i>0; x++) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int y = tailY; y <= tailY+i; y++) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break;
+							}
+						}
+						if (broke) break;
+						i--;
+					}
+				}
+				break; //from case SOUTH
+
+			case EAST: 
+				//Case turning left/port (north)
+				if (pDestination.getY() < tailY) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area 
+					//(i provides the staircase pattern)
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int y = tailY-1; y >= tailY-aCurrentClickedShip.getSize()+1 && i>0; y--) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int x = tailX; x <= tailX+i; x++) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break;
+							}
+						}
+						if (broke) break;
+						i--; //The next column will be shorter by 1
+					}
+				}
+				//Case turning right/starboard (south)
+				else if (pDestination.getY() > tailY) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int y = tailY+1; y <= tailY+aCurrentClickedShip.getSize()-1 && i>0; y++) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int x = tailX; x <= tailX+i; x++) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break;
+							}
+						}
+						if (broke) break;
+						i--;
+					}
+				}
+				break; //from case EAST
+
+			case WEST: //same as east, but change the x's signs
+				//Case turning right/starboard (north)
+				if (pDestination.getY() < tailY) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area 
+					//(i provides the staircase pattern)
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int y = tailY-1; y >= tailY-aCurrentClickedShip.getSize()+1 && i>0; y--) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int x = tailX; x >= tailX-i; x--) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break;
+							}
+						}
+						if (broke) break;
+						i--; //The next column will be shorter by 1
+					}
+				}
+				//Case turning left/port (south)
+				else if (pDestination.getY() > tailY) {
+					//i remembers how far we have to go along the length of a ship when looking at the turn area
+					int i = aCurrentClickedShip.getSize() - 1;
+					boolean broke = false;
+					//Outer loop: going away from the ship, up to the length of the ship - 1
+					for (int y = tailY+1; y <= tailY+aCurrentClickedShip.getSize()-1 && i>0; y++) {
+						//Inner loop: looking along the ship's axis for every x, but with a limit i
+						for (int x = tailX; x >= tailX-i; x--) {
+							Square s = aCurrentVisibleBoard[x][y];
+							//Looking for obstacles
+							if (!clearSquare(s)) {
+								turnSuccess = false;
+								broke = true;
+								break;
+							}
+						}
+						if (broke) break;
+						i--;
+					}
+				}
+				break; //from case WEST
+			}
+
+		}
+		return turnSuccess;
 	}
 }

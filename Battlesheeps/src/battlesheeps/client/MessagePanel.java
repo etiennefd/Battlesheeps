@@ -257,7 +257,7 @@ public class MessagePanel extends JPanel {
 				turnOffButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						//tell Client that radar-off was selected for this ship
-						aClient.turnExtendedRadarOff(aCurrentShip);
+						aClient.turnExtendedRadarOff();
 					}
 				});
 				
@@ -268,7 +268,7 @@ public class MessagePanel extends JPanel {
 				turnOnButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						//tell Client that radar-on was selected for this ship
-						aClient.turnExtendedRadarOn(aCurrentShip);
+						aClient.turnExtendedRadarOn();
 					}
 				});
 				
@@ -293,7 +293,7 @@ public class MessagePanel extends JPanel {
 			baseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					//tell Client that torpedo was selected for this ship
-					aClient.baseRepairSelected(aCurrentShip);
+					aClient.baseRepairSelected();
 				}
 			});
 			
