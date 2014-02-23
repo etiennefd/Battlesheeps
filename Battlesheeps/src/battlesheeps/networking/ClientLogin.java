@@ -10,6 +10,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import battlesheeps.client.Lobby;
 import battlesheeps.networking.LoginMessage.LoginType;
 
 public class ClientLogin
@@ -27,7 +28,7 @@ public class ClientLogin
             
             // Create a thread to asynchronously read messages from the server
             try {
-            	(new Thread(new ServerConnLogin(server, pLoginDialog))).start();
+            	(new Thread(new ServerConnLogin(server, pLoginDialog, pLoginFrame))).start();
             }
             catch (IOException e){
             	System.err.println("Error creating server input thread: " + e);
@@ -82,10 +83,12 @@ class ServerConnLogin implements Runnable {
 	
     private ObjectInputStream aInput;
     private JDialog aDialog;
+    private JFrame aLoginFrame;
  
-    public ServerConnLogin(Socket pServer, JDialog pDialog) throws IOException {
+    public ServerConnLogin(Socket pServer, JDialog pDialog, JFrame pLoginFrame) throws IOException {
         aInput = new ObjectInputStream(pServer.getInputStream());
         aDialog = pDialog;
+        aLoginFrame = pLoginFrame;
     }
  
     public void run() {
@@ -104,13 +107,18 @@ class ServerConnLogin implements Runnable {
 								"Invalid Input", JOptionPane.ERROR_MESSAGE);
 					} 
 					else {
-						// TODO Successful creation, go back to login screen.
+						//Successful creation, go back to login screen.
+						aDialog.setVisible(false);
+						aDialog.dispose();
+						JOptionPane.showMessageDialog(null, "Account creation successful! " +
+								"Please login. :)", 
+								"Account Creation Success", JOptionPane.INFORMATION_MESSAGE);
 					}
 				} 
 				else // Logging in
 				{
 					if (msg.getLogin().equals(FAILURE)){
-						// TODO display failure message, either username or password failure.
+						// display failure message, either username or password failure.
 						msg.getPassword(); //failure message is here.
 						aDialog.setVisible(false);
 						aDialog.dispose();
@@ -118,7 +126,12 @@ class ServerConnLogin implements Runnable {
 								"Login Failed", JOptionPane.ERROR_MESSAGE);
 					} 
 					else {
-						// TODO Successful login, go to lobby.
+						// Successful login, go to lobby.
+						aDialog.setVisible(false);
+						aDialog.dispose();
+						aLoginFrame.setVisible(false);
+						aLoginFrame.dispose();
+						new Lobby();
 						
 					}
 				}
