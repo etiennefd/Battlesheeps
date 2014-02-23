@@ -17,7 +17,7 @@ import javax.swing.SpringLayout;
 import battlesheeps.networking.ClientLogin;
 import battlesheeps.networking.LoginMessage;
 import battlesheeps.networking.LoginMessage.LoginType;
-
+//TODO reenable text fields when creation of account fails
 class LoginListener implements ActionListener
 {
 	private JTextField aUsernameField;
@@ -35,7 +35,9 @@ class LoginListener implements ActionListener
 	{
 		LoginMessage loginInfo = new LoginMessage(LoginType.LOGIN,pUsername, pPassword);
 		ClientLogin loginClient = new ClientLogin(loginDialog, loginFrame);
-		
+		System.out.println("Sending login info to server.\n");
+
+		System.out.println(loginInfo.getLogin());
 		loginClient.sendMessage(loginInfo);
 		
 	}
@@ -55,28 +57,15 @@ class LoginListener implements ActionListener
 					null, new Object[]{}, null);
 	
 			final JDialog dialog = new JDialog();
+			sendLoginInfo(aUsernameField.getText(), aPasswordField.getText(), dialog, aLoginFrame);
+
 			dialog.setTitle("");
 			dialog.setModal(true);
 	
 			dialog.setContentPane(optionPane);
-	
-			//TODO: UNCOMMENT BELOW to prevent "logging in" dialog to be closed
-			//dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.pack();
-	
 			dialog.setVisible(true);
-			
-			//sends login input to server for verification
-			sendLoginInfo(aUsernameField.getText(), aPasswordField.getText(), dialog, aLoginFrame);
-			
-			/*if(loginSuccess)
-			{
-				//auto-close login screen + popup for user
-				aLoginFrame.setVisible(false);
-				aLoginFrame.dispose();
-				dialog.setVisible(false);
-				dialog.dispose();
-			}*/
 			
 		}
 	}
@@ -85,10 +74,11 @@ class LoginListener implements ActionListener
 
 class AccountWizard implements ActionListener
 {
+	private JFrame aLoginFrame;
 	
-	public AccountWizard()
+	public AccountWizard(JFrame pLoginFrame)
 	{
-		//empty on purpose constructor
+		this.aLoginFrame = pLoginFrame;
 	}
 	
 	@Override
@@ -155,9 +145,11 @@ class AccountWizard implements ActionListener
         layout.putConstraint(SpringLayout.NORTH, createAccountButton, 10, SpringLayout.SOUTH, password2Field);
         layout.putConstraint(SpringLayout.WEST, createAccountButton, 100, SpringLayout.WEST, accountWizard.getContentPane());
         
-        createAccountButton.addActionListener(new CreateAccountListener(usernameField, passwordField, password2Field, accountWizard));
+        createAccountButton.addActionListener(new CreateAccountListener(usernameField, passwordField, password2Field, 
+        		accountWizard, aLoginFrame));
         
         accountWizard.getContentPane().setLayout(layout);
+        accountWizard.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         //Display the window.
         accountWizard.pack();
@@ -170,14 +162,31 @@ class CreateAccountListener implements ActionListener {
 	private JTextField aPasswordField;
 	private JTextField aConfirmField;
 	private JFrame aWizard;
+	private JFrame aLoginFrame;
 	
-	public CreateAccountListener(JTextField pUsernameField, JTextField pPasswordField, JTextField pPassword2Field, JFrame pCallingFrame)
+	public CreateAccountListener(JTextField pUsernameField, JTextField pPasswordField, 
+			JTextField pPassword2Field, JFrame pWizard, JFrame pLoginFrame)
 	{
 		this.aUsernameField = pUsernameField;
 		this.aPasswordField = pPasswordField;
 		this.aConfirmField = pPassword2Field;
-		this.aWizard = pCallingFrame;
+		this.aWizard = pWizard;
+		this.aLoginFrame = pLoginFrame;
 	}
+	
+	private void sendNewAccount(JDialog dialog)
+	{
+		String username = aUsernameField.getText();
+		String password = aPasswordField.getText();
+		LoginMessage newAccount = new LoginMessage(LoginType.CREATE,username, password);
+		ClientLogin loginClient = new ClientLogin(dialog, aLoginFrame);
+		System.out.println("Sending new account info to server.\n");
+
+		System.out.println(newAccount.getLogin());
+		loginClient.sendMessage(newAccount);
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) 
 	{
@@ -204,6 +213,8 @@ class CreateAccountListener implements ActionListener {
 					null, new Object[]{}, null);
 	
 			final JDialog dialog = new JDialog();
+			sendNewAccount(dialog);
+			
 			dialog.setTitle("");
 			dialog.setModal(true);
 	
@@ -214,7 +225,6 @@ class CreateAccountListener implements ActionListener {
 			dialog.pack();
 	
 			dialog.setVisible(true);
-			//TODO: send dialog to client so it knows to close it :)
 		}
 	}
 	
@@ -291,7 +301,7 @@ public class LoginScreen {
         JButton createButton = new JButton("Create Account");
         frame.getContentPane().add(createButton);
         
-        createButton.addActionListener(new AccountWizard());
+        createButton.addActionListener(new AccountWizard(frame));
         
         layout.putConstraint(SpringLayout.NORTH, createButton, 10, SpringLayout.SOUTH, loginButton);
         layout.putConstraint(SpringLayout.WEST, createButton, 100, SpringLayout.WEST, frame.getContentPane());
@@ -306,6 +316,7 @@ public class LoginScreen {
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
+    	System.out.println("Creating Login Screen\n");
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowLogin();

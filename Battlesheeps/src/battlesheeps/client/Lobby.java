@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -19,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
+
+import battlesheeps.accounts.Account;
 
 class ExitActionListener implements ActionListener
 {
@@ -71,7 +74,8 @@ class ListMouseAdapter extends MouseAdapter
         if (e.getClickCount() == 2) {
             int index = aList.locationToIndex(e.getPoint());
             System.out.println("Double clicked on Item " + index);
-            
+            if(index != -1)
+            {
             SpringLayout layout = new SpringLayout();
             //user name player requested info to label
             String userRequested = aList.getSelectedValue();
@@ -99,18 +103,19 @@ class ListMouseAdapter extends MouseAdapter
 			dialog.setTitle("");
 			dialog.setModal(true);
 			dialog.setMinimumSize(new Dimension(225,125));
+			dialog.setMaximumSize(new Dimension(225,125));
 			dialog.setResizable(false);
 	
 			dialog.setContentPane(requestPane);
 			
 			//add action listener to withdraw
 			withdrawButton.addActionListener(new WithdrawListener(dialog));
-	
-			//TODO: UNCOMMENT BELOW
+				
 			//dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.pack();
 	
 			dialog.setVisible(true);
+            }
          }
     }
 }
@@ -135,12 +140,13 @@ class WithdrawListener implements ActionListener
 //TODO: MAKE GAMES LIST BIGGER
 public class Lobby 
 {
+	private static ArrayList<Account> aAccounts;
+	private Account aAccount;
+	
 	//params: dialog box to close
-    public Lobby(JDialog pLoginDialog) {
+    public Lobby() {
     	
-    	pLoginDialog.setVisible(false);
-    	pLoginDialog.dispose();
-    	
+    	//TODO assign users to list
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -159,13 +165,13 @@ public class Lobby
         
         frame.setMinimumSize(new Dimension(640,480));
         
-        //TODO: GET INPUT FROM SERVER (thru client)
+        //GET INPUT FROM SERVER (thru client)
         JPanel listsPanel = new JPanel();
         SpringLayout layout = new SpringLayout();
         
-        //TODO: REPLACE String WITH OBJECT CONTAINING USER INFO
-        String[] testUserList = {"Alice","Bob","Carl"};
-        JList<String> userList = new JList<String>(testUserList);
+        //OBJECT CONTAINING USER INFO
+        //String[] testUserList = {"Alice","Bob","Carl"};
+        JList<String> userList = new JList<String>();
         MouseListener userListListener = new ListMouseAdapter(userList);
         userList.addMouseListener(userListListener);
         
@@ -245,8 +251,6 @@ public class Lobby
 	 
 	//params: dialog box to close
     public static void main(String[] args) {
-    	
-    	//TODO: close dialog box
     	
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
