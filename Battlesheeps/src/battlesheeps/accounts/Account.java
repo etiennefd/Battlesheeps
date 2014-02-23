@@ -1,9 +1,12 @@
 package battlesheeps.accounts;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Account {
+public class Account implements Serializable
+{
+	private static final long serialVersionUID = 8547702498479534517L;
 
 	public enum Status {
 		OFFLINE, IN_GAME, AVAILABLE

@@ -21,10 +21,6 @@ import battlesheeps.ships.Ship.Damage;
 import battlesheeps.ships.TorpedoBoat;
 
 public class ServerGame {
-
-	public enum Visible {
-		COVERED_BY_RADAR, COVERED_BY_SONAR, NOT_COVERED
-	}
 	
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 

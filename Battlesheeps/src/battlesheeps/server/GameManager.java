@@ -1,10 +1,8 @@
 package battlesheeps.server;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 import battlesheeps.accounts.Account;
-import battlesheeps.accounts.Account.Status;
 
 /**
  * This is the class that creates games (ServerGame) and holds them in a list. 
@@ -38,21 +36,20 @@ public class GameManager {
 	{
 		return ALL_ACCOUNTS;
 	}
+	
+	public Account getAccount(String pUsername){
+		return ALL_ACCOUNTS.get(pUsername);
+	}
 	/**
-	 * @param aGameID The ID of the game you want.
+	 * @param pGameID The ID of the game you want.
 	 * @return The game OR NULL if game not found.
 	 */
-	public ServerGame getGame(int aGameID){
-		return ALL_GAMES.get(aGameID);
+	public ServerGame getGame(int pGameID){
+		return ALL_GAMES.get(pGameID);
+	}
+	
+	public void addGame(ServerGame pGame){
+		ALL_GAMES.put(pGame.getGameID(), pGame);
 	}
 
-	public ArrayList<Account> getOnlineUsers(){
-		ArrayList<Account> list = new ArrayList<Account>();
-		for (Account acct : ALL_ACCOUNTS.values()){
-			if (acct.getAvailability() == Status.AVAILABLE){
-				list.add(acct);
-			}
-		}
-		return list;
-	}
 }
