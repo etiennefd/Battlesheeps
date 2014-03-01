@@ -211,7 +211,12 @@ public abstract class Ship {
 	}
 	
 	public String getUsername() {
-		return aPlayer.getUsername();
+		try {
+			return aPlayer.getUsername();
+		}
+		catch (NullPointerException e) {
+			return "NO PLAYER FOUND";
+		}
 	}
 	
 	public Damage getDamageAtIndex(int pIndex) {

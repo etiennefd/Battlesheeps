@@ -1,5 +1,7 @@
 package battlesheeps.test;
 
+import java.util.LinkedList;
+
 import battlesheeps.board.Coordinate;
 import battlesheeps.server.*;
 import battlesheeps.server.ServerGame.MoveType;
@@ -90,6 +92,11 @@ public class MainTest {
 		System.out.println(game.printBoard());
 		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(0, 11));
 		System.out.println(game.printBoard());
+		
+		LinkedList<LogEntry> log = game.getLog();
+		for (LogEntry l : log) {
+			System.out.println(l.toString());
+		}
 	}
 
 }

@@ -2,6 +2,7 @@ package battlesheeps.server;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.board.BaseSquare;
@@ -12,6 +13,7 @@ import battlesheeps.board.Sea;
 import battlesheeps.board.ShipSquare;
 import battlesheeps.board.Square;
 import battlesheeps.exceptions.InvalidCoordinateException;
+import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.ships.Cruiser;
 import battlesheeps.ships.Destroyer;
 import battlesheeps.ships.MineLayer;
@@ -42,6 +44,7 @@ public class ServerGame {
 	private Square[][] aBoard;
 	private ArrayList<Ship> aShipListP1;
 	private ArrayList<Ship> aShipListP2;
+	private LinkedList<LogEntry> aLogEntryList = new LinkedList<LogEntry>();
 	
 	//Fields related to the ending of the game
 	private boolean aGameComplete;
@@ -134,8 +137,6 @@ public class ServerGame {
 	 * Places a ship on the board, i.e. sets the appropriate squares on the board to ShipSquares.
 	 * Also sets the ship's internal location parameters. 
 	 *  
-	 * TODO maybe it would be good to have another setShipPosition that takes pHead and a Direction 
-	 * (because this one is annoying to use since it needs the pHead and pTail to correspond to the length of the ship)
 	 * @param pShip
 	 * @param pHead
 	 * @param pTail
@@ -357,7 +358,7 @@ public class ServerGame {
 					Square s = aBoard[headX][y];
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(headX, y+1); //One square before the obstacle
-						//TODO Create log entry/notify players
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, headX, y, aTurnNum));
 						break;
 					}
 					else if (s instanceof MineSquare) {
@@ -408,6 +409,7 @@ public class ServerGame {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), pDestination.getY(), aTurnNum));
 				}
 				else if (s instanceof MineSquare) {
 					//Failed to move
@@ -452,7 +454,7 @@ public class ServerGame {
 						//movement fails
 						finalDestinationTail = tailCoord;
 						finalDestinationHead = headCoord;
-						//Log entry
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), i, aTurnNum));
 						break;
 					}
 				}
@@ -504,7 +506,7 @@ public class ServerGame {
 					Square s = aBoard[headX][y];
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(headX, y-1); //One square before the obstacle
-						//TODO Create log entry/notify players
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, headX, y, aTurnNum));
 						break;
 					}
 					else if (s instanceof MineSquare) {
@@ -554,7 +556,7 @@ public class ServerGame {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
-					//TODO Create log entry/notify players
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), pDestination.getY(), aTurnNum));
 				}
 				else if (s instanceof MineSquare) {
 					//Failed to move
@@ -597,7 +599,7 @@ public class ServerGame {
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationTail = tailCoord;
 						finalDestinationHead = headCoord;
-						//TODO Log entry
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), i, aTurnNum));
 						break;
 					}
 				}
@@ -651,7 +653,7 @@ public class ServerGame {
 					Square s = aBoard[x][headY];
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(x+1, headY); //One square before the obstacle
-						//TODO Create log entry/notify players
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, x, headY, aTurnNum));
 						break;
 					}
 					else if (s instanceof MineSquare) {
@@ -702,7 +704,7 @@ public class ServerGame {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
-					//TODO Create log entry/notify players
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), pDestination.getY(), aTurnNum));
 				}
 				else if (s instanceof MineSquare) {
 					//Failed to move
@@ -747,7 +749,7 @@ public class ServerGame {
 						//movement fails
 						finalDestinationTail = tailCoord;
 						finalDestinationHead = headCoord;
-						//Log entry
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, i, pDestination.getY(), aTurnNum));
 						break;
 					}
 				}
@@ -799,7 +801,7 @@ public class ServerGame {
 					Square s = aBoard[x][headY];
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationHead = new Coordinate(x-1, headY); //One square before the obstacle
-						//TODO Create log entry/notify players
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, x, headY, aTurnNum));
 						break;
 					}
 					else if (s instanceof MineSquare) {
@@ -823,13 +825,10 @@ public class ServerGame {
 							if (!(pShip instanceof MineLayer) && sr instanceof MineSquare) {
 								finalDestinationHead = new Coordinate(x, headY); //The square next to the mine
 								mineExplode(new Coordinate(x, headY-1), headCoord, pShip);
-								//TODO log entry
 								break;
 							}
 						}
-					}
-					
-					
+					}	
 				}
 				if (finalDestinationHead == null) {
 					//Did not find an obstacle
@@ -843,7 +842,6 @@ public class ServerGame {
 					}
 				}
 				finalDestinationTail = new Coordinate (pDestination.getX() - pShip.getSize() + 1, finalDestinationHead.getY());
-				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getX() < tailX) {
@@ -852,7 +850,7 @@ public class ServerGame {
 					//Failed to move
 					finalDestinationTail = tailCoord;
 					finalDestinationHead = headCoord;
-					//TODO Create log entry/notify players
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, pDestination.getX(), pDestination.getY(), aTurnNum));
 				}
 				else if (s instanceof MineSquare) {
 					//Failed to move
@@ -895,8 +893,7 @@ public class ServerGame {
 					if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 						finalDestinationTail = tailCoord;
 						finalDestinationHead = headCoord;
-						//Log entry
-						break;
+						aLogEntryList.add(new LogEntry(LogType.COLLISION, i, pDestination.getY(), aTurnNum));						break;
 					}
 				}
 				//If there still is no final destination, no obstacle/mine was found and movement succeeds. 
@@ -1010,8 +1007,7 @@ public class ServerGame {
 				Square s = aBoard[c.getX()][c.getY()];
 				if (s instanceof ShipSquare) {
 					turnSuccess = false;
-					//TODO log entry
-					System.out.println("Obstacle found");
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, c.getX(), c.getY(), aTurnNum));
 				}
 				//There can't be a mine in the turning area of the ship, otherwise it would have exploded already. 
 				//So we don't need to check for that. 
@@ -1026,88 +1022,88 @@ public class ServerGame {
 		
 		//Turning 90 degrees but over center square
 		else if (pShip.canTurn180()) {
-			ArrayList<Square> listOfSquares = new ArrayList<Square>();
+			ArrayList<Coordinate> listOfCoords = new ArrayList<Coordinate>();
 			Coordinate destinationTail = null;
 			switch (direction) {
 			case NORTH: 
 				//Case turning left/port (west)
 				if (pDestination.getX() < tailX) {
-					listOfSquares.add(aBoard[headX-1][headY]);
-					listOfSquares.add(aBoard[tailX+1][tailY]);
-					listOfSquares.add(aBoard[headX-1][headY+1]);
-					listOfSquares.add(aBoard[tailX+1][tailY-1]);
+					listOfCoords.add(new Coordinate (headX-1, headY));
+					listOfCoords.add(new Coordinate (tailX+1, tailY));
+					listOfCoords.add(new Coordinate (headX-1, headY+1));
+					listOfCoords.add(new Coordinate (tailX+1, tailY-1));
 					destinationTail = new Coordinate(pDestination.getX() + 2, pDestination.getY());
 				}
 				//Case turning right/starboard (east)
 				else if (pDestination.getX() > tailX) {
-					listOfSquares.add(aBoard[headX+1][headY]);
-					listOfSquares.add(aBoard[tailX-1][tailY]);
-					listOfSquares.add(aBoard[headX+1][headY+1]);
-					listOfSquares.add(aBoard[tailX-1][tailY-1]);
+					listOfCoords.add(new Coordinate (headX+1, headY));
+					listOfCoords.add(new Coordinate (tailX-1, tailY));
+					listOfCoords.add(new Coordinate (headX+1, headY+1));
+					listOfCoords.add(new Coordinate (tailX-1, tailY-1));
 					destinationTail = new Coordinate(pDestination.getX() - 2, pDestination.getY());
 				}
 				break; 
 			case SOUTH: 
 				//Case turning right/starboard (west)
 				if (pDestination.getX() < tailX) {
-					listOfSquares.add(aBoard[headX-1][headY]);
-					listOfSquares.add(aBoard[tailX+1][tailY]);
-					listOfSquares.add(aBoard[headX-1][headY-1]);
-					listOfSquares.add(aBoard[tailX+1][tailY+1]);
+					listOfCoords.add(new Coordinate (headX-1, headY));
+					listOfCoords.add(new Coordinate (tailX+1, tailY));
+					listOfCoords.add(new Coordinate (headX-1, headY-1));
+					listOfCoords.add(new Coordinate (tailX+1, tailY+1));
 					destinationTail = new Coordinate(pDestination.getX() + 2, pDestination.getY());
 				}
 				//Case turning left/port (east)
 				else if (pDestination.getX() > tailX) {
-					listOfSquares.add(aBoard[headX+1][headY]);
-					listOfSquares.add(aBoard[tailX-1][tailY]);
-					listOfSquares.add(aBoard[headX+1][headY-1]);
-					listOfSquares.add(aBoard[tailX-1][tailY+1]);
+					listOfCoords.add(new Coordinate (headX+1, headY));
+					listOfCoords.add(new Coordinate (tailX-1, tailY));
+					listOfCoords.add(new Coordinate (headX+1, headY-1));
+					listOfCoords.add(new Coordinate (tailX-1, tailY+1));
 					destinationTail = new Coordinate(pDestination.getX() - 2, pDestination.getY());
 				}
 				break;
 			case EAST: 
 				//Case turning left/port (north)
 				if (pDestination.getY() < tailY) {
-					listOfSquares.add(aBoard[headX][headY-1]);
-					listOfSquares.add(aBoard[tailX][tailY+1]);
-					listOfSquares.add(aBoard[headX-1][headY-1]);
-					listOfSquares.add(aBoard[tailX+1][tailY+1]);
+					listOfCoords.add(new Coordinate (headX, headY-1));
+					listOfCoords.add(new Coordinate (tailX, tailY+1));
+					listOfCoords.add(new Coordinate (headX-1, headY-1));
+					listOfCoords.add(new Coordinate (tailX+1, tailY+1));
 					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() + 2);
 				}
 				//Case turning right/starboard (south)
 				else if (pDestination.getY() > tailY) {
-					listOfSquares.add(aBoard[headX][headY+1]);
-					listOfSquares.add(aBoard[tailX][tailY-1]);
-					listOfSquares.add(aBoard[headX-1][headY+1]);
-					listOfSquares.add(aBoard[tailX+1][tailY-1]);
+					listOfCoords.add(new Coordinate (headX, headY+1));
+					listOfCoords.add(new Coordinate (tailX, tailY-1));
+					listOfCoords.add(new Coordinate (headX-1, headY+1));
+					listOfCoords.add(new Coordinate (tailX+1, tailY-1));
 					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() - 2);
 				}
 				break; 
 			case WEST: 
 				//Case turning right/starboard (north)
 				if (pDestination.getY() < tailY) {
-					listOfSquares.add(aBoard[headX][headY-1]);
-					listOfSquares.add(aBoard[tailX][tailY+1]);
-					listOfSquares.add(aBoard[headX+1][headY-1]);
-					listOfSquares.add(aBoard[tailX-1][tailY+1]);
+					listOfCoords.add(new Coordinate (headX, headY-1));
+					listOfCoords.add(new Coordinate (tailX, tailY+1));
+					listOfCoords.add(new Coordinate (headX+1, headY-1));
+					listOfCoords.add(new Coordinate (tailX-1, tailY+1));
 					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() + 2);
 				}
 				//Case turning left/port (south)
 				else if (pDestination.getY() > tailY) {
-					listOfSquares.add(aBoard[headX][headY+1]);
-					listOfSquares.add(aBoard[tailX][tailY-1]);
-					listOfSquares.add(aBoard[headX+1][headY+1]);
-					listOfSquares.add(aBoard[tailX-1][tailY-1]);
+					listOfCoords.add(new Coordinate (headX, headY+1));
+					listOfCoords.add(new Coordinate (tailX, tailY-1));
+					listOfCoords.add(new Coordinate (headX+1, headY+1));
+					listOfCoords.add(new Coordinate (tailX-1, tailY-1));
 					destinationTail = new Coordinate(pDestination.getX(), pDestination.getY() - 2);
 				}
 				break; 
 			}
-			//Now we iterate over the list of squares we built
-			for (Square s : listOfSquares) {
+			//Now we iterate over the list of coordinates we built
+			for (Coordinate c : listOfCoords) {
+				Square s = aBoard[c.getX()][c.getY()];
 				if (s instanceof ShipSquare) {
 					turnSuccess = false;
-					//TODO log entry
-					System.out.println("Obstacle found");
+					aLogEntryList.add(new LogEntry(LogType.COLLISION, c.getX(), c.getY(), aTurnNum));
 				}
 				//Again, there can't be a mine in that area, so we don't check for that. 
 			}
@@ -1142,8 +1138,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1184,8 +1179,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1229,8 +1223,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1271,8 +1264,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1317,8 +1309,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								System.out.println("Obstacle found");
-								//TODO log entry
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1359,8 +1350,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1405,8 +1395,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								System.out.println("Obstacle found");
-								//TODO log entry
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1447,8 +1436,7 @@ public class ServerGame {
 							//Looking for non-exploding obstacles
 							if (s instanceof ShipSquare || (s instanceof MineSquare && pShip instanceof MineLayer)) {
 								turnSuccess = false;
-								//TODO log entry
-								System.out.println("Obstacle found");
+								aLogEntryList.add(new LogEntry(LogType.COLLISION, x, y, aTurnNum));
 								broke = true;
 								break; 
 							}
@@ -1644,27 +1632,30 @@ public class ServerGame {
 	 * @param pCoord
 	 */
 	private void fireCannon(Ship pShip, Coordinate pCoord) {
-		Square s = aBoard[pCoord.getX()][pCoord.getY()];
+		int x = pCoord.getX();
+		int y = pCoord.getY();
+		Square s = aBoard[x][y];
 		
 		if (s instanceof Sea) {
 			//Miss
-			//TODO Log entry
+			aLogEntryList.add(new LogEntry(LogType.CANNON_MISS, x, y, aTurnNum));
 		}
 		else if (s instanceof CoralReef) { //Might not be needed if client doesn't accept reefs as a valid target
 			//Hit coral reef (no effect)
-			//TODO Log entry
+			aLogEntryList.add(new LogEntry(LogType.CANNON_HIT_REEF, x, y, aTurnNum));
 		}
 		else if (s instanceof MineSquare) {
 			removeMine(pCoord);
-			//TODO Log entry
+			aLogEntryList.add(new LogEntry(LogType.CANNON_HIT_MINE, x, y, aTurnNum));
 		}
 		else if (s instanceof BaseSquare) {
+			aLogEntryList.add(new LogEntry(LogType.CANNON_HIT_BASE, x, y, aTurnNum));
 			damageBase(pCoord);
 		}
 		else if (s instanceof ShipSquare) {
+			aLogEntryList.add(new LogEntry(LogType.CANNON_HIT_SHIP, x, y, aTurnNum));
 			if (((ShipSquare) s).getDamage() == Damage.DESTROYED) {
 				//No effect
-				//TODO log entry
 			}
 			else {
 				boolean heavyCannons = false; 
@@ -1731,12 +1722,16 @@ public class ServerGame {
 		}
 		else {
 			if (s instanceof CoralReef) {
-				//nothing happens, except notify the player I guess
+				//nothing happens, except notify the player
+				aLogEntryList.add(new LogEntry(LogType.TORPEDO_HIT_REEF, pX, pY, aTurnNum));
 			}
 			else if (s instanceof MineSquare) {
 				removeMine(new Coordinate (pX, pY));
+				aLogEntryList.add(new LogEntry(LogType.TORPEDO_HIT_MINE, pX, pY, aTurnNum));
 			}
 			else if (s instanceof ShipSquare) {
+				aLogEntryList.add(new LogEntry(LogType.TORPEDO_HIT_SHIP, pX, pY, aTurnNum));
+				
 				boolean heavyCannons = false; //Torpedoes are never heavy, but presumably they could be with some rule changes
 				Ship targetShip = ((ShipSquare) s).getShip();
 				
@@ -1799,6 +1794,7 @@ public class ServerGame {
 				//else if (leftOrTop == null && rightOrBottom == null) should never happen	
 			}
 			else if (s instanceof BaseSquare) {
+				aLogEntryList.add(new LogEntry(LogType.TORPEDO_HIT_BASE, pX, pY, aTurnNum));
 				damageBase(new Coordinate(pX, pY));
 			}
 			return true; //because we hit something
@@ -1855,6 +1851,11 @@ public class ServerGame {
 	 * The mine also disappears forever. 
 	 */
 	private void mineExplode(Coordinate pMineCoord, Coordinate pDamagedCoord, Ship pDamagedShip) {
+		int x = pDamagedCoord.getX();
+		int y = pDamagedCoord.getY();
+		
+		aLogEntryList.add(new LogEntry(LogType.MINE_EXPLOSION, x, y, aTurnNum));
+		
 		removeMine(pMineCoord);
 		boolean heavy = true;	//Mines always destroy heavy armor
 		
@@ -1862,9 +1863,6 @@ public class ServerGame {
 		damageShip(pDamagedShip, pDamagedCoord, heavy);
 		
 		//Now there is stuff to determine the 2nd square to be damaged (similar to torpedoes)
-		
-		int x = pDamagedCoord.getX();
-		int y = pDamagedCoord.getY();
 		
 		//leftOrTop is the coordinate one less in X (if ship is horizontal) or one less in Y (if ship is vertical)
 		//rightOrBottom is the coordinate one more in X (if ship is horizontal) or one more in Y (if ship is vertical)
@@ -1912,8 +1910,6 @@ public class ServerGame {
 				damageShip(pDamagedShip, rightOrBottom, heavy);
 			}
 		}
-		
-		//TODO log entry for mines
 	}
 	
 	
@@ -1933,7 +1929,11 @@ public class ServerGame {
 			//Check if it sank
 			if (pAttackedShip.isSunk()) {
 				removeShip(pAttackedShip);
-				//TODO Log entry
+				
+				LogEntry log = new LogEntry(LogType.SHIP_SUNK, pCoord.getX(), pCoord.getY(), aTurnNum);
+				log.setSunkenShip(pAttackedShip);
+				aLogEntryList.add(log);
+				
 				//Check if all ships in a team are sunk
 				boolean p1Lost = true;
 				for (Ship ship : aShipListP1) {
@@ -1958,7 +1958,6 @@ public class ServerGame {
 			}
 			else {
 				setShipPosition(pAttackedShip, pAttackedShip.getHead(), pAttackedShip.getTail());
-				//TODO Log entry? Or rather it should be in the cannon/torpedo/mine method. 
 			}
 		}
 	}
@@ -1968,11 +1967,49 @@ public class ServerGame {
 		if (s instanceof BaseSquare) {
 			BaseSquare bs = (BaseSquare) s;
 			if (bs.getDamage()==Damage.UNDAMAGED || bs.getDamage()==Damage.DAMAGED) {
-				aBoard[pCoord.getX()][pCoord.getY()] = new BaseSquare(Damage.DESTROYED, bs.getOwner());
-				//TODO Log entry
+				Account owner = bs.getOwner();
+				aBoard[pCoord.getX()][pCoord.getY()] = new BaseSquare(Damage.DESTROYED, owner);
+				
+				if (isBaseDestroyed(owner)) {
+					LogEntry log = new LogEntry(LogType.BASE_DESTROYED, pCoord.getX(), pCoord.getY(), aTurnNum);
+					log.setAffectedPlayer(owner);
+					aLogEntryList.add(log);
+				}
+				
 			}
 			//else the base square is already destroyed; nothing happens. 
 		}
+	}
+	
+	/**
+	 * Checks whether pPlayer's base is completely destroyed, i.e. whether its 10 BaseSquares 
+	 * have damage DESTROYED. 
+	 * @param pPlayer
+	 * @return
+	 */
+	private boolean isBaseDestroyed(Account pPlayer) {
+		int x;
+		if (aPlayer1 != null && pPlayer.equals(aPlayer1)) {
+			x = 0;
+		}
+		else if (aPlayer2 != null && pPlayer.equals(aPlayer2)) {
+			x = 29;
+		}
+		else {
+			return false; //something is wrong with the input
+		}
+		
+		boolean baseCompletelyDestroyed = true; 
+		for (int i = 10; i < 20; i++) {
+			Square s = aBoard[x][i];
+			if (s instanceof BaseSquare) {
+				BaseSquare bs = (BaseSquare) s;
+				if (bs.getDamage()==Damage.UNDAMAGED || bs.getDamage()==Damage.DAMAGED) {
+					baseCompletelyDestroyed = false;
+				}
+			}
+		}
+		return baseCompletelyDestroyed;
 	}
 	
 	
@@ -2017,6 +2054,12 @@ public class ServerGame {
 			return aPlayer2.getUsername(); //even
 		} else return aPlayer1.getUsername(); //odd 
 	}
+	
+	public LinkedList<LogEntry> getLog() {
+		return aLogEntryList;
+	}
+	
+	
 	/**
 	 * Creates, as a string, an ASCII representation of the board. 
 	 * @return
