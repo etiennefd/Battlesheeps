@@ -337,12 +337,89 @@ public abstract class Ship {
 		
 		return damaged;
 	}
+	
+	/**
+	 * Returns the list of coordinates which fall into this ship's
+	 * cannon range. The cannon range extends all around the ship.  
+	 * @return
+	 */
+	public List<Coordinate> getCannonCoordinates() {
+		
+		ArrayList<Coordinate> cannonCoords = new ArrayList<Coordinate>();
+		Direction myDirection = this.getDirection();
+		
+		int headX = aLocationHead.getX();
+		int headY = aLocationHead.getY();
+		int startX, startY;
+		
+		switch (myDirection) {
+			case NORTH : 
+				
+				startX = headX - aCannonRangeWidth/2; 
+				startY = headY - (aCannonRangeLength - aSize)/2;
+				
+				for (int i = startX; i < (startX + aCannonRangeWidth); i++) {
+					for (int j = startY; j < (startY + aCannonRangeLength); j++) {
+						Coordinate c = new Coordinate(i,j);
+						if (c.inBounds()){
+							cannonCoords.add(c);
+						}
+					}
+				}
+				break;
+			case SOUTH : 
+			
+				startX = headX - aCannonRangeWidth/2; 
+				startY = headY + (aCannonRangeLength - aSize)/2;
+				
+				for (int i = startX; i < (startX + aCannonRangeWidth); i++) {
+					for (int j = startY; j > (startY - aCannonRangeLength); j--) {
+						Coordinate c = new Coordinate(i,j);
+						if (c.inBounds()){
+							cannonCoords.add(c);
+						}
+					}
+				}
+				break; 
+			case WEST : 
+				
+				startX = headX - (aCannonRangeLength - aSize)/2;; 
+				startY = headY - aCannonRangeWidth/2;
+				
+				for (int i = startX; i < (startX + aCannonRangeLength); i++) {
+					for (int j = startY; j < (startY + aCannonRangeWidth); j++) {
+						Coordinate c = new Coordinate(i,j);
+						if (c.inBounds()){
+							cannonCoords.add(c);
+						}
+					}
+				}
+				break;
+			default : /*EAST*/
+				
+				startX = headX + (aCannonRangeLength - aSize)/2;; 
+				startY = headY + aCannonRangeWidth/2;
+				
+				for (int i = startX; i > (startX - aCannonRangeLength); i--) {
+					for (int j = startY; j > (startY - aCannonRangeWidth); j--) {
+						Coordinate c = new Coordinate(i,j);
+						if (c.inBounds()){
+							cannonCoords.add(c);
+						}
+					}
+				}
+				break;
+		}
+		
+		return cannonCoords;
+	}
+	
 	/**
 	 * Returns true if the ship is docked at its player's base 
 	 * i.e. at least one of its squares is touching the base 
 	 * 
 	 * TODO will have to be changed to take into account destroyed base squares
-	 * 
+	 * Switch to ClientGame 
 	 * @param pPlayer1 the player's whose base is WEST
 	 * @return
 	 */
