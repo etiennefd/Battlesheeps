@@ -180,6 +180,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	 */
 	public void showAvailableMoves(List<Coordinate> pList) {
 		
+		drawBoard();
 		aGreenList = pList;
 		aGreenPhase = true;
 		
