@@ -20,8 +20,8 @@ public class LogPanel extends JScrollPane{
 	} 
 
 	public void addLogEntry(LogEntry pEntry) {
-		Coordinate logCoord = pEntry.getCoordinate();
-		String logMessage = pEntry.getMessage();
+		//Coordinate logCoord = pEntry.getCoordinate();
+		String logMessage =  pEntry.toString();
 		
 		JLabel newEntry = new JLabel(logMessage);
 		aLogEntries.add(newEntry);

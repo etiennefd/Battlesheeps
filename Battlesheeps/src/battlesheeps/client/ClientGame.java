@@ -9,7 +9,9 @@ import battlesheeps.server.ServerGame.Direction;
 import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
 
+import battlesheeps.board.BaseSquare;
 import battlesheeps.board.Coordinate;
+import battlesheeps.board.CoralReef;
 import battlesheeps.board.MineSquare;
 import battlesheeps.board.Sea;
 import battlesheeps.board.ShipSquare;
@@ -67,6 +69,8 @@ public class ClientGame {
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
 	
+	//private ClientGameManager myManager;
+	
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
 
@@ -81,6 +85,8 @@ public class ClientGame {
 			aPlayer1 = false;
 			aMyOpponent = pGame.getP1Username();
 		}
+		
+		//myManager = new ClientGameManager(aMyUser, aMyOpponent, pGame.getGameID());
 		
 		GraphicsDevice grdDevice;
 		GraphicsConfiguration grcConfiguration;
@@ -116,6 +122,7 @@ public class ClientGame {
 		
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setResizeWeight(0.8);
+		
 		background.add(splitPane);
 		
 		JSplitPane sidePanel = new JSplitPane();
@@ -184,6 +191,8 @@ public class ClientGame {
 		this.aMainFrame.pack();
 		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
+		
+		splitPane.setDividerLocation(0.8);
 	}
 
 	/*
@@ -705,7 +714,44 @@ public class ClientGame {
 		aCurrentClickedMove = MoveType.FIRE_CANNON;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		
+		//put entire cannon range (length * width) into greenList
+		//then subtract: 
+		//1. all your ships (including this one)
+		//2. coral reefs
+		//3. your base
 		
+		//Note: all except torpedo boat have a cannon range which goes behind them
+		//put getCannonCoordinates() method into Ship 
+		
+		for (Coordinate c : pShip.getCanonCoordinates()) {
+			
+			int x = c.getX();
+			int y = c.getY();
+			boolean canFireOn = true;
+			
+			//coral reef is indestructible!! 
+			if (aCurrentVisibleBoard[x][y] instanceof CoralReef) {
+				canFireOn = false;
+			}
+			//you can't fire on your own base 
+			if (aCurrentVisibleBoard[x][y] instanceof BaseSquare) {
+				BaseSquare b = (BaseSquare)aCurrentVisibleBoard[x][y]; 
+				String owner = (b.getOwner()).getUsername();
+				if (aMyUser.compareTo(owner) == 0) {
+					canFireOn = false;
+				}
+			}
+			//nor on your own ships 
+			if (aCurrentVisibleBoard[x][y] instanceof ShipSquare) {
+				ShipSquare sq = (ShipSquare)aCurrentVisibleBoard[x][y]; 
+				Ship s = sq.getShip();
+				if (aMyUser.compareTo(s.getUsername()) == 0) {
+					canFireOn = false;
+				}
+			}
+			
+			if (canFireOn) greenList.add(c);
+		}	
 		
 		aBoardPanel.showAvailableMoves(greenList);
 		
@@ -714,7 +760,7 @@ public class ClientGame {
 	protected void layMineSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.DROP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		
+		//CANNOT DROP MINE NEXT TO ANOTHER SHIP OR BASE
 		
 		
 		aBoardPanel.showAvailableMoves(greenList);
@@ -769,6 +815,7 @@ public class ClientGame {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
 		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
+		//myManager.sendMove(move);
 	}
 	
 	/**
