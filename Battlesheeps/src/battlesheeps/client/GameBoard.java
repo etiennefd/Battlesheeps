@@ -53,6 +53,22 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private boolean aChosenMove; //true if player has chosen a move this turn
 								//this is to stop the player from choosing more than one
 	
+	//The Colours 
+	private MinuetoColor oceanColour = new MinuetoColor(new Color(53, 106, 172));
+	private MinuetoColor baseColour = MinuetoColor.WHITE;
+	private MinuetoColor baseDamagedColour = MinuetoColor.RED;
+	private MinuetoColor coralColour = MinuetoColor.YELLOW; 
+	private MinuetoColor mineColour = new MinuetoColor(new Color(32, 28, 31));
+	private MinuetoColor radarColour = new MinuetoColor(new Color(88, 166, 203));
+	private MinuetoColor sonarColour = new MinuetoColor(new Color(128, 102, 232));
+	private MinuetoColor opponentShipUndamaged = new MinuetoColor(Color.DARK_GRAY);
+	private MinuetoColor yourShipUndamaged = new MinuetoColor(Color.GRAY);
+	private MinuetoColor opponentShipDamaged = new MinuetoColor(new Color(232, 231, 127)); //dark pink
+	private MinuetoColor yourShipDamaged = new MinuetoColor(Color.PINK);
+	private MinuetoColor opponentShipDestroyed = new MinuetoColor(new Color(239, 230, 82)); //dark red
+	private MinuetoColor yourShipDestroyed = new MinuetoColor(Color.RED);
+	private MinuetoColor moveColour = new MinuetoColor(new Color(72, 234, 92)); //green
+	
 	/**
 	 * Creates a Minueto Panel which acts as the game board. 
 	 * @param pSize : the size of the board (MUST BE A MULTIPLE OF 30) 
@@ -167,37 +183,47 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aGreenList = pList;
 		aGreenPhase = true;
 		
-		MinuetoRectangle greenRectangle = new MinuetoRectangle(increment, increment, MinuetoColor.GREEN, true);
+		MinuetoRectangle greenRectangle = new MinuetoRectangle(increment, increment, moveColour, true);
 		for (Coordinate c : aGreenList) {
 			int x = c.getX();
 			int y = c.getY();
 			aBoard.draw(greenRectangle,x*increment, y*increment);
+			
+			//re-drawing the ships on top
+			if (aVisibleBoard[x][y] instanceof ShipSquare) {
+				this.addShip(x, y);
+			}//as well as any mines 
+			if (aVisibleBoard[x][y] instanceof MineSquare) {
+				MinuetoRectangle mine = new MinuetoRectangle(increment, increment, mineColour, true);
+				aBoard.draw(mine, x*increment, y*increment);
+			}
 		}
 		
-		//And re-drawing on the squares
+		//And re-drawing on the lines to separate the squares
 		for (int i = increment; i < boardSize; i = i + increment) {
 			aBoard.drawLine(MinuetoColor.BLACK, i, 0, i, boardSize);
 		}
-		
 		for (int j = increment; j < boardSize; j = j + increment) {
 			aBoard.drawLine(MinuetoColor.BLACK, 0, j, boardSize, j);
 		}
 	}
+	
 	/**
 	 * Draws the board 
 	 */
 	private void drawBoard () {
 		
+		aBoard.clear(oceanColour);
 		//Coral Reef 
-		MinuetoRectangle coralReef = new MinuetoRectangle(increment, increment, MinuetoColor.YELLOW, true);
+		MinuetoRectangle coralReef = new MinuetoRectangle(increment, increment, coralColour, true);
 		//Ocean
-		MinuetoRectangle ocean = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(53, 106, 172)), true);
+		MinuetoRectangle ocean = new MinuetoRectangle(increment, increment, oceanColour, true);
 		//Mine
-		MinuetoRectangle mine = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(32, 28, 31)), true);
+		MinuetoRectangle mine = new MinuetoRectangle(increment, increment, mineColour, true);
 		//Radar
-		MinuetoRectangle radar = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(88, 166, 203)), true);
+		MinuetoRectangle radar = new MinuetoRectangle(increment, increment, radarColour, true);
 		//Sonar
-		MinuetoRectangle sonar = new MinuetoRectangle(increment, increment, new MinuetoColor(new Color(128, 102, 232)), true);
+		MinuetoRectangle sonar = new MinuetoRectangle(increment, increment, sonarColour, true);
 
 		for (int i = 0; i < aVisibleBoard.length; i++) {
 			for (int j = 0; j < aVisibleBoard.length; j++) {
@@ -229,15 +255,18 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	 * @param pSquareY : the y-coordinate of the square 
 	 */
 	private void addBase (int pSquareX, int pSquareY) {
-		//need to determine damage
+		//need to determine if there's damage
 		BaseSquare baseSquare = (BaseSquare) aVisibleBoard[pSquareX][pSquareY];
 		Damage baseDamage = baseSquare.getDamage();
 		
-		MinuetoColor baseColor;
-		if (baseDamage == Damage.DESTROYED) baseColor = MinuetoColor.RED;
-		else baseColor = MinuetoColor.WHITE;
+		MinuetoRectangle base;
+		if (baseDamage == Damage.DESTROYED) {
+			base = new MinuetoRectangle(increment, increment, baseDamagedColour, true);
+		}
+		else {
+			base = new MinuetoRectangle(increment, increment, baseColour, true);
+		}
 		
-		MinuetoRectangle base = new MinuetoRectangle(increment, increment, baseColor, true);
 		aBoard.draw(base, pSquareX*increment, pSquareY*increment);
 	}
 	
@@ -262,16 +291,16 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		MinuetoColor shipColor;
 		//you can open paint and choose a colour to get the RGB values 
 		if (shipDamage == Damage.UNDAMAGED) {
-			if (isOpponent) shipColor = new MinuetoColor(Color.DARK_GRAY); //dark gray
-			else shipColor = new MinuetoColor(Color.GRAY); //gray
+			if (isOpponent) shipColor = opponentShipUndamaged; 
+			else shipColor = yourShipUndamaged; 
 		}
 		else if (shipDamage == Damage.DAMAGED) {
-			if (isOpponent) shipColor = new MinuetoColor(new Color(232, 231, 127)); //dark pink
-			else shipColor = new MinuetoColor(Color.PINK); //pink
+			if (isOpponent) shipColor = opponentShipDamaged; 
+			else shipColor = yourShipDamaged; 
 		}
 		else { //DESTROYED
-			if (isOpponent) shipColor = new MinuetoColor(new Color(239, 230, 82)); //dark red
-			else shipColor = new MinuetoColor(Color.RED); //red
+			if (isOpponent) shipColor = opponentShipDestroyed; //dark red
+			else shipColor = yourShipDestroyed; //red
 		}
 		//and lastly if it's the head or body
 		if (shipSquare.isHead()) {
@@ -417,7 +446,6 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						aChosenMove = true;
 						aMyClient.greenSelected(coord); 
 						//and getting rid of ship menu
-						aMyClient.displayWaitingMessage();
 					}
 					//In any case, resetting the green list
 					aGreenList = new ArrayList<Coordinate>();

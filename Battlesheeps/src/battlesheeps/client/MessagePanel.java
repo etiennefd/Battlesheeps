@@ -314,42 +314,4 @@ public class MessagePanel extends JPanel {
 		this.repaint();
 		this.validate();
 	}
-	
-//TESTING	
-//	public static void main(String[] args) {
-//		JFrame frame = new JFrame();
-//	
-//		Account account1 = new Account("Player1", "abc");
-//		Account account2 = new Account("Player2", "ebg");
-//		MessagePanel me = new MessagePanel(new ClientGame(), account1.getUsername(), account2.getUsername());
-//		
-//		List<Ship> list1 = new ArrayList<Ship>();
-//		Ship ship1 = new Cruiser(account1);
-//		Ship ship2 = new MineLayer(account1);
-//		Ship ship3 = new RadarBoat(account1);
-//		Ship ship4 = new TorpedoBoat(account1);
-//		Ship ship5 = new Destroyer(account1);
-//		
-//		list1.add(ship1);
-//		list1.add(ship2);
-//		list1.add(ship3);
-//		list1.add(ship4);
-//		list1.add(ship5);
-//		
-//		List<Ship> list2 = new ArrayList<Ship>();
-//		Ship ship6 = new RadarBoat(account2);
-//		Ship ship7 = new RadarBoat(account2);
-//		Ship ship8 = new Destroyer(account2);
-//		
-//		list2.add(ship6);
-//		list2.add(ship7);
-//		list2.add(ship8);
-//		
-//		me.setNotYourTurn(list1, list2);
-//		
-//		Ship shipT = new TorpedoBoat(account1);
-//		me.displayShipMenu(shipT);
-//		frame.add(me);
-//		frame.setVisible(true);
-//	}
 }
