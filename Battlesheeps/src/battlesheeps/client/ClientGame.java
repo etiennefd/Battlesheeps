@@ -20,6 +20,7 @@ import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.server.ServerGame;
 import battlesheeps.ships.MineLayer;
 import battlesheeps.ships.Ship;
+import battlesheeps.ships.Ship.Damage;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -321,12 +322,9 @@ public class ClientGame {
 		if (aPlayer1) p1 = aMyUser;
 		else p1 = aMyOpponent;
 		
-		boolean atBase = pShip.isAtHomeBase(p1);
+		boolean atBase = isAtHomeBase(pShip);
+		
 		aMessagePanel.displayShipMenu(pShip, atBase);
-	}
-	
-	public void displayWaitingMessage() {
-		aMessagePanel.displayMessage("Waiting for Server");
 	}
 	
 	private Square[][] computeVisibility(Square[][] pBoard, List<Ship> pShipList) {
@@ -714,16 +712,15 @@ public class ClientGame {
 		aCurrentClickedMove = MoveType.FIRE_CANNON;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		
-		//put entire cannon range (length * width) into greenList
+		//Put entire cannon range (length * width) into greenList
 		//then subtract: 
 		//1. all your ships (including this one)
 		//2. coral reefs
 		//3. your base
 		
 		//Note: all except torpedo boat have a cannon range which goes behind them
-		//put getCannonCoordinates() method into Ship 
 		
-		for (Coordinate c : pShip.getCanonCoordinates()) {
+		for (Coordinate c : pShip.getCannonCoordinates()) {
 			
 			int x = c.getX();
 			int y = c.getY();
@@ -815,6 +812,7 @@ public class ClientGame {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
 		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
+		aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
 		//myManager.sendMove(move);
 	}
 	
@@ -1166,5 +1164,62 @@ public class ClientGame {
 
 		}
 		return turnSuccess;
+	}
+	
+	/**
+	 * Returns true if the ship is at its home base.
+	 * @param pShip
+	 * @return
+	 */
+	private boolean isAtHomeBase(Ship pShip) {
+		//to figure out if a ship is at home base: 
+		//for each square surrounding it, 
+		//check if the square is a base square and undamaged 
+		//if yes, check if it is owned by this user  
+		//if yes, then the ship is at home base 
+		
+		boolean atHome = false;
+		
+		Direction myDirection = pShip.getDirection();
+		int startX, startY;
+		
+		if (myDirection == Direction.NORTH || myDirection == Direction.SOUTH) {
+			
+			if (myDirection == Direction.NORTH) { 
+				startX = pShip.getHead().getX() - 1;
+				startY = pShip.getHead().getY() - 1;
+			} else {
+				startX = pShip.getTail().getY() - 1;
+				startY = pShip.getTail().getY() - 1;
+			}
+
+			for (int i = startX; i < (startX + pShip.getSize() + 2); i++) {
+				for (int j = startY; j < (startY + pShip.getSize() + 2); j++) {
+					Coordinate c = new Coordinate(i,j);
+					//if the coordinate is in bounds 
+					if (c.inBounds()) {
+						//then we check if its a base square 
+						if (aCurrentVisibleBoard[i][j] instanceof BaseSquare) {
+							BaseSquare base = (BaseSquare) aCurrentVisibleBoard[i][j];
+							//checking that the base square is undamaged 
+							if (base.getDamage() == Damage.UNDAMAGED) { 
+								String owner = base.getOwner().getUsername();
+								//and if so, we check if the base belongs to this user
+								if (owner.compareTo(aMyUser) == 0) {
+									atHome = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				
+				if (atHome) break;
+			}
+			
+		}
+		
+		return atHome;
+		
 	}
 }
