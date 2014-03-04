@@ -138,6 +138,7 @@ public class ClientGame {
 		
 		//LOG
 		aLogPanel = new LogPanel();
+		aLogPanel.updateLogEntries(pGame.getLog());
 		sideBottom.setLeftComponent(aLogPanel);
 		
 		//CHAT
@@ -306,8 +307,7 @@ public class ClientGame {
 			aMessagePanel.setNotYourTurn(myList, oppList);
 		}
 		
-		//TODO
-		//aLogPanel.addLogEntry(pLogEntry);
+		aLogPanel.updateLogEntries(pGame.getLog());
 	}
 	
 	/**
@@ -317,11 +317,6 @@ public class ClientGame {
 	public void showShipMenu(Ship pShip) {
 		
 		aCurrentClickedShip = pShip;
-		
-		String p1;
-		if (aPlayer1) p1 = aMyUser;
-		else p1 = aMyOpponent;
-		
 		boolean atBase = isAtHomeBase(pShip);
 		
 		aMessagePanel.displayShipMenu(pShip, atBase);

@@ -1,10 +1,13 @@
 package battlesheeps.test;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
+import battlesheeps.server.LogEntry;
+import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.server.ServerGame;
 import battlesheeps.ships.*;
 import battlesheeps.ships.Ship.Damage;
@@ -77,6 +80,14 @@ public class TestGameBoard{
 		myGame.addMine(new Coordinate(3, 27));
 		myGame.addMine(new Coordinate(22, 1));
 		
+		LogEntry log1 = new LogEntry(LogType.CANNON_MISS, 1, 1, 1);
+		LogEntry log2 = new LogEntry(LogType.MINE_EXPLOSION, 24, 5, 2);
+		LogEntry log3 = new LogEntry(LogType.TORPEDO_HIT_REEF, 15, 16, 3);
+		
+		myGame.setLogEntry(log1);
+		myGame.setLogEntry(log2);
+		myGame.setLogEntry(log3);
+
 		client = new ClientGame(player.getUsername(), myGame);
 	
 		
