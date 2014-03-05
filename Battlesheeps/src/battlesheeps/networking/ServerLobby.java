@@ -5,11 +5,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Queue;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
+import battlesheeps.networking.Request.LobbyRequest;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.ServerGame;
 
@@ -24,18 +28,9 @@ public class ServerLobby
 //		Account a3 = new Account("dinkle", "IamAdinkle");
 //		Account a4 = new Account("bobs", "password");
 //		
-//		// TODO Ettiene, creating the game should add to Accounts SavedGames
 //		ServerGame g1 = new ServerGame(1, a1, a2);
 //		ServerGame g2 = new ServerGame(2, a2, a3);
 //		ServerGame g3 = new ServerGame(3, a3, a1);
-//		
-//		// shouldn't have to do this
-//		a1.addNewGame(g1.getGameID());
-//		a1.addNewGame(g3.getGameID());
-//		a2.addNewGame(g1.getGameID());
-//		a2.addNewGame(g2.getGameID());
-//		a3.addNewGame(g2.getGameID());
-//		a3.addNewGame(g3.getGameID());
 //		
 //		GameManager gm = GameManager.getInstance();
 //		Hashtable<String,Account> accts = gm.getAccounts();
@@ -85,20 +80,20 @@ public class ServerLobby
 
 class ClientConnLobby implements Runnable {
 	
-	private static final ArrayList<ClientConnLobby> aClientList = new ArrayList<ClientConnLobby>();
+	private static final Hashtable<String, ClientConnLobby> aClientList = new Hashtable<String, ClientConnLobby>();
 	private static final ArrayList<Account> aOnlineAccounts = new ArrayList<Account>();
 	
     private ObjectInputStream aInput;
     private ObjectOutputStream aOutput;
     private String aUsername;
     private Account aAccount;
+    private Queue<Request> aRequestQueue; // for requests received, as only one request can be sent at a time.
 
     /**
-     * Client connections on the server side will receive ChatMessage objects and
-     * will send out only Strings.
      * @param pClient The client socket accepted by the server.
      */
     ClientConnLobby(Socket pClient) {
+    	aRequestQueue = new ArrayDeque<Request>();
         try {
         	aOutput = new ObjectOutputStream(pClient.getOutputStream());
             aInput = new ObjectInputStream(pClient.getInputStream());
@@ -115,43 +110,69 @@ class ClientConnLobby implements Runnable {
         	LobbyMessageToServer msg;
             while ((msg = (LobbyMessageToServer) aInput.readObject()) != null) 
             {
-            	if (msg.getEnterOrExit() == LobbyNotification.ENTERING){
-            		aUsername = msg.getUsername();
-            		aAccount = GameManager.getInstance().getAccount(aUsername);
-            		addConnection(this);
-            		addAccount(aAccount);
-            		// TODO set user to online? EXECUTIVE DECISION, I'm not using player availability.
+            	if (msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST){
             		
-            		// update users of new online user
-            		LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts);
-            		updateAllClients(lobbyMsg);
-                	
-            		// create saved game list to send to this user.
-                	Iterator<Integer> currentGames = aAccount.getCurrentGames();
-                	ArrayList<LobbyMessageGameSummary> games = new ArrayList<LobbyMessageGameSummary>();
-                	
-                	while (currentGames.hasNext()){
-                		ServerGame sg = GameManager.getInstance().getGame(currentGames.next());
-                		Account p1 = GameManager.getInstance().getAccount(sg.getP1Username());
-                		Account p2 = GameManager.getInstance().getAccount(sg.getP2Username());
-                		
-                		games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
-                	}
-                	lobbyMsg.setGames(games);
+            		Request r = msg.getRequest();
             		
-                	this.updateClient(lobbyMsg);
-                	// System.out.println(aUsername + " has connected");
+            		if (r.getType() == LobbyRequest.REQUEST)
+            		{
+            			// send request to requestee
+            			aClientList.get(r.getRequestee()).respondToRequest(r);
+            		}
+            		else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW)
+            		{
+            			// withdraw request from requestee
+            			aClientList.get(r.getRequestee()).respondToRequestWithdraw(r);
+            		}
+            		else if (r.getType() == LobbyRequest.ACCEPT)
+            		{
+            			// send acceptance to requester
+            			this.respondToAccept(r);
+            		}
+            		else 
+            		{ 
+            			// send decline to requester
+            			this.respondToDecline(r);
+            		}
             	}
-            	else { // exiting
-            		removeConnection(this);
-            		removeAccount(aAccount);
-            		
-            		// update users of new online user
-            		LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts);
-            		updateAllClients(lobbyMsg);
-            		// System.out.println(aUsername + " has disconnected");
+            	else {
+            		if (msg.getEnterOrExit() == LobbyNotification.ENTERING){
+            			aUsername = msg.getUsername();
+            			aAccount = GameManager.getInstance().getAccount(aUsername);
+            			addConnection(aUsername, this);
+            			addAccount(aAccount);
+            			// TODO set user to online? EXECUTIVE DECISION, I'm not using player availability.
+
+            			// update users of new online user
+            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts, null);
+            			updateAllClients(lobbyMsg);
+
+            			// create saved game list to send to this user.
+            			Iterator<Integer> currentGames = aAccount.getCurrentGames();
+            			ArrayList<LobbyMessageGameSummary> games = new ArrayList<LobbyMessageGameSummary>();
+
+            			while (currentGames.hasNext()){
+            				ServerGame sg = GameManager.getInstance().getGame(currentGames.next());
+            				Account p1 = GameManager.getInstance().getAccount(sg.getP1Username());
+            				Account p2 = GameManager.getInstance().getAccount(sg.getP2Username());
+
+            				games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
+            			}
+            			lobbyMsg.setGames(games);
+
+            			this.updateClient(lobbyMsg);
+//            			System.out.println(aUsername + " has connected");
+            		}
+            		else { // exiting
+            			removeConnection(aUsername);
+            			removeAccount(aAccount);
+
+            			// update users of new online user
+            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts, null);
+            			updateAllClients(lobbyMsg);
+//            			System.out.println(aUsername + " has disconnected");
+            		}
             	}
-            	
             }
         } 
         catch (IOException e) 
@@ -166,13 +187,14 @@ class ClientConnLobby implements Runnable {
     }
     
     private synchronized void updateAllClients(LobbyMessageToClient pMsg){
-    	for (ClientConnLobby aClient : aClientList){
+    	for (ClientConnLobby aClient : aClientList.values()){
     		if (!aClient.equals(this))
     		{
     			aClient.updateClient(pMsg);
     		}
     	}
     }
+    
     private void updateClient(LobbyMessageToClient pMsg){
     	try	{
 			this.aOutput.writeObject(pMsg);
@@ -182,13 +204,67 @@ class ClientConnLobby implements Runnable {
 			System.err.println("Error sending Lobby update to Client: " + this.getName() + " " + e);
 		}
     }
-    
-    private static synchronized void addConnection(ClientConnLobby aConnection){
-    	aClientList.add(aConnection);
+    // TODO If there's time, create separate locks for RequestQueue, ClientList and OnlineAccounts
+    /**
+     * Add request to queue, and if it's first in queue, message requestee.
+     * @param pRequest
+     */
+    private synchronized void respondToRequest(Request pRequest){
+    	this.aRequestQueue.add(pRequest);
+		if (this.aRequestQueue.peek().equals(pRequest))
+		{
+			this.updateClient(new LobbyMessageToClient(null, pRequest));
+		}
+    }
+    /**
+     * If this request is first in queue, remove it and message requestee.
+     * Does nothing if request is not first in queue
+     * @param pRequest
+     */
+    private synchronized void respondToRequestWithdraw(Request pRequest){
+    	if (this.aRequestQueue.peek().equals(pRequest))
+    	{
+			this.aRequestQueue.poll();
+			this.updateClient(new LobbyMessageToClient(null, pRequest));
+		}
+    }
+    /**
+     * If request is STILL first in queue (may have been withdrawn), removes it
+     * and messages requester.
+     * @param pRequest
+     */
+    private synchronized void respondToAccept(Request pRequest){
+    	if (this.aRequestQueue.peek().equals(pRequest))
+    	{
+			this.aRequestQueue.poll();
+			ClientConnLobby requester = aClientList.get(pRequest.getRequesterName());
+			requester.updateClient(new LobbyMessageToClient(null, pRequest));
+		}
+    }
+    /**
+     * If request is STILL first in queue (may have been withdrawn), removes it,
+     * messages requester, and if there is another request in the queue, will send it.
+     * @param pRequest
+     */
+    private synchronized void respondToDecline(Request pRequest){
+    	if (this.aRequestQueue.peek().equals(pRequest))
+    	{
+			this.aRequestQueue.poll();
+			ClientConnLobby requester = aClientList.get(pRequest.getRequesterName());
+			requester.updateClient(new LobbyMessageToClient(null, pRequest));
+			
+			if (this.aRequestQueue.peek() != null){
+				this.updateClient(new LobbyMessageToClient(null, this.aRequestQueue.peek()));
+			}
+		}
     }
     
-    private static synchronized void removeConnection(ClientConnLobby aConnection){
-    	aClientList.remove(aConnection);
+    private static synchronized void addConnection(String pUsername, ClientConnLobby aConnection){
+    	aClientList.put(pUsername, aConnection);
+    }
+    
+    private static synchronized void removeConnection(String pUsername){
+    	aClientList.remove(pUsername);
     }
     
     private static synchronized void addAccount(Account pAccount){

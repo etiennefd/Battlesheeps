@@ -4,25 +4,31 @@ import java.io.Serializable;
 
 public class LobbyMessageToServer implements Serializable
 {
-	private static final long serialVersionUID = 3168081652129542229L;
+	private static final long serialVersionUID = 2098808939389356495L;
 
 	public enum LobbyNotification {
-		ENTERING, EXITING
+		ENTERING, EXITING, GAME_REQUEST
 	}
-	
 	private LobbyNotification aEnterOrExit;
 	private String aUsername;
-	
-	public LobbyMessageToServer(LobbyNotification pNote, String pUsername){
+	private Request aRequest;
+
+	public LobbyMessageToServer(LobbyNotification pNote, String pUsername, Request pRequest){
 		aEnterOrExit = pNote;
-		aUsername = pUsername;		
+		aUsername = pUsername;
+		aRequest = pRequest;
 	}
 	
 	public LobbyNotification getEnterOrExit(){
 		return aEnterOrExit;
 	}
 
-	public String getUsername(){
+	public Request getRequest(){
+		return aRequest;
+	}
+
+	public String getUsername()
+	{
 		return aUsername;
 	}
 	

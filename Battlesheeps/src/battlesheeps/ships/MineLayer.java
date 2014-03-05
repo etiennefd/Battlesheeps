@@ -11,7 +11,7 @@ public class MineLayer extends Ship {
 
 	private int aMineSupply; 			//Number of mines on board. 
 
-	public MineLayer(Account pPlayer) {
+	public MineLayer(Account pPlayer, int pShipID) {
 		
 		super();
 		aSize = 2;
@@ -22,6 +22,7 @@ public class MineLayer extends Ship {
 		aCannonRangeLength = 4;
 		aCannonRangeWidth = 5;
 		aTurn180 = false; 
+		aShipID = pShipID;
 		
 		initializeShip(pPlayer);
 		

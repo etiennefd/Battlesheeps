@@ -25,6 +25,7 @@ public abstract class Ship {
 	
 	private Account aPlayer; 
 		
+	protected int aShipID;					// 0-9, added by Stefan
 	protected int aSize;					//Length of the ship, in squares. 
 	protected int aMaxSpeed;				//Number of squares the ship can move forward when undamaged
 	protected boolean aHeavyArmour;			//True if the ship has heavy armour, false for normal armour
@@ -185,6 +186,9 @@ public abstract class Ship {
 	/*
 	 * GETTERS
 	 */
+	public int getShipID(){
+		return aShipID;
+	}
 	
 	public int getSize() {
 		return aSize;

@@ -51,5 +51,10 @@ public class GameManager {
 	public void addGame(ServerGame pGame){
 		ALL_GAMES.put(pGame.getGameID(), pGame);
 	}
+	
+	public int generateGameID(){
+		// TODO create method
+		return 0;
+	}
 
 }

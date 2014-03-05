@@ -4,7 +4,7 @@ import battlesheeps.accounts.Account;
 
 public class Destroyer extends Ship {
 
-	public Destroyer(Account pPlayer) {
+	public Destroyer(Account pPlayer, int pShipID) {
 		
 		super();
 		aSize = 4;
@@ -15,6 +15,7 @@ public class Destroyer extends Ship {
 		aCannonRangeLength = 12;
 		aCannonRangeWidth = 9;
 		aTurn180 = false; 
+		aShipID = pShipID;
 		
 		initializeShip(pPlayer);
 	}

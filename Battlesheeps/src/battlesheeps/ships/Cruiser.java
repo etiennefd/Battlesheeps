@@ -4,7 +4,7 @@ import battlesheeps.accounts.Account;
 
 public class Cruiser extends Ship {
 
-	public Cruiser(Account pPlayer) {
+	public Cruiser(Account pPlayer, int pShipID) {
 		
 		super();
 		aSize = 5;
@@ -15,6 +15,7 @@ public class Cruiser extends Ship {
 		aCannonRangeLength = 15;
 		aCannonRangeWidth = 11;
 		aTurn180 = false; 
+		aShipID = pShipID;
 		
 		initializeShip(pPlayer);
 	}

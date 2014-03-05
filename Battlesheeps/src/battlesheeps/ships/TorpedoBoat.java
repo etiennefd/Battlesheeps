@@ -10,7 +10,7 @@ import battlesheeps.server.ServerGame.Direction;
 public class TorpedoBoat extends Ship {
 
 
-	public TorpedoBoat(Account pPlayer) {
+	public TorpedoBoat(Account pPlayer, int pShipID) {
 		
 		super();
 		aSize = 3;
@@ -21,6 +21,7 @@ public class TorpedoBoat extends Ship {
 		aCannonRangeLength = 5;
 		aCannonRangeWidth = 5;
 		aTurn180 = true; 
+		aShipID = pShipID;
 		
 		initializeShip(pPlayer);
 	}

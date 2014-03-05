@@ -32,19 +32,19 @@ public class MainTest {
 		ServerGame game = new ServerGame(0, null, null);
 		
 		//Add some ships and set their position
-		Cruiser c = new Cruiser(null);
+		Cruiser c = new Cruiser(null,0);
 		game.setShipPosition(c, new Coordinate(5, 5), new Coordinate(5, 9));
-		MineLayer m = new MineLayer(null);
+		MineLayer m = new MineLayer(null,1);
 		game.setShipPosition(m, new Coordinate(4, 3), new Coordinate(5, 3));
-		RadarBoat r = new RadarBoat(null);
+		RadarBoat r = new RadarBoat(null,2);
 		game.setShipPosition(r, new Coordinate(0, 3), new Coordinate(2, 3));
-		Destroyer d = new Destroyer(null);
+		Destroyer d = new Destroyer(null,3);
 		game.setShipPosition(d, new Coordinate(7, 25), new Coordinate(4, 25));
-		TorpedoBoat t = new TorpedoBoat(null);
+		TorpedoBoat t = new TorpedoBoat(null,4);
 		game.setShipPosition(t, new Coordinate(26, 25), new Coordinate(26, 27));
-		Cruiser c2 = new Cruiser(null);
+		Cruiser c2 = new Cruiser(null,5);
 		game.setShipPosition(c2, new Coordinate(24, 5), new Coordinate(24, 1));
-		MineLayer m2 = new MineLayer(null);
+		MineLayer m2 = new MineLayer(null,6);
 		game.setShipPosition(m2, new Coordinate(5, 0), new Coordinate(5, 1));
 		//Add some mines
 		game.addMine(new Coordinate(7, 5));

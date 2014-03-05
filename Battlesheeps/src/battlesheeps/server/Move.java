@@ -6,6 +6,9 @@ import battlesheeps.ships.Ship;
 
 public class Move {
 	
+	public enum ServerInfo {
+		CORAL_REEF_ACCEPT, CORAL_REEF_DECLINE, SHIP_INIT, SHIP_INIT_COMPLETE
+	}
 	private Coordinate aCoord;
 	private Ship aShip;
 	private MoveType aMoveType;

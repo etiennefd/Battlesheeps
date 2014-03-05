@@ -6,7 +6,7 @@ public class RadarBoat extends Ship {
 	
 	private boolean aExtendedRadar;
 	
-	public RadarBoat(Account pPlayer) {
+	public RadarBoat(Account pPlayer, int pShipID) {
 		
 		super();
 		aSize = 3;
@@ -17,6 +17,7 @@ public class RadarBoat extends Ship {
 		aCannonRangeLength = 5;
 		aCannonRangeWidth = 3;
 		aTurn180 = true; 
+		aShipID = pShipID;
 		
 		initializeShip(pPlayer);
 		

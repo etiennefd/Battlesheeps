@@ -7,12 +7,13 @@ import battlesheeps.accounts.Account;
 
 public class LobbyMessageToClient implements Serializable
 {
-	private static final long serialVersionUID = -2773499275423309266L;
-	
+	private static final long serialVersionUID = -6541532121428369798L;
 	private ArrayList<LobbyMessageGameSummary> aGames;
 	private ArrayList<Account> aOnlineAccounts;
+	private Request aRequest;
 	
-	public LobbyMessageToClient(ArrayList<Account> pOnlineAccounts){
+	public LobbyMessageToClient(ArrayList<Account> pOnlineAccounts, Request pRequest){
+		aRequest = pRequest;
 		aOnlineAccounts = pOnlineAccounts;
 	}
 	
@@ -27,4 +28,9 @@ public class LobbyMessageToClient implements Serializable
 	public void setGames(ArrayList<LobbyMessageGameSummary> pGames){
 		aGames = pGames;
 	}
+
+	public Request getRequest(){
+		return aRequest;
+	}
+
 }

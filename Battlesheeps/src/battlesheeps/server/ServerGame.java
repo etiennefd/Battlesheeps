@@ -65,6 +65,9 @@ public class ServerGame {
 		aTurnNum = 1;
 		aDateLastPlayed = new Date();
 		
+		aPlayer1.addNewGame(aGameID);
+		aPlayer2.addNewGame(aGameID);
+		
 		aGameComplete = false; 
 		aWinner = null;
 		
@@ -91,28 +94,28 @@ public class ServerGame {
 		
 		//Generating the ships for both players
 		aShipListP1 = new ArrayList<Ship>();
-		aShipListP1.add(new Cruiser(aPlayer1));
-		aShipListP1.add(new Cruiser(aPlayer1));
-		aShipListP1.add(new Destroyer(aPlayer1));
-		aShipListP1.add(new Destroyer(aPlayer1));
-		aShipListP1.add(new Destroyer(aPlayer1));
-		aShipListP1.add(new TorpedoBoat(aPlayer1));
-		aShipListP1.add(new TorpedoBoat(aPlayer1));
-		aShipListP1.add(new MineLayer(aPlayer1));
-		aShipListP1.add(new MineLayer(aPlayer1));
-		aShipListP1.add(new RadarBoat(aPlayer1));
+		aShipListP1.add(new Cruiser(aPlayer1, 0));
+		aShipListP1.add(new Cruiser(aPlayer1, 1));
+		aShipListP1.add(new Destroyer(aPlayer1, 2));
+		aShipListP1.add(new Destroyer(aPlayer1, 3));
+		aShipListP1.add(new Destroyer(aPlayer1, 4));
+		aShipListP1.add(new TorpedoBoat(aPlayer1, 5));
+		aShipListP1.add(new TorpedoBoat(aPlayer1, 6));
+		aShipListP1.add(new MineLayer(aPlayer1, 7));
+		aShipListP1.add(new MineLayer(aPlayer1, 8));
+		aShipListP1.add(new RadarBoat(aPlayer1, 9));
 		
 		aShipListP2 = new ArrayList<Ship>();
-		aShipListP2.add(new Cruiser(aPlayer2));
-		aShipListP2.add(new Cruiser(aPlayer2));
-		aShipListP2.add(new Destroyer(aPlayer2));
-		aShipListP2.add(new Destroyer(aPlayer2));
-		aShipListP2.add(new Destroyer(aPlayer2));
-		aShipListP2.add(new TorpedoBoat(aPlayer2));
-		aShipListP2.add(new TorpedoBoat(aPlayer2));
-		aShipListP2.add(new MineLayer(aPlayer2));
-		aShipListP2.add(new MineLayer(aPlayer2));
-		aShipListP2.add(new RadarBoat(aPlayer2));
+		aShipListP2.add(new Cruiser(aPlayer2, 0));
+		aShipListP2.add(new Cruiser(aPlayer2, 1));
+		aShipListP2.add(new Destroyer(aPlayer2, 2));
+		aShipListP2.add(new Destroyer(aPlayer2, 3));
+		aShipListP2.add(new Destroyer(aPlayer2, 4));
+		aShipListP2.add(new TorpedoBoat(aPlayer2, 5));
+		aShipListP2.add(new TorpedoBoat(aPlayer2, 6));
+		aShipListP2.add(new MineLayer(aPlayer2, 7));
+		aShipListP2.add(new MineLayer(aPlayer2, 8));
+		aShipListP2.add(new RadarBoat(aPlayer2, 9));
 		
 	}
 	
