@@ -171,6 +171,7 @@ class ClientConnLobby implements Runnable {
             			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts, null);
             			updateAllClients(lobbyMsg);
 //            			System.out.println(aUsername + " has disconnected");
+            			// TODO break? or does closed socket execute close()?
             		}
             	}
             }

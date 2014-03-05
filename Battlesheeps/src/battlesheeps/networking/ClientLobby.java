@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
+import battlesheeps.networking.Request.LobbyRequest;
 
 public class ClientLobby
 {
@@ -22,28 +23,46 @@ public class ClientLobby
     private String aUsername;
     private ObjectOutputStream aOutput = null;
     
-    public static void main(String[] args)
-	{
-		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-    	String you, foo;
-    	try{
-    		you = stdIn.readLine();
-    	}
-    	catch (IOException e1) {
-    		you = "p1";
-    		e1.printStackTrace();
-    	}
-    	ClientLobby p = new ClientLobby(you);
-    	try{
-    		foo = stdIn.readLine();
-    		if (foo.equals("close")){
-    			p.close();
-    		}
-    	}
-    	catch (IOException e1) {
-    		e1.printStackTrace();
-    	}
-	}
+//    public static void main(String[] args)
+//	{
+//		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+//    	String you, foo;
+//    	try{
+//    		you = stdIn.readLine();
+//    	}
+//    	catch (IOException e1) {
+//    		you = "p1";
+//    		e1.printStackTrace();
+//    	}
+//    	ClientLobby p = new ClientLobby(you);
+//    	while (true){
+//    		try{
+//    			foo = stdIn.readLine();
+//    			if (foo.equals("close")){
+//    				p.close();
+//    				break;
+//    			}
+//    			else if (foo.startsWith("a ")){
+//    				String[] arr = foo.split(" ");
+//    				p.sendRequest(new Request(LobbyRequest.ACCEPT, arr[1], you));
+//    			}
+//    			else if (foo.startsWith("d ")){
+//    				String[] arr = foo.split(" ");
+//    				p.sendRequest(new Request(LobbyRequest.DECLINE, arr[1], you));
+//    			}
+//    			else if (foo.startsWith("w ")){
+//    				String[] arr = foo.split(" ");
+//    				p.sendRequest(new Request(LobbyRequest.REQUEST_WITHDRAW, you, arr[1]));
+//    			}
+//    			else { // should be a name to send a request to.
+//    				p.sendRequest(new Request(LobbyRequest.REQUEST, you, foo));
+//    			}
+//    		}
+//    		catch (IOException e1) {
+//    			e1.printStackTrace();
+//    		}
+//    	}
+//	}
     
     public ClientLobby(String pUsername) {
     	aUsername = pUsername;
@@ -52,7 +71,7 @@ public class ClientLobby
             
             // Create a thread to asynchronously read messages from the server
             try {
-            	(new Thread(new ServerConnLobby(server))).start();
+            	(new Thread(new ServerConnLobby(server, this))).start();
             }
             catch (IOException e){
             	System.err.println("Error creating server input thread: " + e);
@@ -61,7 +80,7 @@ public class ClientLobby
             
     		try	{
     			aOutput = new ObjectOutputStream(server.getOutputStream());
-    			aOutput.writeObject(new LobbyMessageToServer(LobbyNotification.ENTERING, aUsername));
+    			aOutput.writeObject(new LobbyMessageToServer(LobbyNotification.ENTERING, aUsername, null));
     		}
     		catch (IOException e){
     			System.err.println("Error in outputStream: " + e);
@@ -77,6 +96,17 @@ public class ClientLobby
             System.exit(1);
 		}
     }
+    public boolean sendRequest(Request pRequest){
+    	try	{
+    		aOutput.writeObject(new LobbyMessageToServer(LobbyNotification.GAME_REQUEST, aUsername, pRequest));
+    		return true;
+    	}
+    	catch (IOException e) {
+    		System.err.println("Error outputting request message: " + e);
+    		return false;
+    	}
+    }
+    
     /**
      * Closing pOut will also close the socket. This will cause the ServerConn thread
      * to throw an error when it tries to access the socket. Then the ServerConn exits
@@ -84,7 +114,7 @@ public class ClientLobby
      */
     public void close(){
     	try {
-    		aOutput.writeObject(new LobbyMessageToServer(LobbyNotification.EXITING, aUsername));
+    		aOutput.writeObject(new LobbyMessageToServer(LobbyNotification.EXITING, aUsername, null));
     		aOutput.close();
     	} catch (IOException e)	{ 
             System.err.println("Error closing socket: " + e);
@@ -95,9 +125,11 @@ public class ClientLobby
 class ServerConnLobby implements Runnable {
 	
     private ObjectInputStream aInput;
+    private ClientLobby aOutput;
  
-    public ServerConnLobby(Socket pServer) throws IOException {
+    public ServerConnLobby(Socket pServer, ClientLobby pLobby) throws IOException {
         aInput = new ObjectInputStream(pServer.getInputStream());
+        aOutput = pLobby;
     }
  
     public void run() {
@@ -105,33 +137,67 @@ class ServerConnLobby implements Runnable {
 			LobbyMessageToClient msg;
 			while ((msg = (LobbyMessageToClient)aInput.readObject()) != null) 
 			{ 	
-				if (msg.getGames() == null){
-					// CASE 1: A different user has entered or exited the lobby and this user must be updated
-					System.out.print("Update online users: ");
-					for (Account acct : msg.getOnlineAccounts()){
-						System.out.print(acct.getUsername() + " ");
-	            		// TODO Populate online user list
-						// list will contain this user, which should be filtered out
-	            	}
-					System.out.println();
-					// TODO Re-match online users with saved games
+				// A LobbyMessageToClient is either a request or a lobby update
+				if (msg.getRequest() == null){
+					// Lobby update
+					if (msg.getGames() == null){
+						// CASE 1: A different user has entered or exited the lobby and this user must be updated
+						System.out.print("Update online users: ");
+						for (Account acct : msg.getOnlineAccounts()){
+							System.out.print(acct.getUsername() + " ");
+		            		// TODO Populate online user list
+							// list will contain this user, which should be filtered out
+		            	}
+						System.out.println();
+						// TODO Re-match online users with saved games
+					}
+					else {
+						// CASE 2: This user has just entered the lobby.
+						System.out.print("Initial online users: ");
+						for (Account acct : msg.getOnlineAccounts()){
+							System.out.print(acct.getUsername() + " ");
+							// TODO Populate online user list
+							// list will contain this user, which should be filtered out
+						}
+						System.out.println();
+	
+						System.out.print("Saved games: ");
+						for (LobbyMessageGameSummary game : msg.getGames()){
+							System.out.print(game.getGameID() + " ");
+							// TODO Populate saved game list and match any games with online users.
+						}
+						System.out.println();
+					}
 				}
 				else {
-					// CASE 2: This user has just entered the lobby.
-					System.out.print("Initial online users: ");
-					for (Account acct : msg.getOnlineAccounts()){
-						System.out.print(acct.getUsername() + " ");
-						// TODO Populate online user list
-						// list will contain this user, which should be filtered out
-					}
-					System.out.println();
+					// Request
+					Request r = msg.getRequest();
+					
+					if (r.getType() == LobbyRequest.REQUEST){
+						// TODO Display requester info in pop-up with accept or decline buttons 
+						// Lei, you'll need to check if a saved game exists with the user
+						System.out.println("Game request from: " + r.getRequesterName());
+						System.out.println("Accept or Decline? (Input either a or d)");
+						
+						// TODO Create a anonymous action listeners for Accept/Decline
+						// Accept will trigger: 
+						// aOutput.sendRequest(new Request(LobbyRequest.ACCEPT, r.getRequesterName(), r.getRequestee()));
 
-					System.out.print("Saved games: ");
-					for (LobbyMessageGameSummary game : msg.getGames()){
-						System.out.print(game.getGameID() + " ");
-						// TODO Populate saved game list and match any games with online users.
+						// Decline will trigger:
+						// aOutput.sendRequest(new Request(LobbyRequest.DECLINE, r.getRequesterName(), r.getRequestee()));
 					}
-					System.out.println();
+					else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW){
+						// TODO Close the existing request pop-up
+						System.out.println("Request withdrawn by user: " + r.getRequesterName());
+					}
+					else if (r.getType() == LobbyRequest.ACCEPT){
+						// TODO Opponent accepted invitation, move to game screen
+						System.out.println("Now beginning game with " + r.getRequestee() + "...");
+					}
+					else { 
+						// TODO Opponent declined invitation, notify user that he/she should get on with their life.
+						System.out.println(r.getRequestee() + " has declined your invitation. Move on.");
+					}
 				}
 			}
 		} 
