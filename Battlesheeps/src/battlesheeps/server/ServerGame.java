@@ -1,5 +1,6 @@
 package battlesheeps.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -22,8 +23,10 @@ import battlesheeps.ships.Ship;
 import battlesheeps.ships.Ship.Damage;
 import battlesheeps.ships.TorpedoBoat;
 
-public class ServerGame {
-	
+public class ServerGame implements Serializable 
+{
+	private static final long serialVersionUID = 8385471662601246081L;
+
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 
 		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP
@@ -2019,6 +2022,28 @@ public class ServerGame {
 	/*
 	 * GETTERS
 	 */
+	/**
+	 * Will return the necessary ship based on equality with the ship from the client.
+	 * @param pShipFromClient
+	 * @return Server ship
+	 */
+	public Ship matchWithShip(Ship pShipFromClient){
+		if (pShipFromClient.getUsername() == this.getP1Username()){
+			for (Ship thisShip: this.aShipListP1){
+				if (pShipFromClient.equals(thisShip)){
+					return thisShip;
+				}
+			}
+		}
+		else {
+			for (Ship thisShip: this.aShipListP2){
+				if (pShipFromClient.equals(thisShip)){
+					return thisShip;
+				}
+			}
+		}
+		return null;
+	}
 	
 	public Square[][] getBoard() {
 		return aBoard;

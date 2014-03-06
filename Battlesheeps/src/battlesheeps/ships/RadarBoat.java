@@ -2,8 +2,9 @@ package battlesheeps.ships;
 
 import battlesheeps.accounts.Account;
 
-public class RadarBoat extends Ship {
-	
+public class RadarBoat extends Ship 
+{
+	private static final long serialVersionUID = 189425481040172189L;
 	private boolean aExtendedRadar;
 	
 	public RadarBoat(Account pPlayer, int pShipID) {

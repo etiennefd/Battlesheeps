@@ -806,7 +806,7 @@ public class ClientGame {
 	protected void greenSelected(Coordinate pCoord) {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
-		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
+		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove, null);
 		aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
 		//myManager.sendMove(move);
 	}

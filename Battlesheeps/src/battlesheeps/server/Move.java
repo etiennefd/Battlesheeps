@@ -1,22 +1,28 @@
 package battlesheeps.server;
 
+import java.io.Serializable;
+
 import battlesheeps.board.Coordinate;
 import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.Ship;
 
-public class Move {
-	
+public class Move implements Serializable 
+{
+	private static final long serialVersionUID = -1767292751081182904L;
 	public enum ServerInfo {
 		CORAL_REEF_ACCEPT, CORAL_REEF_DECLINE, SHIP_INIT, SHIP_INIT_COMPLETE
 	}
+	
 	private Coordinate aCoord;
 	private Ship aShip;
 	private MoveType aMoveType;
+	private ServerInfo aServerInfo;
 	
-	public Move(Coordinate pCoord, Ship pShip, MoveType pMoveType){
+	public Move(Coordinate pCoord, Ship pShip, MoveType pMoveType, ServerInfo pServerInfo){
 		this.aCoord = pCoord;
 		this.aShip = pShip;
 		this.aMoveType = pMoveType;
+		this.aServerInfo = pServerInfo;
 	}
 	
 	/**
@@ -60,6 +66,13 @@ public class Move {
 	 */
 	public void setMoveType(MoveType aMoveType) {
 		this.aMoveType = aMoveType;
+	}
+	/**
+	 * Getter for ServerInfo enum.
+	 * @return
+	 */
+	public ServerInfo getServerInfo(){
+		return aServerInfo;
 	}
 
 	

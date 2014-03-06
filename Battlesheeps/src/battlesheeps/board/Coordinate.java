@@ -1,7 +1,10 @@
 package battlesheeps.board;
 
-public class Coordinate {
+import java.io.Serializable;
 
+public class Coordinate implements Serializable
+{
+	private static final long serialVersionUID = 8467959046333824976L;
 	private int x;
 	private int y;
 	
@@ -54,5 +57,8 @@ public class Coordinate {
 		Coordinate c = (Coordinate) o;
 		if (c.x == this.x && c.y == this.y) return true;
 		else return false;
+	}
+	public int hashCode(){
+		return (x+1)*(y+100);
 	}
 }

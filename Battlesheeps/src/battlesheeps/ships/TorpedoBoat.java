@@ -7,8 +7,9 @@ import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.server.ServerGame.Direction;
 
-public class TorpedoBoat extends Ship {
-
+public class TorpedoBoat extends Ship 
+{
+	private static final long serialVersionUID = -6257700737574162318L;
 
 	public TorpedoBoat(Account pPlayer, int pShipID) {
 		

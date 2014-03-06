@@ -53,8 +53,8 @@ public class GameManager {
 	}
 	
 	public int generateGameID(){
-		// TODO create method
-		return 0;
+		// TODO make this more better-er.
+		return (int) (Math.random() * 1001);
 	}
 
 }

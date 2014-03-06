@@ -7,8 +7,9 @@ import battlesheeps.board.Coordinate;
 import battlesheeps.accounts.Account;
 import battlesheeps.server.ServerGame.Direction;
 
-public class MineLayer extends Ship {
-
+public class MineLayer extends Ship 
+{
+	private static final long serialVersionUID = -9029447450269094157L;
 	private int aMineSupply; 			//Number of mines on board. 
 
 	public MineLayer(Account pPlayer, int pShipID) {
