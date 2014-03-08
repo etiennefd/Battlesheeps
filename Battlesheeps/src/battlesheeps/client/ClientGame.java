@@ -99,7 +99,7 @@ public class ClientGame {
 
 		this.aMainFrame = new JFrame(grcConfiguration); 
 
-		this.aMainFrame.setPreferredSize(new Dimension(1000,700));
+		this.aMainFrame.setPreferredSize(new Dimension(1000,725));
 		
 		this.aMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.aMainFrame.setResizable(true);
