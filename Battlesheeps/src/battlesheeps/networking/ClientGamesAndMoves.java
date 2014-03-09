@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import battlesheeps.client.ClientGame;
 import battlesheeps.networking.Request.LobbyRequest;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
@@ -23,57 +24,57 @@ public class ClientGamesAndMoves
     private static final String HOST = "localhost"; 
     private ObjectOutputStream aOutput = null;
 
-    public static void main(String[] args)
-	{
-    	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-      	String you, foo;
-      	try{
-      		you = stdIn.readLine();
-      		foo = stdIn.readLine();
-      	}
-      	catch (IOException e1) {
-      		you = "p1";
-      		foo = "p2";
-      		e1.printStackTrace();
-      	}
-      	if (foo.equals("")){
-      		System.out.println("foo empty");
-      		foo = null;
-      	}
-      	ClientGamesAndMoves p = new ClientGamesAndMoves(you, foo, 0);
-      	
-      	while (true){
-      		try{
-      			foo = stdIn.readLine();
-      			if (foo.equals("close")){
-      				p.close();
-      				break;
-      			}
-      			else if (foo.equals("a")){
-      				p.sendMove(new Move(null, null, null, ServerInfo.CORAL_REEF_ACCEPT));
-      			}
-      			else if (foo.equals("d")){
-      				p.sendMove(new Move(null, null, null, ServerInfo.CORAL_REEF_DECLINE));
-      			}
-      		}
-      		catch (IOException e1) {
-      			e1.printStackTrace();
-      		}
-      	}
-	}
+//    public static void main(String[] args)
+//	{
+//    	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+//      	String you, foo;
+//      	try{
+//      		you = stdIn.readLine();
+//      		foo = stdIn.readLine();
+//      	}
+//      	catch (IOException e1) {
+//      		you = "p1";
+//      		foo = "p2";
+//      		e1.printStackTrace();
+//      	}
+//      	if (foo.equals("")){
+//      		System.out.println("foo empty");
+//      		foo = null;
+//      	}
+//      	ClientGamesAndMoves p = new ClientGamesAndMoves(you, foo, 0);
+//      	
+//      	while (true){
+//      		try{
+//      			foo = stdIn.readLine();
+//      			if (foo.equals("close")){
+//      				p.close();
+//      				break;
+//      			}
+//      			else if (foo.equals("a")){
+//      				p.sendMove(new Move(null, null, null, ServerInfo.CORAL_REEF_ACCEPT));
+//      			}
+//      			else if (foo.equals("d")){
+//      				p.sendMove(new Move(null, null, null, ServerInfo.CORAL_REEF_DECLINE));
+//      			}
+//      		}
+//      		catch (IOException e1) {
+//      			e1.printStackTrace();
+//      		}
+//      	}
+//	}
     
     /**
      * @param pUsername The username of the active user
      * @param pOpponent The username of opponent, SHOULD BE NULL iff sent by requestee
      * @param pGameID If requesting a new game, send ID '0'
      */
-    public ClientGamesAndMoves(String pUsername, String pOpponent, int pGameID) {
+    public ClientGamesAndMoves(String pUsername, String pOpponent, int pGameID, ClientGame pClient) {
         try {
             Socket server = new Socket(HOST, PORT);
             
             // Create a thread to asynchronously read messages from the server
             try {
-            	(new Thread(new ServerConnGame(server))).start();
+            	(new Thread(new ServerConnGame(server, pClient))).start();
             }
             catch (IOException e){
             	System.err.println("Error creating server input thread: " + e);
@@ -132,9 +133,11 @@ public class ClientGamesAndMoves
 
 class ServerConnGame implements Runnable {
     private ObjectInputStream aInput = null;
- 
-    public ServerConnGame(Socket pServer) throws IOException {
+    private ClientGame aMyClient; 
+    
+    public ServerConnGame(Socket pServer, ClientGame pClient) throws IOException {
         aInput = new ObjectInputStream(pServer.getInputStream());
+        aMyClient = pClient;
     }
  
     public void run() {
@@ -152,6 +155,7 @@ class ServerConnGame implements Runnable {
 					case SHIP_INIT:
 						break;
 					case GAME_UPDATE:
+						aMyClient.updateGame(newGame);
 						break;
 				}
 			}

@@ -21,17 +21,6 @@ public class ServerGamesAndMoves
     private static ServerSocket SERVER;
     
     public static void main (String[] args) {
-    	Account a1 = new Account("dave", "12345");
-		Account a2 = new Account("bob", "password");
-		Account a3 = new Account("dinkle", "IamAdinkle");
-		Account a4 = new Account("bobs", "password");
-		
-		GameManager gm = GameManager.getInstance();
-		Hashtable<String,Account> accts = gm.getAccounts();
-		accts.put(a1.getUsername(), a1);
-		accts.put(a2.getUsername(), a2);
-		accts.put(a3.getUsername(), a3);
-		accts.put(a4.getUsername(), a4);
 		
     	(new ServerGamesAndMoves()).acceptClients();
     }
