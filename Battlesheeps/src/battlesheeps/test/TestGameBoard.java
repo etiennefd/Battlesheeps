@@ -7,6 +7,7 @@ import java.util.List;
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
+import battlesheeps.networking.ServerGamesAndMoves;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.LogEntry;
 import battlesheeps.server.LogEntry.LogType;
@@ -104,6 +105,7 @@ public class TestGameBoard{
 //		myGame.setLogEntry(log1);
 //		myGame.setLogEntry(log2);
 //		myGame.setLogEntry(log3);
+		new Thread(new ServerGamesAndMoves()).start();
 		
 		client = new ClientGame("player", myGame);
 		
