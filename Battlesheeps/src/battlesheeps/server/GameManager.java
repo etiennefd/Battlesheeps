@@ -14,7 +14,7 @@ import battlesheeps.accounts.Account;
 public class GameManager {
 	private static Hashtable<Integer, ServerGame> ALL_GAMES;
 	private static Hashtable<String, Account> ALL_ACCOUNTS;
-	private static final GameManager INSTANCE = new GameManager();
+	private static GameManager INSTANCE;
 	
 	private GameManager()
 	{
@@ -28,7 +28,14 @@ public class GameManager {
 	 * @return The only instance of GameManager
 	 */
 	public static GameManager getInstance()
-	{
+	{	
+		if (INSTANCE == null){
+			synchronized (GameManager.class){
+				if (INSTANCE == null){
+					INSTANCE = new GameManager();
+				}
+			}
+		}
 		return INSTANCE;
 	}
 	
