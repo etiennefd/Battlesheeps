@@ -54,7 +54,7 @@ public class GameManager {
 	
 	public int generateGameID(){
 		// TODO make this more better-er.
-		return (int) (Math.random() * 1001);
+		return (int) (Math.random() * 1001) + 1;
 	}
 
 }

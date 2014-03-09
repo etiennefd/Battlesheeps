@@ -1,5 +1,6 @@
 package battlesheeps.networking;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,6 +13,7 @@ import battlesheeps.server.GameManager;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame;
+import battlesheeps.server.ServerGame.ClientInfo;
 
 public class ServerGamesAndMoves
 {
@@ -103,7 +105,7 @@ class ClientConnGame implements Runnable {
         	System.out.println(aUsername + " has connected.");
         	
         	boolean isNewGame = false;
-        	if (aGameID == 0) isNewGame = true;
+        	if (init.getGameID() == 0) isNewGame = true;
         	
         	ServerGame aGame = null;
         	GameManager gm = GameManager.getInstance();
@@ -149,9 +151,8 @@ class ClientConnGame implements Runnable {
         			// After that it either generates new coral or exits loop.
         			boolean p1acceptedGame = false;
         			
-        			while (true)
+        			while ((msg = (Move) aInput.readObject()) != null)
         			{
-        				msg = (Move) aInput.readObject();
         				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
         					p1acceptedGame = true;
         				}
@@ -160,8 +161,8 @@ class ClientConnGame implements Runnable {
         				
         				if (!opponentAcceptedCoral || !p1acceptedGame){
         					aGame.generateCoralReefs(); // TODO ask ettienne if coral reef is wiped.
+        					aGame.setClientInfo(ClientInfo.NEW_CORAL);
         					aOutput.writeObject(aGame);
-        					aOpponent.aOutput.writeObject(aGame);
         					
         					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
         					p1acceptedGame = false;
@@ -171,8 +172,11 @@ class ClientConnGame implements Runnable {
         					aOpponent.opponentRespondedToCoral = true;
         				}
         				else {
+        					aGame.setClientInfo(ClientInfo.FINAL_CORAL);
         					aOpponent.opponentAcceptedCoral = true;
         					aOpponent.opponentRespondedToCoral = true;
+        					aOutput.writeObject(aGame);
+        					
         					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
         					break;
         				}
@@ -180,9 +184,8 @@ class ClientConnGame implements Runnable {
         		}
         		else {
         			// P2 will tell p1 accept/decline, then wait for p1 to respond.
-        			while (true)
+        			while ((msg = (Move) aInput.readObject()) != null)
         			{
-        				msg = (Move) aInput.readObject();
         				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
         					aOpponent.opponentAcceptedCoral = true;
         				}
@@ -191,27 +194,32 @@ class ClientConnGame implements Runnable {
         				while (!opponentRespondedToCoral) {/*WAIT*/}
         				
         				if (opponentAcceptedCoral){
+        					aOutput.writeObject(aGame);
         					break;
         				}
         				else {
+        					aOutput.writeObject(aGame);
         					opponentRespondedToCoral = false;
         				}
         			}
         		}
-        		System.out.println(aUsername + " SHIP SETUP");
+        		
+        		System.out.println("SHIP SETUP for user: " + aUsername);
         		// Ship setup, moves ships into place until it is told player is done.
-        		while (true){
-        			msg = (Move) aInput.readObject();
+        		aGame.setClientInfo(ClientInfo.SHIP_INIT);
+        		while ((msg = (Move) aInput.readObject()) != null){
         			if (msg.getServerInfo() == ServerInfo.SHIP_INIT_COMPLETE){
         				break;
         			}
         			else if (msg.getServerInfo() == ServerInfo.SHIP_INIT) {
         				// TODO is this correct? probably not.
         				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord());
+        				aOutput.writeObject(aGame);
         			}
         		}
         	}
         	
+        	aGame.setClientInfo(ClientInfo.GAME_UPDATE);
             while ((msg = (Move) aInput.readObject()) != null) 
             {
             	// TODO is THIS correct? It might be actually.
@@ -220,7 +228,10 @@ class ClientConnGame implements Runnable {
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
             }
-        } 
+        }
+        catch (EOFException e) {
+        	close();
+        }
         catch (IOException e) 
         {
         	close();
@@ -228,8 +239,8 @@ class ClientConnGame implements Runnable {
         }
 		catch (ClassNotFoundException e)
 		{
-			System.err.println("Error reading in Move, or casting it." + e);
 			close();
+			System.err.println("Error reading in Move, or casting it." + e);
 		}
     }
     

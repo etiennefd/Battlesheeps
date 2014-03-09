@@ -36,12 +36,17 @@ public class ServerGame implements Serializable
 		NORTH, SOUTH, EAST, WEST
 	}
 	
+	public enum ClientInfo {
+		NEW_GAME, NEW_CORAL, FINAL_CORAL, SHIP_INIT, GAME_UPDATE
+	}
+	
 	//Fields related to the identity of the game
 	private int aGameID;
 	private Account aPlayer1;
 	private Account aPlayer2;
 	private int aTurnNum;			//Odd -> it is P1's turn. Even -> it is P2's turn.  
 	private Date aDateLastPlayed;	//TODO update this when a turn is done.
+	private ClientInfo aClientInfo;
 	
 	//Fields related to the contents of the game
 	private Square[][] aBoard;
@@ -67,6 +72,7 @@ public class ServerGame implements Serializable
 		aPlayer2 = pPlayer2;
 		aTurnNum = 1;
 		aDateLastPlayed = new Date();
+		aClientInfo = ClientInfo.NEW_GAME;
 		
 		aPlayer1.addNewGame(aGameID);
 		aPlayer2.addNewGame(aGameID);
@@ -301,7 +307,7 @@ public class ServerGame implements Serializable
 	 * @param pShip
 	 * @param pMove
 	 */
-	public boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
+	public synchronized boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
 		
 		switch (pMove) {
 		case TRANSLATE_SHIP: translateShip(pShip, pCoord); break;
@@ -2045,6 +2051,14 @@ public class ServerGame implements Serializable
 		return null;
 	}
 	
+	public ClientInfo getClientInfo(){
+		return aClientInfo;
+	}
+
+	public void setClientInfo(ClientInfo pClientInfo){
+		this.aClientInfo = pClientInfo;
+	}
+
 	public Square[][] getBoard() {
 		return aBoard;
 	}

@@ -23,7 +23,7 @@ public class ClientGamesAndMoves
     private static final String HOST = "localhost"; 
     private ObjectOutputStream aOutput = null;
 
-    public static void main(String[] args) throws InterruptedException
+    public static void main(String[] args)
 	{
     	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
       	String you, foo;
@@ -142,6 +142,18 @@ class ServerConnGame implements Runnable {
 			ServerGame newGame;
 			while ((newGame = (ServerGame) aInput.readObject()) != null) { 
 				// TODO update with new ServerGame
+				switch (newGame.getClientInfo()){
+					case NEW_GAME:
+						break;
+					case NEW_CORAL:
+						break;
+					case FINAL_CORAL:
+						break;
+					case SHIP_INIT:
+						break;
+					case GAME_UPDATE:
+						break;
+				}
 			}
 		} 
 		catch (IOException e) { 
