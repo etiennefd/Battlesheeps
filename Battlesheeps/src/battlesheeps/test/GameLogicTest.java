@@ -2,12 +2,13 @@ package battlesheeps.test;
 
 import java.util.LinkedList;
 
+import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.server.*;
 import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
 
-public class MainTest {
+public class GameLogicTest {
 
 	/**
 	 * @param args
@@ -29,7 +30,7 @@ public class MainTest {
 				"Lower case indicates the head of a ship\n";
 		System.out.println(s);
 		
-		ServerGame game = new ServerGame(0, null, null);
+		ServerGame game = new ServerGame(0, new Account("a", "a"), new Account("b", "b"));
 		
 		//Add some ships and set their position
 		Cruiser c = new Cruiser(null,0);
