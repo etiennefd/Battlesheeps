@@ -1,5 +1,6 @@
 package battlesheeps.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -22,8 +23,10 @@ import battlesheeps.ships.Ship;
 import battlesheeps.ships.Ship.Damage;
 import battlesheeps.ships.TorpedoBoat;
 
-public class ServerGame {
-	
+public class ServerGame implements Serializable 
+{
+	private static final long serialVersionUID = 8385471662601246081L;
+
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 
 		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP
@@ -33,12 +36,17 @@ public class ServerGame {
 		NORTH, SOUTH, EAST, WEST
 	}
 	
+	public enum ClientInfo {
+		NEW_GAME, NEW_CORAL, FINAL_CORAL, SHIP_INIT, GAME_UPDATE
+	}
+	
 	//Fields related to the identity of the game
 	private int aGameID;
 	private Account aPlayer1;
 	private Account aPlayer2;
 	private int aTurnNum;			//Odd -> it is P1's turn. Even -> it is P2's turn.  
 	private Date aDateLastPlayed;	//TODO update this when a turn is done.
+	private ClientInfo aClientInfo;
 	
 	//Fields related to the contents of the game
 	private Square[][] aBoard;
@@ -64,6 +72,7 @@ public class ServerGame {
 		aPlayer2 = pPlayer2;
 		aTurnNum = 1;
 		aDateLastPlayed = new Date();
+		aClientInfo = ClientInfo.NEW_GAME;
 		
 		aPlayer1.addNewGame(aGameID);
 		aPlayer2.addNewGame(aGameID);
@@ -298,7 +307,7 @@ public class ServerGame {
 	 * @param pShip
 	 * @param pMove
 	 */
-	public boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
+	public synchronized boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
 		
 		switch (pMove) {
 		case TRANSLATE_SHIP: translateShip(pShip, pCoord); break;
@@ -2019,7 +2028,37 @@ public class ServerGame {
 	/*
 	 * GETTERS
 	 */
+	/**
+	 * Will return the necessary ship based on equality with the ship from the client.
+	 * @param pShipFromClient
+	 * @return Server ship
+	 */
+	public Ship matchWithShip(Ship pShipFromClient){
+		if (pShipFromClient.getUsername() == this.getP1Username()){
+			for (Ship thisShip: this.aShipListP1){
+				if (pShipFromClient.equals(thisShip)){
+					return thisShip;
+				}
+			}
+		}
+		else {
+			for (Ship thisShip: this.aShipListP2){
+				if (pShipFromClient.equals(thisShip)){
+					return thisShip;
+				}
+			}
+		}
+		return null;
+	}
 	
+	public ClientInfo getClientInfo(){
+		return aClientInfo;
+	}
+
+	public void setClientInfo(ClientInfo pClientInfo){
+		this.aClientInfo = pClientInfo;
+	}
+
 	public Square[][] getBoard() {
 		return aBoard;
 	}

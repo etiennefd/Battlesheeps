@@ -1,10 +1,13 @@
 package battlesheeps.board;
 
+import java.io.Serializable;
+
 import battlesheeps.accounts.Account;
 import battlesheeps.ships.Ship.Damage;
 
 
-public class BaseSquare implements Square {
+public class BaseSquare implements Square, Serializable {
+	private static final long serialVersionUID = -6794223046387774769L;
 	private Damage aDamage;
 	private Account aOwner;
 	

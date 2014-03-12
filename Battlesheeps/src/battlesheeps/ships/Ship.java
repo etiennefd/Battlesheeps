@@ -1,5 +1,6 @@
 package battlesheeps.ships;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,9 @@ import battlesheeps.server.ServerGame.Direction;
  * @author etienne
  *
  */
-public abstract class Ship {
+public abstract class Ship implements Serializable 
+{
+	private static final long serialVersionUID = -6725501593382592751L;
 
 	public enum Damage {
 		UNDAMAGED, DAMAGED, DESTROYED
@@ -38,7 +41,30 @@ public abstract class Ship {
 	protected int aActualSpeed;				//Number of squares the ship can move forward, given current amount of damage
 	protected Damage[] aDamage;				//Array of the length of the ship providing information on the damage status of every square (head == 0)
 	
-	
+	/**
+	 * Used to get the server Ship from the Ship sent in a move.
+	 */
+	public boolean equals(Object p1){
+		if( p1 == null )
+		{
+			return false;
+		}
+		if( p1 == this )
+		{
+			return true;
+		}
+		if( p1.getClass() != getClass() )
+		{
+			return false;
+		}
+		return this.aShipID == ((Ship)p1).getShipID() && this.getUsername().equals(((Ship)p1).getUsername());
+	}
+	/**
+	 * Written because I overwrote equals(), and good coding practices and whatnot.
+	 */
+	public int hashCode(){
+		return (aShipID+1)*(this.getUsername().hashCode());
+	}
 	/**
 	 * This method should be called by the subclass after the construction of a ship
 	 */

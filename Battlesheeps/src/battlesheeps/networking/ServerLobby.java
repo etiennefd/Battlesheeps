@@ -17,7 +17,7 @@ import battlesheeps.networking.Request.LobbyRequest;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.ServerGame;
 
-public class ServerLobby
+public class ServerLobby implements Runnable
 {
 	private static final int PORT = 5003; /* port to listen on */
     private static ServerSocket SERVER;
@@ -76,6 +76,12 @@ public class ServerLobby
             (new Thread(new ClientConnLobby(client))).start();
         }
     }
+
+	@Override
+	public void run()
+	{
+		this.acceptClients();
+	}
 }
 
 class ClientConnLobby implements Runnable {

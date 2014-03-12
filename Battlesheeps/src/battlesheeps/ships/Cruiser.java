@@ -2,7 +2,9 @@ package battlesheeps.ships;
 
 import battlesheeps.accounts.Account;
 
-public class Cruiser extends Ship {
+public class Cruiser extends Ship 
+{
+	private static final long serialVersionUID = 5698109593782495582L;
 
 	public Cruiser(Account pPlayer, int pShipID) {
 		

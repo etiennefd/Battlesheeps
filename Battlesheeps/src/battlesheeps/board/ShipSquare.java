@@ -1,10 +1,18 @@
 package battlesheeps.board;
 
+import java.io.Serializable;
+
+import battlesheeps.ships.Cruiser;
+import battlesheeps.ships.Destroyer;
+import battlesheeps.ships.MineLayer;
+import battlesheeps.ships.RadarBoat;
+import battlesheeps.ships.Ship;
 import battlesheeps.ships.Ship.Damage;
-import battlesheeps.ships.*;
+import battlesheeps.ships.TorpedoBoat;
 
-public class ShipSquare implements Square {
-
+public class ShipSquare implements Square, Serializable 
+{
+	private static final long serialVersionUID = 1932779428353868210L;
 	private Ship aShip;
 	private Damage aDamage;
 	private boolean aHead;

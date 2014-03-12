@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import battlesheeps.board.*;
+import battlesheeps.networking.ClientGamesAndMoves;
 import battlesheeps.server.Move;
 import battlesheeps.server.ServerGame.Direction;
 import battlesheeps.server.ServerGame.MoveType;
@@ -70,7 +71,7 @@ public class ClientGame {
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
 	
-	//private ClientGameManager myManager;
+	private ClientGamesAndMoves myManager;
 	
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
@@ -87,7 +88,7 @@ public class ClientGame {
 			aMyOpponent = pGame.getP1Username();
 		}
 		
-		//myManager = new ClientGameManager(aMyUser, aMyOpponent, pGame.getGameID());
+		myManager = new ClientGamesAndMoves(aMyUser, aMyOpponent, pGame.getGameID(), this);
 		
 		GraphicsDevice grdDevice;
 		GraphicsConfiguration grcConfiguration;
@@ -99,7 +100,7 @@ public class ClientGame {
 
 		this.aMainFrame = new JFrame(grcConfiguration); 
 
-		this.aMainFrame.setPreferredSize(new Dimension(1000,700));
+		this.aMainFrame.setPreferredSize(new Dimension(1000,725));
 		
 		this.aMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.aMainFrame.setResizable(true);
@@ -806,9 +807,9 @@ public class ClientGame {
 	protected void greenSelected(Coordinate pCoord) {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
-		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove);
+		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove, null);
 		aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
-		//myManager.sendMove(move);
+		myManager.sendMove(move);
 	}
 	
 	/**

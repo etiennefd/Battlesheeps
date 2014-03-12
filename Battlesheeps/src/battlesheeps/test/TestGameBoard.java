@@ -1,11 +1,14 @@
 package battlesheeps.test;
 
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
+import battlesheeps.networking.ServerGamesAndMoves;
+import battlesheeps.server.GameManager;
 import battlesheeps.server.LogEntry;
 import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.server.ServerGame;
@@ -18,11 +21,26 @@ public class TestGameBoard{
 	private ServerGame myGame;
 	
 	public TestGameBoard() {
-		
-		Account player = new Account("Player", "abc");
-		Account opponent = new Account("Opponent", "def");
 
-		myGame = new ServerGame(1, player, opponent);
+		Account a1 = new Account("dave", "12345");
+		Account a2 = new Account("bob", "password");
+		Account a3 = new Account("dinkle", "IamAdinkle");
+		Account a4 = new Account("bobs", "password");
+		Account player = new Account("player", "abc");
+		Account opponent = new Account("opponent", "def");
+		
+		GameManager gm = GameManager.getInstance();
+		Hashtable<String,Account> accts = gm.getAccounts();
+		accts.put(a1.getUsername(), a1);
+		accts.put(a2.getUsername(), a2);
+		accts.put(a3.getUsername(), a3);
+		accts.put(a4.getUsername(), a4);
+		accts.put(player.getUsername(), player);
+		accts.put(opponent.getUsername(), opponent);
+		
+		myGame = new ServerGame(1, gm.getAccount("player"), gm.getAccount("opponent"));
+		
+		gm.addGame(myGame);
 		
 		List<Ship> p1ships = myGame.getP1ShipList();
 		List<Ship> p2ships = myGame.getP2ShipList();
@@ -84,12 +102,14 @@ public class TestGameBoard{
 		LogEntry log2 = new LogEntry(LogType.MINE_EXPLOSION, 24, 5, 2);
 		LogEntry log3 = new LogEntry(LogType.TORPEDO_HIT_REEF, 15, 16, 3);
 		
-		myGame.setLogEntry(log1);
-		myGame.setLogEntry(log2);
-		myGame.setLogEntry(log3);
-
-		client = new ClientGame(player.getUsername(), myGame);
-	
+//		myGame.setLogEntry(log1);
+//		myGame.setLogEntry(log2);
+//		myGame.setLogEntry(log3);
+		new Thread(new ServerGamesAndMoves()).start();
+		
+		client = new ClientGame("player", myGame);
+		
+		ClientGame clientO = new ClientGame("opponent", myGame);
 		
 	}
 	
