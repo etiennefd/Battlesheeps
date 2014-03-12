@@ -8,7 +8,8 @@ import java.net.Socket;
 import java.util.Hashtable;
 
  
-public class ServerChat {
+public class ServerChat implements Runnable
+{
     private static final int PORT = 5000; /* port to listen on */
     private static ServerSocket SERVER = null;
     
@@ -55,6 +56,12 @@ public class ServerChat {
             (new Thread(new ClientConn(client))).start();
         }
     }
+
+	@Override
+	public void run()
+	{
+		this.acceptClients();
+	}
 }
  
 class ClientConn implements Runnable {
