@@ -7,7 +7,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Date;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -19,9 +21,14 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ListModel;
 import javax.swing.SpringLayout;
 
 import battlesheeps.accounts.Account;
+import battlesheeps.networking.ClientLobby;
+import battlesheeps.networking.LobbyMessageGameSummary;
+import battlesheeps.networking.LobbyMessageToServer;
+import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
 
 class ExitActionListener implements ActionListener
 {
@@ -140,41 +147,52 @@ class WithdrawListener implements ActionListener
 //TODO: MAKE GAMES LIST BIGGER
 public class Lobby 
 {
-	private static ArrayList<Account> aAccounts;
-	private Account aAccount;
+	private static ClientLobby aClient;
 	
 	//params: dialog box to close
-    public Lobby() {
+    public Lobby(String pUsername) {
     	
-    	//TODO assign users to list
+    	Lobby.aClient = new ClientLobby(pUsername, this);
+    	LobbyMessageToServer enterMessage = new LobbyMessageToServer(
+    			LobbyNotification.ENTERING, pUsername, null);
+    	//assuming request can be null
+    	System.out.println("Name going into lobby: "+ enterMessage.getUsername());
+    	
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        /*javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowLobby();
             }
-        });
+        });*/
     }
-	
-	private static void createAndShowLobby()
-	//need input for account info (updates with Lobby is entered)
-	//need input lists (updates at a certain interval)
+    
+    public static void createAndShowLobby()
 	{
 		JFrame frame = new JFrame("Battlesheeps Lobby");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         frame.setMinimumSize(new Dimension(640,480));
         
-        //GET INPUT FROM SERVER (thru client)
         JPanel listsPanel = new JPanel();
         SpringLayout layout = new SpringLayout();
         
-        //OBJECT CONTAINING USER INFO
-        //String[] testUserList = {"Alice","Bob","Carl"};
-        JList<String> userList = new JList<String>();
+        //ArrayList<String> userData = new ArrayList<String>();
+        DefaultListModel<String> userData = new DefaultListModel<String>();
+        if(aClient.getAccounts() != null)
+        {
+	        for (Account acct : aClient.getAccounts())
+	        {
+	        	userData.addElement(acct.toString());
+	        }
+        }
+        else
+        {
+        	userData.addElement("No other players online :(");
+        }
+        JList<String> userList = new JList<String>(userData);
         MouseListener userListListener = new ListMouseAdapter(userList);
         userList.addMouseListener(userListListener);
-        
         JScrollPane userPane = new JScrollPane(userList);
         listsPanel.add(userPane);
 
@@ -200,10 +218,12 @@ public class Lobby
         //end listsPanel editing
         
         //TODO: set to account info from client
-        JTextArea accountPanel = new JTextArea("Your Account\nFabio\n\nWins: 0\nLosses: 42\n\nJoined on: Feb.14/14");
+       	System.out.println(aClient.getAccount()==null);
+
+        JTextArea accountPanel = new JTextArea("Account");
         accountPanel.setBackground(frame.getBackground());
         //Prettify: Change Font
-        
+         	
         frame.getContentPane().add(accountPanel);
         frame.getContentPane().add(listsPanel);
 
@@ -252,13 +272,8 @@ public class Lobby
 	//params: dialog box to close
     public static void main(String[] args) {
     	
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowLobby();
-            }
-        });
+    	new Lobby("sheep");
+    	
     }
 }
 
