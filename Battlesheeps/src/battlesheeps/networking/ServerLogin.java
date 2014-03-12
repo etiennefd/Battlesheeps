@@ -12,7 +12,7 @@ import battlesheeps.accounts.Account.Status;
 import battlesheeps.networking.LoginMessage.LoginType;
 import battlesheeps.server.GameManager;
 
-public class ServerLogin
+public class ServerLogin implements Runnable
 {
 	private static final int PORT = 5002; /* port to listen on */
     private static ServerSocket SERVER;
@@ -52,6 +52,12 @@ public class ServerLogin
             (new Thread(new ClientConnLogin(client))).start();
         }
     }
+
+	@Override
+	public void run()
+	{
+		this.acceptClients();
+	}
 }
 
 class ClientConnLogin implements Runnable {
