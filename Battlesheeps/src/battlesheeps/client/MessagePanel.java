@@ -129,6 +129,7 @@ public class MessagePanel extends JPanel {
 		
 		//and lastly validate the changes
 		this.validate();
+		this.repaint();
 		
 	}
 	
