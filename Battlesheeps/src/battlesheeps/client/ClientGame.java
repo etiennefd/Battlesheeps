@@ -238,6 +238,9 @@ public class ClientGame {
 
 	}		
 	
+	public void setManager(ClientGamesAndMoves pManager) {
+		myManager = pManager;
+	}
 	/*After each move, 
 	 * 1. the board will be updated 
 	 * 2. the log entries will be updated 

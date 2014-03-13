@@ -69,7 +69,10 @@ public class ClientGamesAndMoves
      * @param pGameID If requesting a new game, send ID '0'
      */
     public ClientGamesAndMoves(String pUsername, String pOpponent, int pGameID, ClientGame pClient) {
-        try {
+        
+    	pClient.setManager(this);
+    	
+    	try {
             Socket server = new Socket(HOST, PORT);
             
             // Create a thread to asynchronously read messages from the server
