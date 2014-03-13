@@ -64,8 +64,6 @@ public class ClientGame {
 
 	//should know who it's player is 
 	private String aMyUser;
-	private String aMyOpponent;
-	private boolean aPlayer1; //if true, base is on WEST, else EAST
 	
 	private Square[][] aCurrentVisibleBoard;
 	private Ship aCurrentClickedShip; 
@@ -76,19 +74,9 @@ public class ClientGame {
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
 
-	public ClientGame(String pPlayer, ServerGame pGame) {
+	public ClientGame(String pPlayer) {
 
 		aMyUser = pPlayer;
-		if (pPlayer.compareTo(pGame.getP1Username()) == 0) {
-			aPlayer1 = true;
-			aMyOpponent = pGame.getP2Username();
-		}
-		else{
-			aPlayer1 = false;
-			aMyOpponent = pGame.getP1Username();
-		}
-		
-		myManager = new ClientGamesAndMoves(aMyUser, aMyOpponent, pGame.getGameID(), this);
 		
 		GraphicsDevice grdDevice;
 		GraphicsConfiguration grcConfiguration;
@@ -139,52 +127,27 @@ public class ClientGame {
 		
 		//LOG
 		aLogPanel = new LogPanel();
-		aLogPanel.updateLogEntries(pGame.getLog());
 		sideBottom.setLeftComponent(aLogPanel);
 		
 		//CHAT
 		JPanel chat = new JPanel();
 		sideBottom.setRightComponent(chat);
 		
-		String opponent;
-		if (aPlayer1) opponent = pGame.getP2Username();
-		else opponent = pGame.getP1Username();
-		
 		//MESSAGES
-		aMessagePanel = new MessagePanel(this, pPlayer, opponent);
+		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
 		sidePanel.setLeftComponent(aMessagePanel);
 		
-		boolean isTurn;
+		//sending a board full of sea to the gui
+		Square[][] aCurrentVisibleBoard = new Square[30][30];
 		
-		if (pPlayer.compareTo(pGame.getTurnPlayer()) == 0) {
-			isTurn = true;
-			aMessagePanel.setYourTurn();
-		} else {
-			isTurn = false;
-			
-			List<Ship> myList;
-			List<Ship> oppList;
-			
-			if (aPlayer1) {
-				myList = pGame.getP1ShipList();
-				oppList = pGame.getP2ShipList();
+		for(int i = 0; i < 30; i++) { 
+			for (int j = 0; j<30; j++) {
+				aCurrentVisibleBoard[i][j] = new Sea();
 			}
-			else {
-				myList = pGame.getP2ShipList();
-				oppList = pGame.getP1ShipList();
-			}
-			
-			aMessagePanel.setNotYourTurn(myList, oppList);
 		}
-		
-		//computing the visible board to send the GUI
-		List<Ship> shipList;
-		if (aPlayer1) shipList = pGame.getP1ShipList();
-		else shipList = pGame.getP2ShipList();
-		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), shipList);
 	
 		//and creating the board panel 
-		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, isTurn, this);
+		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, this);
 		
 		aBoardPanel.setPreferredSize(new Dimension(600, 600));
 		splitPane.setLeftComponent(aBoardPanel);
@@ -284,10 +247,12 @@ public class ClientGame {
 		
 		String turnPlayer = pGame.getTurnPlayer(); 
 		
+		boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
+		
 		List<Ship> myList;
 		List<Ship> oppList;
 		
-		if (aPlayer1) {
+		if (myTurn) {
 			myList = pGame.getP1ShipList();
 			oppList = pGame.getP2ShipList();
 		}
@@ -338,7 +303,12 @@ public class ClientGame {
 	
 		//plus need to add area around player's base to list
 		int baseX;
-		if (aPlayer1) {
+		
+		boolean isBaseWest = false;
+		
+		if (((BaseSquare)pBoard[0][10]).getOwner().equals(aMyUser)) isBaseWest = true;
+		
+		if (isBaseWest) {
 			baseX = 1;
 			visibleRadarList.add(new Coordinate(0, 9));
 			visibleRadarList.add(new Coordinate(0, 20));
@@ -729,7 +699,7 @@ public class ClientGame {
 			//you can't fire on your own base 
 			if (aCurrentVisibleBoard[x][y] instanceof BaseSquare) {
 				BaseSquare b = (BaseSquare)aCurrentVisibleBoard[x][y]; 
-				String owner = (b.getOwner()).getUsername();
+				String owner = b.getOwner();
 				if (aMyUser.compareTo(owner) == 0) {
 					canFireOn = false;
 				}
@@ -808,6 +778,7 @@ public class ClientGame {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
 		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove, null);
+		System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
 		aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
 		myManager.sendMove(move);
 	}
@@ -1199,7 +1170,7 @@ public class ClientGame {
 							BaseSquare base = (BaseSquare) aCurrentVisibleBoard[i][j];
 							//checking that the base square is undamaged 
 							if (base.getDamage() == Damage.UNDAMAGED) { 
-								String owner = base.getOwner().getUsername();
+								String owner = base.getOwner();
 								//and if so, we check if the base belongs to this user
 								if (owner.compareTo(aMyUser) == 0) {
 									atHome = true;
