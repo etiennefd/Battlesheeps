@@ -18,6 +18,7 @@ public class ServerLogin implements Runnable
     private static ServerSocket SERVER;
     
     public static void main (String[] args) {
+    	(new Thread(new ServerLobby())).start();
     	(new ServerLogin()).acceptClients();
     }
     
@@ -111,6 +112,8 @@ class ClientConnLogin implements Runnable {
             		else { 
             			// Create account
             			addAccount(msg);
+            			System.out.println("name saved in server: "+msg.getLogin() +" "
+            					+GameManager.getInstance().getAccount(msg.getLogin()).getPassword());
             			aOutput.writeObject(new LoginMessage(LoginType.CREATE, "", ""));
             		}
             	}
@@ -125,7 +128,7 @@ class ClientConnLogin implements Runnable {
             			{
             				// Password correct
             				thisAcct.setAvailability(Status.AVAILABLE);
-            				aOutput.writeObject(new LoginMessage(LoginType.LOGIN, "", ""));
+            				aOutput.writeObject(new LoginMessage(LoginType.LOGIN, msg.getLogin(), ""));
             				// Send lobby?
             			}
             			else {

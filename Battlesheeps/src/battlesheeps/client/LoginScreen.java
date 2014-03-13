@@ -1,4 +1,5 @@
 package battlesheeps.client;
+//TODO JTextField doesn't always work
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -17,7 +18,6 @@ import javax.swing.SpringLayout;
 import battlesheeps.networking.ClientLogin;
 import battlesheeps.networking.LoginMessage;
 import battlesheeps.networking.LoginMessage.LoginType;
-//TODO reenable text fields when creation of account fails
 class LoginListener implements ActionListener
 {
 	private JTextField aUsernameField;
@@ -38,8 +38,7 @@ class LoginListener implements ActionListener
 		System.out.println("Sending login info to server.\n");
 
 		System.out.println(loginInfo.getLogin());
-		loginClient.sendMessage(loginInfo);
-		
+		loginClient.sendMessage(loginInfo);		
 	}
 	
 	@Override
@@ -180,11 +179,10 @@ class CreateAccountListener implements ActionListener {
 		String password = aPasswordField.getText();
 		LoginMessage newAccount = new LoginMessage(LoginType.CREATE,username, password);
 		ClientLogin loginClient = new ClientLogin(dialog, aLoginFrame);
-		System.out.println("Sending new account info to server.\n");
+		System.out.println("Sending new account info to server.");
 
 		System.out.println(newAccount.getLogin());
 		loginClient.sendMessage(newAccount);
-		
 	}
 	
 	@Override
@@ -202,9 +200,6 @@ class CreateAccountListener implements ActionListener {
 		}
 		else
 		{
-			//TODO: send info to server!!!
-			
-			//auto-close login screen + popup for user
 			aWizard.setVisible(false);
 			aWizard.dispose();
 		
@@ -220,8 +215,7 @@ class CreateAccountListener implements ActionListener {
 	
 			dialog.setContentPane(optionPane);
 	
-			//TODO: UNCOMMENT BELOW
-			//dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.pack();
 	
 			dialog.setVisible(true);

@@ -1,17 +1,18 @@
 package battlesheeps.networking;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import battlesheeps.accounts.Account;
+import battlesheeps.client.Lobby;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
 import battlesheeps.networking.Request.LobbyRequest;
 
+//TODO disable multiple sign in for single user
 public class ClientLobby
 {
     /* Host to connect to. This can be "localhost" if running both client/server 
@@ -22,13 +23,17 @@ public class ClientLobby
     
     private String aUsername;
     private ObjectOutputStream aOutput = null;
+    private Lobby aLobby;
+    private ArrayList<Account> aAccounts;
+	private ArrayList<LobbyMessageGameSummary> aSavedGames;
+	private Account aAccount;
     
 //    public static void main(String[] args)
 //	{
 //		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 //    	String you, foo;
 //    	try{
-//    		you = stdIn.readLine();
+//    		you = stdIn.readLine();f
 //    	}
 //    	catch (IOException e1) {
 //    		you = "p1";
@@ -64,14 +69,19 @@ public class ClientLobby
 //    	}
 //	}
     
-    public ClientLobby(String pUsername) {
+    public ClientLobby(String pUsername, Lobby pLobby) {
     	aUsername = pUsername;
+    	aLobby = pLobby;
+    	aAccounts = new ArrayList<Account>();
+    	aSavedGames = new ArrayList<LobbyMessageGameSummary>();
+    	
+    	System.out.println("Name going into client lobby: " + aUsername);
         try {
             Socket server = new Socket(HOST, PORT);
             
             // Create a thread to asynchronously read messages from the server
             try {
-            	(new Thread(new ServerConnLobby(server, this))).start();
+            	(new Thread(new ServerConnLobby(server,this))).start();
             }
             catch (IOException e){
             	System.err.println("Error creating server input thread: " + e);
@@ -120,6 +130,33 @@ public class ClientLobby
             System.err.println("Error closing socket: " + e);
 		}
     }
+    //Getters
+    public Lobby getLobby()
+    {
+    	return this.aLobby;
+    }
+    public String getUsername()
+    {
+    	return this.aUsername;
+    }
+	public ArrayList<Account> getAccounts() {
+		return this.aAccounts;
+	}
+	public void setAccounts(ArrayList<Account> aAccounts) {
+		aAccounts = this.aAccounts;
+	}
+	public ArrayList<LobbyMessageGameSummary> getSavedGames() {
+		return aSavedGames;
+	}
+	public void setSavedGames(ArrayList<LobbyMessageGameSummary> aSavedGames) {
+		this.aSavedGames = aSavedGames;
+	}
+	public Account getAccount() {
+		return aAccount;
+	}
+	public void setAccount(Account aAccount) {
+		this.aAccount = aAccount;
+	}
 }
 
 class ServerConnLobby implements Runnable {
@@ -127,9 +164,10 @@ class ServerConnLobby implements Runnable {
     private ObjectInputStream aInput;
     private ClientLobby aOutput;
  
-    public ServerConnLobby(Socket pServer, ClientLobby pLobby) throws IOException {
+    public ServerConnLobby(Socket pServer, ClientLobby pClientLobby) 
+    		throws IOException {
         aInput = new ObjectInputStream(pServer.getInputStream());
-        aOutput = pLobby;
+        aOutput = pClientLobby;
     }
  
     public void run() {
@@ -143,21 +181,42 @@ class ServerConnLobby implements Runnable {
 					if (msg.getGames() == null){
 						// CASE 1: A different user has entered or exited the lobby and this user must be updated
 						System.out.print("Update online users: ");
+						aOutput.getAccounts().clear();
 						for (Account acct : msg.getOnlineAccounts()){
 							System.out.print(acct.getUsername() + " ");
-		            		// TODO Populate online user list
-							// list will contain this user, which should be filtered out
-		            	}
+							// User list will contain this user, which should be filtered out
+							if (!acct.getUsername().equals(aOutput.getUsername()))
+							{
+								// Populate online user list
+								aOutput.getAccounts().add(acct);
+							}
+						}
 						System.out.println();
-						// TODO Re-match online users with saved games
+						aOutput.getLobby().updateOnlineUsers();
+						//TODO Re-match online users with saved games
 					}
 					else {
 						// CASE 2: This user has just entered the lobby.
 						System.out.print("Initial online users: ");
-						for (Account acct : msg.getOnlineAccounts()){
-							System.out.print(acct.getUsername() + " ");
-							// TODO Populate online user list
-							// list will contain this user, which should be filtered out
+						if(!msg.getOnlineAccounts().isEmpty()){
+							System.out.println(msg.getOnlineAccounts());
+							for (Account acct : msg.getOnlineAccounts()){
+								
+								if(acct!=null)
+								{
+									System.out.println(acct.getUsername());
+									// User list will contain this user, which should be filtered out
+									if (acct.getUsername().equals(aOutput.getUsername()))
+									{
+										aOutput.setAccount(acct);
+									}
+									// Populate online user list
+									else
+									{
+										aOutput.getAccounts().add(acct);
+									}
+								}
+							}
 						}
 						System.out.println();
 	
@@ -165,8 +224,18 @@ class ServerConnLobby implements Runnable {
 						for (LobbyMessageGameSummary game : msg.getGames()){
 							System.out.print(game.getGameID() + " ");
 							// TODO Populate saved game list and match any games with online users.
+							if(aOutput.getAccount().equals(game.getPlayer1()) ||
+									aOutput.getAccount().equals(game.getPlayer2()));
+							{
+								aOutput.getSavedGames().add(game);
+							}
 						}
 						System.out.println();
+						javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				            public void run() {
+				                aOutput.getLobby().createAndShowLobby();
+				            }
+				        });
 					}
 				}
 				else {
@@ -174,28 +243,32 @@ class ServerConnLobby implements Runnable {
 					Request r = msg.getRequest();
 					
 					if (r.getType() == LobbyRequest.REQUEST){
-						// TODO Display requester info in pop-up with accept or decline buttons 
-						// Lei, you'll need to check if a saved game exists with the user
+						// Display requester info in pop-up with accept or decline buttons 
+						// TODO Lei, you'll need to check if a saved game exists with the user
 						System.out.println("Game request from: " + r.getRequesterName());
 						System.out.println("Accept or Decline? (Input either a or d)");
 						
-						// TODO Create a anonymous action listeners for Accept/Decline
-						// Accept will trigger: 
+						aOutput.getLobby().requestPopup(r.getRequesterName(), r.getRequestee());
+					
+						// Accept will trigger: DONE IN LOBBY CLASS
 						// aOutput.sendRequest(new Request(LobbyRequest.ACCEPT, r.getRequesterName(), r.getRequestee()));
 
 						// Decline will trigger:
 						// aOutput.sendRequest(new Request(LobbyRequest.DECLINE, r.getRequesterName(), r.getRequestee()));
 					}
 					else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW){
-						// TODO Close the existing request pop-up
+						// Close the existing request pop-up
+						aOutput.getLobby().requestWithdrawn(r.getRequesterName());
 						System.out.println("Request withdrawn by user: " + r.getRequesterName());
 					}
 					else if (r.getType() == LobbyRequest.ACCEPT){
-						// TODO Opponent accepted invitation, move to game screen
+						// Opponent accepted invitation, move to game screen
+						aOutput.getLobby().requestAccepted();
 						System.out.println("Now beginning game with " + r.getRequestee() + "...");
 					}
 					else { 
-						// TODO Opponent declined invitation, notify user that he/she should get on with their life.
+						// Opponent declined invitation, notify user that he/she should get on with their life.
+						aOutput.getLobby().requestDeclined(r.getRequestee());
 						System.out.println(r.getRequestee() + " has declined your invitation. Move on.");
 					}
 				}
@@ -212,6 +285,8 @@ class ServerConnLobby implements Runnable {
 
 	private void close()
 	{
+		System.out.println("closing client");
+		new LobbyMessageToServer(LobbyNotification.EXITING,"",null);
 		try {
 			aInput.close();
 		}

@@ -55,6 +55,10 @@ public class Account implements Serializable
 		return aCurrentGames.iterator();
 	}
 	
+	public ArrayList<Integer> getCurrentGamesList(){
+		return aCurrentGames;
+	}
+	
 	/* SETTERS */
 	public void setAvailability(Status pAvailability){
 		aAvailability = pAvailability;
@@ -66,5 +70,11 @@ public class Account implements Serializable
 	
 	public void removeFinishedGame(int aGame){
 		aCurrentGames.remove(aGame);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return aUsername + " (" + aNumGamesWon + " : " + aNumGamesLost + ")";
 	}
 }

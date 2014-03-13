@@ -21,6 +21,8 @@ public class ServerLobby implements Runnable
 {
 	private static final int PORT = 5003; /* port to listen on */
     private static ServerSocket SERVER;
+    private static final Hashtable<String, ClientConnLobby> aClientList = new Hashtable<String, ClientConnLobby>();
+	private static final ArrayList<Account> aOnlineAccounts = new ArrayList<Account>();
     
 //    public static void main (String[] args) {
 //    	Account a1 = new Account("dave", "12345");
@@ -50,6 +52,7 @@ public class ServerLobby implements Runnable
      * Creates serverSocket on specified port.
      */
     public ServerLobby(){
+    	System.out.println("Server Lobby starting.");
     	try {
             SERVER = new ServerSocket(PORT); /* start listening on the port */
         } catch (IOException e) {
@@ -73,7 +76,7 @@ public class ServerLobby implements Runnable
                 System.exit(1);
             }
             /* start a new thread to handle this client */
-            (new Thread(new ClientConnLobby(client))).start();
+            (new Thread(new ClientConnLobby(client, this))).start();
         }
     }
 
@@ -82,23 +85,29 @@ public class ServerLobby implements Runnable
 	{
 		this.acceptClients();
 	}
+
+	public Hashtable<String, ClientConnLobby> getClientlist() {
+		return aClientList;
+	}
+
+	public ArrayList<Account> getOnlineaccounts() {
+		return aOnlineAccounts;
+	}
 }
 
 class ClientConnLobby implements Runnable {
-	
-	private static final Hashtable<String, ClientConnLobby> aClientList = new Hashtable<String, ClientConnLobby>();
-	private static final ArrayList<Account> aOnlineAccounts = new ArrayList<Account>();
 	
     private ObjectInputStream aInput;
     private ObjectOutputStream aOutput;
     private String aUsername;
     private Account aAccount;
     private Queue<Request> aRequestQueue; // for requests received, as only one request can be sent at a time.
-
+    private static ServerLobby aServer;
     /**
      * @param pClient The client socket accepted by the server.
      */
-    ClientConnLobby(Socket pClient) {
+    ClientConnLobby(Socket pClient, ServerLobby pServer) {
+    	ClientConnLobby.aServer = pServer;
     	aRequestQueue = new ArrayDeque<Request>();
         try {
         	aOutput = new ObjectOutputStream(pClient.getOutputStream());
@@ -116,19 +125,26 @@ class ClientConnLobby implements Runnable {
         	LobbyMessageToServer msg;
             while ((msg = (LobbyMessageToServer) aInput.readObject()) != null) 
             {
+    			System.out.println("Message received on server.");
+    			System.out.println(msg.getUsername());
+    			System.out.println(msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST);
+
             	if (msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST){
             		
             		Request r = msg.getRequest();
             		
             		if (r.getType() == LobbyRequest.REQUEST)
             		{
+            			System.out.println("Request received on server. ");
             			// send request to requestee
-            			aClientList.get(r.getRequestee()).respondToRequest(r);
+            			aServer.getClientlist().get(r.getRequestee()).respondToRequest(r);
             		}
             		else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW)
             		{
+            			System.out.println(aServer.getClientlist()==null);
+            			System.out.println(r.getRequestee()==null);
             			// withdraw request from requestee
-            			aClientList.get(r.getRequestee()).respondToRequestWithdraw(r);
+            			aServer.getClientlist().get(r.getRequestee()).respondToRequestWithdraw(r);
             		}
             		else if (r.getType() == LobbyRequest.ACCEPT)
             		{
@@ -150,22 +166,24 @@ class ClientConnLobby implements Runnable {
             			// TODO set user to online? EXECUTIVE DECISION, I'm not using player availability.
 
             			// update users of new online user
-            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts, null);
+            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aServer.getOnlineaccounts(), null);
             			updateAllClients(lobbyMsg);
 
             			// create saved game list to send to this user.
-            			Iterator<Integer> currentGames = aAccount.getCurrentGames();
             			ArrayList<LobbyMessageGameSummary> games = new ArrayList<LobbyMessageGameSummary>();
-
-            			while (currentGames.hasNext()){
-            				ServerGame sg = GameManager.getInstance().getGame(currentGames.next());
-            				Account p1 = GameManager.getInstance().getAccount(sg.getP1Username());
-            				Account p2 = GameManager.getInstance().getAccount(sg.getP2Username());
-
-            				games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
+            			if(aAccount.getCurrentGames()!=null){
+	            			Iterator<Integer> currentGames = aAccount.getCurrentGames();
+	
+	            			while (currentGames.hasNext()){
+	            				ServerGame sg = GameManager.getInstance().getGame(currentGames.next());
+	            				Account p1 = GameManager.getInstance().getAccount(sg.getP1Username());
+	            				Account p2 = GameManager.getInstance().getAccount(sg.getP2Username());
+	
+	            				games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
+	            			}
             			}
             			lobbyMsg.setGames(games);
-
+            			
             			this.updateClient(lobbyMsg);
 //            			System.out.println(aUsername + " has connected");
             		}
@@ -174,10 +192,10 @@ class ClientConnLobby implements Runnable {
             			removeAccount(aAccount);
 
             			// update users of new online user
-            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aOnlineAccounts, null);
+            			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aServer.getOnlineaccounts(), null);
             			updateAllClients(lobbyMsg);
-//            			System.out.println(aUsername + " has disconnected");
-            			// TODO break? or does closed socket execute close()?
+            			System.out.println(aUsername + " has disconnected");
+            			// closed socket execute close()
             		}
             	}
             }
@@ -194,7 +212,8 @@ class ClientConnLobby implements Runnable {
     }
     
     private synchronized void updateAllClients(LobbyMessageToClient pMsg){
-    	for (ClientConnLobby aClient : aClientList.values()){
+    	for (ClientConnLobby aClient : aServer.getClientlist().values()){
+    		System.out.println("client list: "+aClient.aUsername);
     		if (!aClient.equals(this))
     		{
     			aClient.updateClient(pMsg);
@@ -244,7 +263,7 @@ class ClientConnLobby implements Runnable {
     	if (this.aRequestQueue.peek().equals(pRequest))
     	{
 			this.aRequestQueue.poll();
-			ClientConnLobby requester = aClientList.get(pRequest.getRequesterName());
+			ClientConnLobby requester = aServer.getClientlist().get(pRequest.getRequesterName());
 			requester.updateClient(new LobbyMessageToClient(null, pRequest));
 		}
     }
@@ -257,7 +276,7 @@ class ClientConnLobby implements Runnable {
     	if (this.aRequestQueue.peek().equals(pRequest))
     	{
 			this.aRequestQueue.poll();
-			ClientConnLobby requester = aClientList.get(pRequest.getRequesterName());
+			ClientConnLobby requester = aServer.getClientlist().get(pRequest.getRequesterName());
 			requester.updateClient(new LobbyMessageToClient(null, pRequest));
 			
 			if (this.aRequestQueue.peek() != null){
@@ -267,19 +286,19 @@ class ClientConnLobby implements Runnable {
     }
     
     private static synchronized void addConnection(String pUsername, ClientConnLobby aConnection){
-    	aClientList.put(pUsername, aConnection);
+    	aServer.getClientlist().put(pUsername, aConnection);
     }
     
     private static synchronized void removeConnection(String pUsername){
-    	aClientList.remove(pUsername);
+    	aServer.getClientlist().remove(pUsername);
     }
     
     private static synchronized void addAccount(Account pAccount){
-    	aOnlineAccounts.add(pAccount);
+    	aServer.getOnlineaccounts().add(pAccount);
     }
     
     private static synchronized void removeAccount(Account pAccount){
-    	aOnlineAccounts.remove(pAccount);
+    	aServer.getOnlineaccounts().remove(pAccount);
     }
 
 	private void close(){
