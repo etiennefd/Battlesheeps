@@ -65,7 +65,7 @@ public class ClientGame {
 	//should know who it's player is 
 	private String aMyUser;
 	
-	private Square[][] aCurrentVisibleBoard;
+	private Square[][] aCurrentVisibleBoard = new Square[30][30];
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
 	
