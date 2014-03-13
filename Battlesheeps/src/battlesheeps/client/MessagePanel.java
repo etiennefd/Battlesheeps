@@ -121,6 +121,7 @@ public class MessagePanel extends JPanel {
 				shipStats[2], shipStats[3], shipStats[4]};
 	
 		JTable shipTable = new JTable(shipData, columnNames);
+		shipTable.setEnabled(false);
 		
 		this.add(opponentTurn);
 		this.add(space);
