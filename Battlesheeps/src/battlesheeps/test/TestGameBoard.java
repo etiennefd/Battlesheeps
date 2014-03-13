@@ -109,10 +109,10 @@ public class TestGameBoard{
 //		myGame.setLogEntry(log3);
 		new Thread(new ServerGamesAndMoves()).start();
 		
-		client = new ClientGame("player");
-		ClientGamesAndMoves pManager = new ClientGamesAndMoves("player", null, 1, client);
-		ClientGame clientO = new ClientGame("opponent");
-		ClientGamesAndMoves oManager = new ClientGamesAndMoves("opponent", null, 1, clientO);
+		client = new ClientGame(player.getUsername());
+		ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
+		ClientGame clientO = new ClientGame(opponent.getUsername());
+		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 1, clientO);
 		
 	}
 	

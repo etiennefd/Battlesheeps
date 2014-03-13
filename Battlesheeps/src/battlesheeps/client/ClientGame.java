@@ -247,9 +247,7 @@ public class ClientGame {
 	 * 3. a message may be displayed  
 	 */
 	public void updateGame (ServerGame pGame) {
-		
-		String turnPlayer = pGame.getTurnPlayer(); 
-		
+	
 		boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
 		
 		List<Ship> myList;
@@ -266,9 +264,15 @@ public class ClientGame {
 			oppList = pGame.getP1ShipList();
 		}
 		
-		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
+		Square[][] tempBoard = computeVisibility(pGame.getBoard(), myList);
+		for (int i = 0; i <30; i++) {
+			for (int j = 0; j<30; j++) {
+				aCurrentVisibleBoard[i][j] = tempBoard[i][j]; 
+			}
+		}
+		
 				
-		if (turnPlayer.equals(aMyUser)){
+		if (myTurn){
 			//my turn 
 			aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
 			aMessagePanel.setYourTurn();
