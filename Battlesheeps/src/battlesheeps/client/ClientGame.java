@@ -337,26 +337,26 @@ public class ClientGame {
 
 		//now calculate
 		for (Ship ship : pShipList) {
+			if (!ship.isSunk()) {
+				List<Coordinate> radarRange = ship.getRadarRange();
 
-			List<Coordinate> radarRange = ship.getRadarRange();
+				for (Coordinate c : radarRange) {
+					//if the list doesn't already contain this coordinate
+					if (!(visibleRadarList.contains(c))) {
+						//then add it
+						visibleRadarList.add(c);
+					}
 
-			for (Coordinate c : radarRange) {
-				//if the list doesn't already contain this coordinate
-				if (!(visibleRadarList.contains(c))) {
-					//then add it
-					visibleRadarList.add(c);
-				}
-				
-				//and if the ship is a Mine Layer
-				//we need to add it to the sonar list (sonar = radar)
-				if (ship instanceof MineLayer) {
-					if (!(visibleSonarList.contains(c))) {
-						visibleSonarList.add(c);
+					//and if the ship is a Mine Layer
+					//we need to add it to the sonar list (sonar = radar)
+					if (ship instanceof MineLayer) {
+						if (!(visibleSonarList.contains(c))) {
+							visibleSonarList.add(c);
+						}
 					}
 				}
 			}
 		}
-
 		Sea seaSquare = new Sea();
 	
 		for (int i = 0; i < 30; i++) {
