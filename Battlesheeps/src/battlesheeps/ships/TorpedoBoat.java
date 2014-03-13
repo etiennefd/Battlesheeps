@@ -35,15 +35,15 @@ public class TorpedoBoat extends Ship
 		ArrayList<Coordinate> cannonCoords = new ArrayList<Coordinate>();
 		Direction myDirection = this.getDirection();
 		
-		int headX = this.getTail().getX();
-		int headY = this.getTail().getY();
+		int tailX = this.getTail().getX();
+		int tailY = this.getTail().getY();
 		int startX, startY;
 		
 		switch (myDirection) {
 			case NORTH : 
 				
-				startX = headX - aCannonRangeWidth/2; 
-				startY = headY;
+				startX = tailX - aCannonRangeWidth/2; 
+				startY = tailY;
 				
 				for (int i = startX; i < (startX + aCannonRangeWidth); i++) {
 					for (int j = startY; j > (startY - aCannonRangeLength); j--) {
@@ -56,8 +56,8 @@ public class TorpedoBoat extends Ship
 				break;
 			case SOUTH : 
 			
-				startX = headX - aCannonRangeWidth/2; 
-				startY = headY;
+				startX = tailX - aCannonRangeWidth/2; 
+				startY = tailY;
 				
 				for (int i = startX; i < (startX + aCannonRangeWidth); i++) {
 					for (int j = startY; j < (startY + aCannonRangeLength); j++) {
@@ -70,11 +70,11 @@ public class TorpedoBoat extends Ship
 				break; 
 			case WEST : 
 				
-				startX = headX; 
-				startY = headY - aCannonRangeLength/2;
+				startX = tailX; 
+				startY = tailY - aCannonRangeLength/2;
 				
 				for (int i = startX; i > (startX - aCannonRangeLength); i--) {
-					for (int j = startY; j > (startY - aCannonRangeWidth); j--) {
+					for (int j = startY; j <(startY + aCannonRangeWidth); j++) {
 						Coordinate c = new Coordinate(i,j);
 						if (c.inBounds()){
 							cannonCoords.add(c);
@@ -84,8 +84,8 @@ public class TorpedoBoat extends Ship
 				break;
 			default : /*EAST*/
 				
-				startX = headX; 
-				startY = headY - aCannonRangeLength/2;
+				startX = tailX; 
+				startY = tailY - aCannonRangeWidth/2;
 				
 				for (int i = startX; i < (startX + aCannonRangeLength); i++) {
 					for (int j = startY; j < (startY + aCannonRangeWidth); j++) {
