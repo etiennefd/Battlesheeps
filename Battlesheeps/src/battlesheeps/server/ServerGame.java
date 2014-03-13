@@ -2042,7 +2042,7 @@ public class ServerGame implements Serializable
 	 * @return Server ship
 	 */
 	public Ship matchWithShip(Ship pShipFromClient){
-		if (pShipFromClient.getUsername() == this.getP1Username()){
+		if (pShipFromClient.getUsername().equals(this.getP1Username())){
 			for (Ship thisShip: this.aShipListP1){
 				if (pShipFromClient.equals(thisShip)){
 					return thisShip;
