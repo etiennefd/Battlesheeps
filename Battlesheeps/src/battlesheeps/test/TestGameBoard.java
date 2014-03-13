@@ -7,11 +7,13 @@ import java.util.List;
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
+import battlesheeps.networking.ClientGamesAndMoves;
 import battlesheeps.networking.ServerGamesAndMoves;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.LogEntry;
 import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.server.ServerGame;
+import battlesheeps.server.ServerGame.ClientInfo;
 import battlesheeps.ships.*;
 import battlesheeps.ships.Ship.Damage;
 
@@ -39,7 +41,7 @@ public class TestGameBoard{
 		accts.put(opponent.getUsername(), opponent);
 		
 		myGame = new ServerGame(1, gm.getAccount("player"), gm.getAccount("opponent"));
-		
+		myGame.setClientInfo(ClientInfo.GAME_UPDATE);
 		gm.addGame(myGame);
 		
 		List<Ship> p1ships = myGame.getP1ShipList();
@@ -108,9 +110,9 @@ public class TestGameBoard{
 		new Thread(new ServerGamesAndMoves()).start();
 		
 		client = new ClientGame("player");
-		client.updateGame(myGame);
+		ClientGamesAndMoves pManager = new ClientGamesAndMoves("player", null, 1, client);
 		ClientGame clientO = new ClientGame("opponent");
-		clientO.updateGame(myGame);
+		ClientGamesAndMoves oManager = new ClientGamesAndMoves("opponent", null, 1, clientO);
 		
 	}
 	

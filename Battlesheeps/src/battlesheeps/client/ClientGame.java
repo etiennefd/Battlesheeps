@@ -255,7 +255,9 @@ public class ClientGame {
 		List<Ship> myList;
 		List<Ship> oppList;
 		
-		if (myTurn) {
+		boolean isP1 = aMyUser.equals(pGame.getP1Username());
+		
+		if (isP1) {
 			myList = pGame.getP1ShipList();
 			oppList = pGame.getP2ShipList();
 		}
@@ -266,7 +268,7 @@ public class ClientGame {
 		
 		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
 				
-		if (turnPlayer.compareTo(aMyUser) == 0){
+		if (turnPlayer.equals(aMyUser)){
 			//my turn 
 			aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
 			aMessagePanel.setYourTurn();
