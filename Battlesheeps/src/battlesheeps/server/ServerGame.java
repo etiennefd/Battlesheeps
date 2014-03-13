@@ -129,10 +129,18 @@ public class ServerGame implements Serializable
 	}
 	
 	/**
-	 * Adds 24 coral reef squares to the board within the central 10*24 area. 
+	 * Adds 24 coral reef squares to the board within the central 10*24 area.
+	 * Also first removes anything that is in the central area and puts Sea squares there.  
 	 * Can be called repeatedly in case of disagreement between players. 
 	 */
 	public void generateCoralReefs() {
+		//Wipe out whatever's in the central area
+		for (int x = 10; x<=19; x++) {
+			for (int y = 3 ; y<=26; y++) {
+				aBoard[x][y] = new Sea();
+			}
+		}
+		//Add 24 coral reef squares in there
 		for (int i = 0; i<24; i++) {
 			Coordinate newCoral = Coordinate.randomCoord(10, 19, 3, 26);
 			if (aBoard[newCoral.getX()][newCoral.getY()] instanceof CoralReef) {
