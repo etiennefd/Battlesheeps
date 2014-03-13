@@ -19,6 +19,7 @@ public class ServerLogin implements Runnable
     
     public static void main (String[] args) {
     	(new Thread(new ServerLobby())).start();
+    	new Thread(new ServerGamesAndMoves()).start();
     	(new ServerLogin()).acceptClients();
     }
     
