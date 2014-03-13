@@ -65,9 +65,9 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private MinuetoColor aSonarColour = new MinuetoColor(new Color(128, 102, 232));
 	private MinuetoColor aOpponentShipUndamaged = new MinuetoColor(Color.DARK_GRAY);
 	private MinuetoColor aYourShipUndamaged = new MinuetoColor(Color.GRAY);
-	private MinuetoColor aOpponentShipDamaged = new MinuetoColor(new Color(232, 231, 127)); //dark pink
+	private MinuetoColor aOpponentShipDamaged = new MinuetoColor(new Color(232, 77, 104)); //dark pink
 	private MinuetoColor aYourShipDamaged = new MinuetoColor(Color.PINK);
-	private MinuetoColor aOpponentShipDestroyed = new MinuetoColor(new Color(239, 230, 82)); //dark red
+	private MinuetoColor aOpponentShipDestroyed = new MinuetoColor(new Color(134, 17, 37)); //dark red
 	private MinuetoColor aYourShipDestroyed = new MinuetoColor(Color.RED);
 	private MinuetoColor aMoveColour = new MinuetoColor(new Color(72, 234, 92)); //green
 	
