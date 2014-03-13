@@ -1,10 +1,13 @@
 package battlesheeps.server;
 
-import battlesheeps.accounts.Account;
+import java.io.Serializable;
+
 import battlesheeps.board.Coordinate;
 import battlesheeps.ships.Ship;
 
-public class LogEntry {
+public class LogEntry implements Serializable
+{
+	private static final long serialVersionUID = -7054533442523433536L;
 
 	public enum LogType {
 		CANNON_MISS, CANNON_HIT_REEF, CANNON_HIT_SHIP, CANNON_HIT_BASE, CANNON_HIT_MINE, 

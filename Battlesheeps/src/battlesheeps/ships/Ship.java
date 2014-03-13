@@ -65,6 +65,9 @@ public abstract class Ship implements Serializable
 	public int hashCode(){
 		return (aShipID+1)*(this.getUsername().hashCode());
 	}
+	public String toString(){
+		return aPlayer + "   id: " + aShipID;
+	}
 	/**
 	 * This method should be called by the subclass after the construction of a ship
 	 */

@@ -8,12 +8,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
 
-import battlesheeps.accounts.Account;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame;
 import battlesheeps.server.ServerGame.ClientInfo;
+import battlesheeps.ships.Ship;
 
 public class ServerGamesAndMoves implements Runnable 
 {
@@ -139,12 +139,15 @@ class ClientConnGame implements Runnable {
         	
         	// Set aOpponent
         	if (aGame.getP1Username().equals(aUsername)){
+        		while (!aClientList.containsKey(aGame.getP2Username())) {/*WAIT for requestee to connect*/}
         		aOpponent = aClientList.get(aGame.getP2Username());
         		isP1 = true;
         	}
         	else {
+        		while (!aClientList.containsKey(aGame.getP1Username())) {/*WAIT for requestee to connect*/}
         		aOpponent = aClientList.get(aGame.getP1Username());
         	}
+        	if (aOpponent == null) System.out.println(aUsername + " opponent connection null.");
         	
         	Move msg;
         	if (isNewGame){
@@ -223,15 +226,17 @@ class ClientConnGame implements Runnable {
         			}
         		}
         	}
-        	
+        	aOutput.reset();
         	aGame.setClientInfo(ClientInfo.GAME_UPDATE);
             while ((msg = (Move) aInput.readObject()) != null) 
             {
             	// TODO is THIS correct? It might be actually.
             	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord());
-            	
+            	System.out.println(aGame.printBoard());
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
+            	aOutput.reset();
+            	aOpponent.aOutput.reset();
             }
         }
         catch (EOFException e) {
