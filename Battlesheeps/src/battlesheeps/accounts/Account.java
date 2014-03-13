@@ -72,7 +72,8 @@ public class Account implements Serializable
 		aCurrentGames.remove(aGame);
 	}
 	
-	public String userString()
+	@Override
+	public String toString()
 	{
 		return aUsername + " (" + aNumGamesWon + " : " + aNumGamesLost + ")";
 	}

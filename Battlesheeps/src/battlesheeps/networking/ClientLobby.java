@@ -12,7 +12,7 @@ import battlesheeps.client.Lobby;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
 import battlesheeps.networking.Request.LobbyRequest;
 
-//TODO multiple sign in
+//TODO disable multiple sign in for single user
 public class ClientLobby
 {
     /* Host to connect to. This can be "localhost" if running both client/server 
@@ -181,6 +181,7 @@ class ServerConnLobby implements Runnable {
 					if (msg.getGames() == null){
 						// CASE 1: A different user has entered or exited the lobby and this user must be updated
 						System.out.print("Update online users: ");
+						aOutput.getAccounts().clear();
 						for (Account acct : msg.getOnlineAccounts()){
 							System.out.print(acct.getUsername() + " ");
 							// User list will contain this user, which should be filtered out
@@ -191,6 +192,7 @@ class ServerConnLobby implements Runnable {
 							}
 						}
 						System.out.println();
+						aOutput.getLobby().updateOnlineUsers();
 						//TODO Re-match online users with saved games
 					}
 					else {
@@ -231,8 +233,7 @@ class ServerConnLobby implements Runnable {
 						System.out.println();
 						javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				            public void run() {
-				                aOutput.getLobby();
-								Lobby.createAndShowLobby();
+				                aOutput.getLobby().createAndShowLobby();
 				            }
 				        });
 					}
@@ -242,28 +243,32 @@ class ServerConnLobby implements Runnable {
 					Request r = msg.getRequest();
 					
 					if (r.getType() == LobbyRequest.REQUEST){
-						// TODO Display requester info in pop-up with accept or decline buttons 
-						// Lei, you'll need to check if a saved game exists with the user
+						// Display requester info in pop-up with accept or decline buttons 
+						// TODO Lei, you'll need to check if a saved game exists with the user
 						System.out.println("Game request from: " + r.getRequesterName());
 						System.out.println("Accept or Decline? (Input either a or d)");
 						
-						// TODO Create a anonymous action listeners for Accept/Decline
-						// Accept will trigger: 
+						aOutput.getLobby().requestPopup(r.getRequesterName(), r.getRequestee());
+					
+						// Accept will trigger: DONE IN LOBBY CLASS
 						// aOutput.sendRequest(new Request(LobbyRequest.ACCEPT, r.getRequesterName(), r.getRequestee()));
 
 						// Decline will trigger:
 						// aOutput.sendRequest(new Request(LobbyRequest.DECLINE, r.getRequesterName(), r.getRequestee()));
 					}
 					else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW){
-						// TODO Close the existing request pop-up
+						// Close the existing request pop-up
+						aOutput.getLobby().requestWithdrawn(r.getRequesterName());
 						System.out.println("Request withdrawn by user: " + r.getRequesterName());
 					}
 					else if (r.getType() == LobbyRequest.ACCEPT){
-						// TODO Opponent accepted invitation, move to game screen
+						// Opponent accepted invitation, move to game screen
+						aOutput.getLobby().requestAccepted();
 						System.out.println("Now beginning game with " + r.getRequestee() + "...");
 					}
 					else { 
-						// TODO Opponent declined invitation, notify user that he/she should get on with their life.
+						// Opponent declined invitation, notify user that he/she should get on with their life.
+						aOutput.getLobby().requestDeclined(r.getRequestee());
 						System.out.println(r.getRequestee() + " has declined your invitation. Move on.");
 					}
 				}
@@ -280,6 +285,8 @@ class ServerConnLobby implements Runnable {
 
 	private void close()
 	{
+		System.out.println("closing client");
+		new LobbyMessageToServer(LobbyNotification.EXITING,"",null);
 		try {
 			aInput.close();
 		}

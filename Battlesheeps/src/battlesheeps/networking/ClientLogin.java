@@ -134,7 +134,6 @@ class ServerConnLogin implements Runnable {
 						//TODO here's where to input more things into the lobby
 						System.out.println("Name going into lobby: "+ msg.getLogin());
 						new Lobby(msg.getLogin());
-
 						//TODO correct?
 						close();
 					}
