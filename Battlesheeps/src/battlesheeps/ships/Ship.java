@@ -26,7 +26,7 @@ public abstract class Ship implements Serializable
 	private Coordinate aLocationHead;	//x and y coordinates of the bow of the ship on the board (between 0 and 29)
 	private Coordinate aLocationTail;	//x and y coordinates of the stern of the ship
 	
-	private Account aPlayer; 
+	private String aPlayer; 
 		
 	protected int aShipID;					// 0-9, added by Stefan
 	protected int aSize;					//Length of the ship, in squares. 
@@ -68,7 +68,7 @@ public abstract class Ship implements Serializable
 	/**
 	 * This method should be called by the subclass after the construction of a ship
 	 */
-	public void initializeShip(Account pPlayer) {
+	public void initializeShip(String pPlayer) {
 		aPlayer = pPlayer;
 		aLocationHead = null;
 		aLocationTail = null;
@@ -242,7 +242,7 @@ public abstract class Ship implements Serializable
 	
 	public String getUsername() {
 		try {
-			return aPlayer.getUsername();
+			return aPlayer;
 		}
 		catch (NullPointerException e) {
 			return "NO PLAYER FOUND";

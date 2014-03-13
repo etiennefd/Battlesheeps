@@ -35,8 +35,8 @@ public class LogEntry {
 		aAffectedPlayer = pShip.getUsername();
 	}
 	
-	public void setAffectedPlayer (Account pPlayer) {
-		aAffectedPlayer = pPlayer.getUsername();
+	public void setAffectedPlayer (String pPlayer) {
+		aAffectedPlayer = pPlayer;
 	}
 	
 	public String toString(){

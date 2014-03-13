@@ -9,9 +9,9 @@ import battlesheeps.ships.Ship.Damage;
 public class BaseSquare implements Square, Serializable {
 	private static final long serialVersionUID = -6794223046387774769L;
 	private Damage aDamage;
-	private Account aOwner;
+	private String aOwner;
 	
-	public BaseSquare(Damage pDamage, Account pOwner) {
+	public BaseSquare(Damage pDamage, String pOwner) {
 		aDamage = pDamage;
 		aOwner = pOwner;
 	}
@@ -32,7 +32,7 @@ public class BaseSquare implements Square, Serializable {
 		return aDamage;
 	}
 	
-	public Account getOwner() {
+	public String getOwner() {
 		return aOwner;
 	}
 

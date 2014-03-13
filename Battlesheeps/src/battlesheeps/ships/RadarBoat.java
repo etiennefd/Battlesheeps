@@ -7,7 +7,7 @@ public class RadarBoat extends Ship
 	private static final long serialVersionUID = 189425481040172189L;
 	private boolean aExtendedRadar;
 	
-	public RadarBoat(Account pPlayer, int pShipID) {
+	public RadarBoat(String pPlayer, int pShipID) {
 		
 		super();
 		aSize = 3;

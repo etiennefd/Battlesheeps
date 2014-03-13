@@ -12,7 +12,7 @@ public class MineLayer extends Ship
 	private static final long serialVersionUID = -9029447450269094157L;
 	private int aMineSupply; 			//Number of mines on board. 
 
-	public MineLayer(Account pPlayer, int pShipID) {
+	public MineLayer(String pPlayer, int pShipID) {
 		
 		super();
 		aSize = 2;

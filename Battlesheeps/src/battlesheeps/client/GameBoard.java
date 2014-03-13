@@ -275,7 +275,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		BaseSquare baseSquare = (BaseSquare) aVisibleBoard[pSquareX][pSquareY];
 		Damage baseDamage = baseSquare.getDamage();
 		
-		String myOwner = (baseSquare.getOwner()).getUsername();
+		String myOwner = baseSquare.getOwner();
 		MinuetoColor baseColour; 
 		
 		if (myOwner.compareTo(aUsername) == 0) {

@@ -42,8 +42,8 @@ public class ServerGame implements Serializable
 	
 	//Fields related to the identity of the game
 	private int aGameID;
-	private Account aPlayer1;
-	private Account aPlayer2;
+	private String aPlayer1;
+	private String aPlayer2;
 	private int aTurnNum;			//Odd -> it is P1's turn. Even -> it is P2's turn.  
 	private Date aDateLastPlayed;	//TODO update this when a turn is done.
 	private ClientInfo aClientInfo;
@@ -56,7 +56,7 @@ public class ServerGame implements Serializable
 	
 	//Fields related to the ending of the game
 	private boolean aGameComplete;
-	private Account aWinner;
+	private String aWinner;
 	
 	/**
 	 * Constructor for Games. Accepts an ID and the two players. 
@@ -68,14 +68,14 @@ public class ServerGame implements Serializable
 	public ServerGame(int pGameID, Account pPlayer1, Account pPlayer2) {
 		
 		aGameID = pGameID;
-		aPlayer1 = pPlayer1;
-		aPlayer2 = pPlayer2;
+		aPlayer1 = pPlayer1.getUsername();
+		aPlayer2 = pPlayer2.getUsername();
 		aTurnNum = 1;
 		aDateLastPlayed = new Date();
 		aClientInfo = ClientInfo.NEW_GAME;
 		
-		aPlayer1.addNewGame(aGameID);
-		aPlayer2.addNewGame(aGameID);
+		pPlayer1.addNewGame(aGameID);
+		pPlayer2.addNewGame(aGameID);
 		
 		aGameComplete = false; 
 		aWinner = null;
@@ -315,7 +315,7 @@ public class ServerGame implements Serializable
 	 * @param pShip
 	 * @param pMove
 	 */
-	public synchronized boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { //I removed GameID and player because the game calls this instead of the gameManager
+	public synchronized boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord) { 
 		
 		switch (pMove) {
 		case TRANSLATE_SHIP: translateShip(pShip, pCoord); break;
@@ -1987,7 +1987,7 @@ public class ServerGame implements Serializable
 		if (s instanceof BaseSquare) {
 			BaseSquare bs = (BaseSquare) s;
 			if (bs.getDamage()==Damage.UNDAMAGED || bs.getDamage()==Damage.DAMAGED) {
-				Account owner = bs.getOwner();
+				String owner = bs.getOwner();
 				aBoard[pCoord.getX()][pCoord.getY()] = new BaseSquare(Damage.DESTROYED, owner);
 				
 				if (isBaseDestroyed(owner)) {
@@ -2007,7 +2007,7 @@ public class ServerGame implements Serializable
 	 * @param pPlayer
 	 * @return
 	 */
-	private boolean isBaseDestroyed(Account pPlayer) {
+	private boolean isBaseDestroyed(String pPlayer) {
 		int x;
 		if (aPlayer1 != null && pPlayer.equals(aPlayer1)) {
 			x = 0;
@@ -2080,11 +2080,11 @@ public class ServerGame implements Serializable
 	}
 	
 	public String getP1Username() {
-		return aPlayer1.getUsername();
+		return aPlayer1;
 	}
 	
 	public String getP2Username() {
-		return aPlayer2.getUsername();
+		return aPlayer2;
 	}
 	
 	public int getGameID()	{
@@ -2101,8 +2101,8 @@ public class ServerGame implements Serializable
 
 	public String getTurnPlayer() {
 		if ((aTurnNum%2) == 0) {
-			return aPlayer2.getUsername(); //even
-		} else return aPlayer1.getUsername(); //odd 
+			return aPlayer2; //even
+		} else return aPlayer1; //odd 
 	}
 	
 	public LinkedList<LogEntry> getLog() {

@@ -6,7 +6,7 @@ public class Cruiser extends Ship
 {
 	private static final long serialVersionUID = 5698109593782495582L;
 
-	public Cruiser(Account pPlayer, int pShipID) {
+	public Cruiser(String pPlayer, int pShipID) {
 		
 		super();
 		aSize = 5;

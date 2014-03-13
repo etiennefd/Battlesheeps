@@ -11,7 +11,7 @@ public class TorpedoBoat extends Ship
 {
 	private static final long serialVersionUID = -6257700737574162318L;
 
-	public TorpedoBoat(Account pPlayer, int pShipID) {
+	public TorpedoBoat(String pPlayer, int pShipID) {
 		
 		super();
 		aSize = 3;
