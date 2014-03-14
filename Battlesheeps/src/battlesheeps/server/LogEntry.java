@@ -54,43 +54,43 @@ public class LogEntry implements Serializable
 		} else player = 1;  
 
 		//Display the turn number and player
-		String s = "Turn " + aTurnNumber + " -- Player " + player + "\n";
+		String s = "Turn " + aTurnNumber + " - Player " + player + ":\n";
 
 		//Figure out which message to display
 		switch (aLogType) {
 		case CANNON_MISS: 
-			s = s + "A cannon shot was detected on square (" + x + ", " + y + "), but " +
+			s = s + "Cannon shot detected on square (" + x + ", " + y + "), but " +
 				"it did not hit anything.";
 			break;
 		case CANNON_HIT_REEF: 
-			s = s + "A cannon shot hit a reef on square (" + x + ", " + y + "), but " +
+			s = s + "Cannon shot hit a reef on square (" + x + ", " + y + "), but " +
 				"it had no effect.";
 			break;
 		case CANNON_HIT_SHIP: 
-			s = s + "A cannon shot hit a ship on square (" + x + ", " + y + ").";
+			s = s + "Cannon shot hit a ship on square (" + x + ", " + y + ").";
 			break;
 		case CANNON_HIT_BASE: 
-			s = s + "A cannon shot hit the base on square (" + x + ", " + y + ").";
+			s = s + "Cannon shot hit the base on square (" + x + ", " + y + ").";
 			break;
 		case CANNON_HIT_MINE: 
-			s = s + "A cannon shot was detected on square (" + x + ", " + y + "), but " +
+			s = s + "Cannon shot detected on square (" + x + ", " + y + "), but " +
 				"it did not hit anything."; //Players don't know it destroyed a mine
 			break;
 		case TORPEDO_HIT_REEF: 
-			s = s + "A torpedo hit a reef on square (" + x + ", " + y + "), but " +
+			s = s + "Torpedo hit a reef on square (" + x + ", " + y + "), but " +
 				"it had no effect.";
 			break;
 		case TORPEDO_HIT_SHIP: 
-			s = s + "A torpedo hit a ship on square (" + x + ", " + y + ").";
+			s = s + "Torpedo hit a ship on square (" + x + ", " + y + ").";
 			break;
 		case TORPEDO_HIT_BASE: 
-			s = s + "A torpedo hit the base on square (" + x + ", " + y + ").";
+			s = s + "Torpedo hit the base on square (" + x + ", " + y + ").";
 			break;
 		case TORPEDO_HIT_MINE: 
-			s = s + "A torpedo hit something underwater on square (" + x + ", " + y + ").";
+			s = s + "Torpedo hit something underwater on square (" + x + ", " + y + ").";
 			break;
 		case MINE_EXPLOSION: 
-			s = s + "A mine exploded on square (" + x + ", " + y + ").";
+			s = s + "Mine explosion on square (" + x + ", " + y + ").";
 			break;
 		case SHIP_SUNK: 
 			s = s + "The ship " + aSunkenShip + " belonging to player " + aAffectedPlayer + " has sunk!";
