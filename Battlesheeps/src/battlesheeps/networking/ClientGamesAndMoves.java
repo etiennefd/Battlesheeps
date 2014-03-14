@@ -21,7 +21,7 @@ public class ClientGamesAndMoves
     /* Host to connect to. This can be "localhost" if running both client/server 
      * on your computer, or the IP address of the host. 
      */
-    private static final String HOST = "localhost"; 
+    private static final String HOST = "142.157.145.143"; 
     private ObjectOutputStream aOutput = null;
 
 //    public static void main(String[] args)
