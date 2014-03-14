@@ -58,6 +58,7 @@ public class ServerGamesAndMoves implements Runnable
         {
             try {
                 client = SERVER.accept();
+                System.out.println("game client accepted!");
             } catch (IOException e) {
                 System.err.println("Accept failed.\n" + e);
                 System.exit(1);
