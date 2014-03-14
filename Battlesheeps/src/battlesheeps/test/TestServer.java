@@ -7,6 +7,8 @@ import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.client.ClientGame;
 import battlesheeps.networking.ServerGamesAndMoves;
+import battlesheeps.networking.ServerLobby;
+import battlesheeps.networking.ServerLogin;
 import battlesheeps.server.GameManager;
 import battlesheeps.server.ServerGame;
 import battlesheeps.server.ServerGame.ClientInfo;
@@ -88,6 +90,8 @@ public class TestServer {
 		myGame.setShipPosition(p2ships.get(9), new Coordinate(4, 29), new Coordinate(6, 29));
 		
 		new Thread(new ServerGamesAndMoves()).start();
+		new Thread(new ServerLobby()).start();
+		new Thread(new ServerLogin()).start();
 	}
 	
 	public static void main(String[] args) {
