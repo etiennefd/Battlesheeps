@@ -71,6 +71,12 @@ public class MineLayer extends Ship
 		int maxY;
 		
 		Direction shipDirection = this.getDirection();
+		
+		//Empty list if the ship is not on board
+		if (shipDirection == null) {
+			return list;
+		}
+		
 		Coordinate head = this.getHead();
 		Coordinate tail = this.getTail();
 		

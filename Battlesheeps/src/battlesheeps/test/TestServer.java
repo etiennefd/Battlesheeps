@@ -20,9 +20,9 @@ public class TestServer {
 
 	public TestServer() {
 		
-		Account a1 = new Account("dave", "12345");
-		Account a2 = new Account("bob", "password");
-		Account a3 = new Account("dinkle", "IamAdinkle");
+		Account a1 = new Account("a", "a");
+		Account a2 = new Account("q", "q");
+		Account a3 = new Account("qwe", "qwe");
 		Account a4 = new Account("bobs", "password");
 		Account player = new Account("player", "abc");
 		Account opponent = new Account("opponent", "def");

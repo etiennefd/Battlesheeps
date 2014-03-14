@@ -246,6 +246,9 @@ public abstract class Ship implements Serializable
 	 * @return
 	 */
 	public Direction getDirection() {
+		if (aLocationHead == null || aLocationTail == null) {
+			return null;
+		}
 		if (aLocationHead.getX() == aLocationTail.getX()) {
 			//Both head and tail in same column: either facing North or South
 			if (aLocationHead.getY() > aLocationTail.getY()) return Direction.SOUTH;
@@ -271,6 +274,11 @@ public abstract class Ship implements Serializable
 		int startY;
 		
 		Direction shipDirection = this.getDirection();
+		
+		//Empty list if the ship is not on board
+		if (shipDirection == null) {
+			return list;
+		}
 		
 		if (shipDirection == Direction.WEST) {
 			startX = aLocationTail.getX() - 1;
