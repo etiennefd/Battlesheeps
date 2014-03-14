@@ -83,12 +83,12 @@ class LogoutActionListener implements ActionListener
  */
 class UserListMouseAdapter extends MouseAdapter
 {
-	private JList<String> aList;
+	private JList aList;
 	private String requester;
 	private ClientLobby aClient;
 	private JFrame aFrame;
 	
-	public UserListMouseAdapter(JList<String> pList, String pRequester, ClientLobby pClient, JFrame pFrame)
+	public UserListMouseAdapter(JList pList, String pRequester, ClientLobby pClient, JFrame pFrame)
 	{
 		this.aFrame = pFrame;
 		this.aClient = pClient;
@@ -103,7 +103,7 @@ class UserListMouseAdapter extends MouseAdapter
             {
 	            SpringLayout layout = new SpringLayout();
 	            //user name player requested info to label
-	            String userRequested = aList.getSelectedValue();
+	            String userRequested = (String) aList.getSelectedValue();
 	            int endIndex = userRequested.indexOf(" ");
 	            userRequested = userRequested.substring(0, endIndex);
 	            System.out.println("User requested"+userRequested);
@@ -373,14 +373,17 @@ public class Lobby
 	private ClientLobby aClient;
 	
 	//TODO
-	private JList<String> userList = new JList<String>();
+	private JList userList = new JList();
 	//private JList<Account> userList = new JList<Account>();
-	private DefaultListModel<String> userData = new DefaultListModel<String>();
+	private DefaultListModel userData = new DefaultListModel();
 	//private DefaultListModel<Account> userData = new DefaultListModel<Account>();
 	
-	private JList<LobbyMessageGameSummary> gamesList = new JList<LobbyMessageGameSummary>();
-	private DefaultListModel<LobbyMessageGameSummary> gamesData 
-		= new DefaultListModel<LobbyMessageGameSummary>();
+	//private JList<LobbyMessageGameSummary> gamesList = new JList<LobbyMessageGameSummary>();
+	private JList gamesList = new JList();
+	//private DefaultListModel<LobbyMessageGameSummary> gamesData 
+	//	= new DefaultListModel<LobbyMessageGameSummary>();
+	private DefaultListModel gamesData = new DefaultListModel();
+
 	private JPanel listsPanel = new JPanel();
 	private JDialog aRequesterDialog;
 	private JDialog aRequesteeDialog;
