@@ -135,11 +135,11 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aBorder = new MinuetoRectangle(aBoardSize+25, aBoardSize+25, MinuetoColor.WHITE, true);
 
 		//adding the numbers beside the board: 
-		for (int i = 1; i <= 30; i++) {
+		for (int i = 0; i < 30; i++) {
 			Integer in = new Integer(i);
 			MinuetoText number = new MinuetoText(in.toString(), aFont, MinuetoColor.BLACK, false);
-			aBorder.draw(number, aBoardSize+5, (i-1)*aIncrement);
-			aBorder.draw(number, ((i-1)*(aIncrement))+4, aBoardSize+5);
+			aBorder.draw(number, aBoardSize+5, (i)*aIncrement);
+			aBorder.draw(number, ((i)*(aIncrement))+4, aBoardSize+5);
 		}
 		
 		//and here's the actual board
