@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -82,12 +83,12 @@ class LogoutActionListener implements ActionListener
  */
 class UserListMouseAdapter extends MouseAdapter
 {
-	private JList<Account> aList;
+	private JList<String> aList;
 	private String requester;
 	private ClientLobby aClient;
 	private JFrame aFrame;
 	
-	public UserListMouseAdapter(JList<Account> pList, String pRequester, ClientLobby pClient, JFrame pFrame)
+	public UserListMouseAdapter(JList<String> pList, String pRequester, ClientLobby pClient, JFrame pFrame)
 	{
 		this.aFrame = pFrame;
 		this.aClient = pClient;
@@ -97,12 +98,15 @@ class UserListMouseAdapter extends MouseAdapter
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
             int index = aList.locationToIndex(e.getPoint());
-            System.out.println("Double clicked on Item " + index);
+            System.out.println("Double clicked on Item " + index +" "+aList.getSelectedIndex());
             if(index != -1)
             {
 	            SpringLayout layout = new SpringLayout();
 	            //user name player requested info to label
-	            String userRequested = aList.getSelectedValue().getUsername();
+	            String userRequested = aList.getSelectedValue();
+	            int endIndex = userRequested.indexOf(" ");
+	            userRequested = userRequested.substring(0, endIndex);
+	            System.out.println("User requested"+userRequested);
 	            final JPanel requestPane = new JPanel();
 	            JLabel waitLabel = new JLabel("Waiting for response from: ");
 	            JLabel userLabel = new JLabel(userRequested);
@@ -147,7 +151,7 @@ class UserListMouseAdapter extends MouseAdapter
          }
     }
 }
-// write listener for games list
+// TODO update clicker write listener for games list
 class GamesListMouseAdapter extends MouseAdapter
 {
 	private JList<LobbyMessageGameSummary> aList;
@@ -367,8 +371,13 @@ class FrameListener implements WindowListener
 public class Lobby 
 {
 	private ClientLobby aClient;
-	private JList<Account> userList = new JList<Account>();
-	private DefaultListModel<Account> userData = new DefaultListModel<Account>();
+	
+	//TODO
+	private JList<String> userList = new JList<String>();
+	//private JList<Account> userList = new JList<Account>();
+	private DefaultListModel<String> userData = new DefaultListModel<String>();
+	//private DefaultListModel<Account> userData = new DefaultListModel<Account>();
+	
 	private JList<LobbyMessageGameSummary> gamesList = new JList<LobbyMessageGameSummary>();
 	private DefaultListModel<LobbyMessageGameSummary> gamesData 
 		= new DefaultListModel<LobbyMessageGameSummary>();
@@ -512,7 +521,7 @@ public class Lobby
     	{
     		for (Account acct : aClient.getAccounts())
    	        {
-   	        	userData.addElement(acct);
+   	        	userData.addElement(acct.toString());
    	        }
     	}
     }

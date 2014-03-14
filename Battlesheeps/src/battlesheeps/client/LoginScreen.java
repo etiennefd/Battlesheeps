@@ -194,9 +194,11 @@ class CreateAccountListener implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Passwords don't match, please try again", 
 					"Invalid Input", JOptionPane.ERROR_MESSAGE);
 		}
-		else if(aUsernameField.getText().equals("") || aPasswordField.getText().equals("")) //check password??
+		else if(aUsernameField.getText().equals("") || aPasswordField.getText().equals("")
+				|| aUsernameField.getText().contains(" ")) //check password??
 		{
-			JOptionPane.showMessageDialog(null, "Please enter a valid username and password.", 
+			JOptionPane.showMessageDialog(null, "Please enter a valid username and password." +
+					"No spaces allowed.", 
 					"Invalid Input", JOptionPane.ERROR_MESSAGE);
 		}
 		else

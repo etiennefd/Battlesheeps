@@ -52,7 +52,6 @@ public class ServerLobby implements Runnable
      * Creates serverSocket on specified port.
      */
     public ServerLobby(){
-    	System.out.println("Server Lobby starting.");
     	try {
             SERVER = new ServerSocket(PORT); /* start listening on the port */
         } catch (IOException e) {
@@ -135,7 +134,7 @@ class ClientConnLobby implements Runnable {
             		
             		if (r.getType() == LobbyRequest.REQUEST)
             		{
-            			System.out.println("Request received on server. ");
+            			System.out.println("Request received on server. " +r.getRequestee());
             			// send request to requestee
             			aServer.getClientlist().get(r.getRequestee()).respondToRequest(r);
             		}
