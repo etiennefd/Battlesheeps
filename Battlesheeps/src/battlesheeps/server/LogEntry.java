@@ -54,7 +54,7 @@ public class LogEntry implements Serializable
 		} else player = 1;  
 
 		//Display the turn number and player
-		String s = "Turn " + aTurnNumber + " - Player " + player + ":\n";
+		String s = "<html>Turn " + aTurnNumber + " - Player " + player + ":<br>";
 
 		//Figure out which message to display
 		switch (aLogType) {
@@ -102,7 +102,8 @@ public class LogEntry implements Serializable
 			s = s + "A collision involving a ship occurred on square (" + x + ", " + y + ").";
 			break;
 		}
-
+		
+		s = s + "</html>";
 		return s;
 	}
 }
