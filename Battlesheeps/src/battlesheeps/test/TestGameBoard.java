@@ -53,7 +53,7 @@ public class TestGameBoard{
 		
 		//cruisers 
 		myGame.setShipPosition(p1ships.get(0), new Coordinate(5, 5), new Coordinate(5, 9));
-		myGame.setShipPosition(p1ships.get(1), new Coordinate(21, 17), new Coordinate(17, 17));
+		myGame.setShipPosition(p1ships.get(1), new Coordinate(6, 17), new Coordinate(2, 17));
 		
 		//destroyer 
 		myGame.setShipPosition(p1ships.get(2), new Coordinate(7, 20), new Coordinate(4, 20));
@@ -99,6 +99,8 @@ public class TestGameBoard{
 		myGame.addMine(new Coordinate(7, 5));
 		myGame.addMine(new Coordinate(3, 27));
 		myGame.addMine(new Coordinate(22, 1));
+		
+		System.out.println(myGame.printBoard());
 		
 		LogEntry log1 = new LogEntry(LogType.CANNON_MISS, 1, 1, 1);
 		LogEntry log2 = new LogEntry(LogType.MINE_EXPLOSION, 24, 5, 2);

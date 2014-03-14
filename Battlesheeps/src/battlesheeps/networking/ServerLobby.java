@@ -124,9 +124,9 @@ class ClientConnLobby implements Runnable {
         	LobbyMessageToServer msg;
             while ((msg = (LobbyMessageToServer) aInput.readObject()) != null) 
             {
-    			System.out.println("Message received on server.");
-    			System.out.println(msg.getUsername());
-    			System.out.println(msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST);
+//    			System.out.println("Message received on server.");
+//    			System.out.println(msg.getUsername());
+//    			System.out.println(msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST);
 
             	if (msg.getEnterOrExit() == LobbyNotification.GAME_REQUEST){
             		
@@ -134,14 +134,14 @@ class ClientConnLobby implements Runnable {
             		
             		if (r.getType() == LobbyRequest.REQUEST)
             		{
-            			System.out.println("Request received on server. " +r.getRequestee());
+//            			System.out.println("Request received on server. " +r.getRequestee());
             			// send request to requestee
             			aServer.getClientlist().get(r.getRequestee()).respondToRequest(r);
             		}
             		else if (r.getType() == LobbyRequest.REQUEST_WITHDRAW)
             		{
-            			System.out.println(aServer.getClientlist()==null);
-            			System.out.println(r.getRequestee()==null);
+//            			System.out.println(aServer.getClientlist()==null);
+//            			System.out.println(r.getRequestee()==null);
             			// withdraw request from requestee
             			aServer.getClientlist().get(r.getRequestee()).respondToRequestWithdraw(r);
             		}
@@ -193,7 +193,7 @@ class ClientConnLobby implements Runnable {
             			// update users of new online user
             			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aServer.getOnlineaccounts(), null);
             			updateAllClients(lobbyMsg);
-            			System.out.println(aUsername + " has disconnected");
+//            			System.out.println(aUsername + " has disconnected");
             			// closed socket execute close()
             		}
             	}
@@ -212,7 +212,7 @@ class ClientConnLobby implements Runnable {
     
     private synchronized void updateAllClients(LobbyMessageToClient pMsg){
     	for (ClientConnLobby aClient : aServer.getClientlist().values()){
-    		System.out.println("client list: "+aClient.aUsername);
+//    		System.out.println("client list: "+aClient.aUsername);
     		if (!aClient.equals(this))
     		{
     			aClient.updateClient(pMsg);
