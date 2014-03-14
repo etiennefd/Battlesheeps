@@ -41,33 +41,7 @@ public abstract class Ship implements Serializable
 	protected int aActualSpeed;				//Number of squares the ship can move forward, given current amount of damage
 	protected Damage[] aDamage;				//Array of the length of the ship providing information on the damage status of every square (head == 0)
 	
-	/**
-	 * Used to get the server Ship from the Ship sent in a move.
-	 */
-	public boolean equals(Object p1){
-		if( p1 == null )
-		{
-			return false;
-		}
-		if( p1 == this )
-		{
-			return true;
-		}
-		if( p1.getClass() != getClass() )
-		{
-			return false;
-		}
-		return this.aShipID == ((Ship)p1).getShipID() && this.getUsername().equals(((Ship)p1).getUsername());
-	}
-	/**
-	 * Written because I overwrote equals(), and good coding practices and whatnot.
-	 */
-	public int hashCode(){
-		return (aShipID+1)*(this.getUsername().hashCode());
-	}
-	public String toString(){
-		return aPlayer + "   id: " + aShipID;
-	}
+	
 	/**
 	 * This method should be called by the subclass after the construction of a ship
 	 */
@@ -227,8 +201,19 @@ public abstract class Ship implements Serializable
 		return aMaxSpeed;
 	}
 	
+	/**
+	 * Computes the actual speed out of the max speed and the number of damaged square
+	 * @return
+	 */
 	public int getActualSpeed() {
-		return aActualSpeed;
+		int speedValueOfASquare = aMaxSpeed / aDamage.length;
+		int numberDamagedSquares = 0;
+		for (int i=0; i<aDamage.length; i++) {
+			if (aDamage[i] == Damage.DESTROYED) {
+				numberDamagedSquares++;
+			}
+		}
+		return aMaxSpeed - (numberDamagedSquares * speedValueOfASquare);
 	}
 	
 	public Coordinate getHead() {
@@ -353,6 +338,7 @@ public abstract class Ship implements Serializable
 
 		return list;
 	}
+	
 	/**
 	 * Returns true if at least one square of the ship is damaged. 
 	 * @return
@@ -474,6 +460,35 @@ public abstract class Ship implements Serializable
 		
 		return myCoords;
 		
+	}
+	
+	
+	@Override
+	public boolean equals(Object p1){
+		if( p1 == null )
+		{
+			return false;
+		}
+		if( p1 == this )
+		{
+			return true;
+		}
+		if( p1.getClass() != getClass() )
+		{
+			return false;
+		}
+		return this.aShipID == ((Ship)p1).getShipID() && this.getUsername().equals(((Ship)p1).getUsername());
+	}
+	
+	/**
+	 * Written because I overwrote equals(), and good coding practices and whatnot.
+	 */
+	public int hashCode(){
+		return (aShipID+1)*(this.getUsername().hashCode());
+	}
+	
+	public String toString(){
+		return aPlayer + "   id: " + aShipID;
 	}
 	
 }
