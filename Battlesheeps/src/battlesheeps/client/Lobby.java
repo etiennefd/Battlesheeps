@@ -154,10 +154,11 @@ class UserListMouseAdapter extends MouseAdapter
 // TODO update clicker write listener for games list
 class GamesListMouseAdapter extends MouseAdapter
 {
-	private JList<LobbyMessageGameSummary> aList;
+	//private JList<LobbyMessageGameSummary> aList;
+	private JList aList;
 	private String requester;
 	private ClientLobby aClient;
-	public GamesListMouseAdapter(JList<LobbyMessageGameSummary> pList, String pRequester, ClientLobby pClient)
+	public GamesListMouseAdapter(JList pList, String pRequester, ClientLobby pClient)
 	{
 		this.aClient = pClient;
 		this.aList = pList;
@@ -171,14 +172,14 @@ class GamesListMouseAdapter extends MouseAdapter
             {
             	//get user to request
             	String userRequested = "";
-            	if(aList.getSelectedValue().getPlayer1().equals(aClient.getAccount()))
+            	/*if(aList.getSelectedValue().getPlayer1().equals(aClient.getAccount()))
             	{
             		userRequested = aList.getSelectedValue().getPlayer2().getUsername();
             	}
             	else
             	{
             		userRequested = aList.getSelectedValue().getPlayer1().getUsername();
-            	}
+            	}*/
             	
 	            SpringLayout layout = new SpringLayout();
 	            
