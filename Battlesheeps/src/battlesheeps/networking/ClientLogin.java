@@ -131,10 +131,10 @@ class ServerConnLogin implements Runnable {
 						aDialog.dispose();
 						aLoginFrame.setVisible(false);
 						aLoginFrame.dispose();
-						//TODO here's where to input more things into the lobby
+						//here's where to input more things into the lobby
 						System.out.println("Name going into lobby: "+ msg.getLogin());
 						new Lobby(msg.getLogin());
-						//TODO correct?
+						//correct?
 						close();
 					}
 				}

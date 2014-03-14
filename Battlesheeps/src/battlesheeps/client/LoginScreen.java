@@ -151,6 +151,7 @@ class AccountWizard implements ActionListener
         accountWizard.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         //Display the window.
+        accountWizard.setLocationRelativeTo(aLoginFrame);
         accountWizard.pack();
         accountWizard.setVisible(true);
 	}
@@ -301,6 +302,7 @@ public class LoginScreen {
         layout.putConstraint(SpringLayout.WEST, createButton, 100, SpringLayout.WEST, frame.getContentPane());
  
         frame.getContentPane().setLayout(layout);
+        frame.setLocationRelativeTo(null);
         
         //Display the window.
         frame.pack();

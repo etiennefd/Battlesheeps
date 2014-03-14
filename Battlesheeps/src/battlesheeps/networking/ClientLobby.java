@@ -193,7 +193,8 @@ class ServerConnLobby implements Runnable {
 						}
 						System.out.println();
 						aOutput.getLobby().updateOnlineUsers();
-						//TODO Re-match online users with saved games
+						//Re-match online users with saved games
+						aOutput.getLobby().updateSavedGames();
 					}
 					else {
 						// CASE 2: This user has just entered the lobby.
@@ -223,12 +224,18 @@ class ServerConnLobby implements Runnable {
 						System.out.print("Saved games: ");
 						for (LobbyMessageGameSummary game : msg.getGames()){
 							System.out.print(game.getGameID() + " ");
-							// TODO Populate saved game list and match any games with online users.
-							if(aOutput.getAccount().equals(game.getPlayer1()) ||
-									aOutput.getAccount().equals(game.getPlayer2()));
-							{
-								aOutput.getSavedGames().add(game);
-							}
+							// Populate saved game list with list already filtered for this user
+							//DONE IN GUI match any games with online users.
+							aOutput.getSavedGames().add(game);
+							if(game.hasPlayer(aOutput.getAccount())==1)
+			    			{
+			    				game.setMyGame(1);
+			    			}
+			    			else
+			    			{
+			    				game.setMyGame(2);
+			    			}
+							
 						}
 						System.out.println();
 						javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -244,11 +251,24 @@ class ServerConnLobby implements Runnable {
 					
 					if (r.getType() == LobbyRequest.REQUEST){
 						// Display requester info in pop-up with accept or decline buttons 
-						// TODO Lei, you'll need to check if a saved game exists with the user
+						//Lei, you'll need to check if a saved game exists with the user
+						
+						boolean isNewGame = true;
+						for(LobbyMessageGameSummary game : aOutput.getSavedGames())
+						{
+							String P1 = game.getPlayer1().getUsername();
+							String P2 = game.getPlayer2().getUsername();
+							if(msg.getRequest().getRequesterName().equals(P1)||
+									msg.getRequest().getRequesterName().equals(P2))
+							{
+								isNewGame = false;
+							}
+						}
+						
 						System.out.println("Game request from: " + r.getRequesterName());
 						System.out.println("Accept or Decline? (Input either a or d)");
 						
-						aOutput.getLobby().requestPopup(r.getRequesterName(), r.getRequestee());
+						aOutput.getLobby().requestPopup(r.getRequesterName(), r.getRequestee(), isNewGame);
 					
 						// Accept will trigger: DONE IN LOBBY CLASS
 						// aOutput.sendRequest(new Request(LobbyRequest.ACCEPT, r.getRequesterName(), r.getRequestee()));
@@ -263,7 +283,18 @@ class ServerConnLobby implements Runnable {
 					}
 					else if (r.getType() == LobbyRequest.ACCEPT){
 						// Opponent accepted invitation, move to game screen
-						aOutput.getLobby().requestAccepted();
+						boolean isNewGame = true;
+						for(LobbyMessageGameSummary game : aOutput.getSavedGames())
+						{
+							String P1 = game.getPlayer1().getUsername();
+							String P2 = game.getPlayer2().getUsername();
+							if(msg.getRequest().getRequestee().equals(P1)||
+									msg.getRequest().getRequestee().equals(P2))
+							{
+								isNewGame = false;
+							}
+						}
+						aOutput.getLobby().requestAccepted(r.getRequestee(),isNewGame);
 						System.out.println("Now beginning game with " + r.getRequestee() + "...");
 					}
 					else { 

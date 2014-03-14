@@ -1,7 +1,10 @@
 package battlesheeps.client;
 
-//TODO fix withdraw, make OPEN GAME WINDOW work, fix games list, make pretty
+//TODO add labels
+//TODO filter lists by if saved game or not
+//make pretty
 
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +30,9 @@ import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
 
 import battlesheeps.accounts.Account;
+import battlesheeps.networking.ClientGamesAndMoves;
 import battlesheeps.networking.ClientLobby;
+import battlesheeps.networking.LobbyMessageGameSummary;
 import battlesheeps.networking.Request;
 import battlesheeps.networking.Request.LobbyRequest;
 
@@ -75,14 +80,16 @@ class LogoutActionListener implements ActionListener
 /*
  * Handles user game request
  */
-class ListMouseAdapter extends MouseAdapter
+class UserListMouseAdapter extends MouseAdapter
 {
 	private JList<Account> aList;
 	private String requester;
 	private ClientLobby aClient;
+	private JFrame aFrame;
 	
-	public ListMouseAdapter(JList<Account> pList, String pRequester, ClientLobby pClient)
+	public UserListMouseAdapter(JList<Account> pList, String pRequester, ClientLobby pClient, JFrame pFrame)
 	{
+		this.aFrame = pFrame;
 		this.aClient = pClient;
 		this.aList = pList;
 		this.requester = pRequester;
@@ -91,7 +98,7 @@ class ListMouseAdapter extends MouseAdapter
         if (e.getClickCount() == 2) {
             int index = aList.locationToIndex(e.getPoint());
             System.out.println("Double clicked on Item " + index);
-            if(index != -1 && !aList.getSelectedValue().equals("No other players online :("))
+            if(index != -1)
             {
 	            SpringLayout layout = new SpringLayout();
 	            //user name player requested info to label
@@ -130,6 +137,82 @@ class ListMouseAdapter extends MouseAdapter
 				withdrawButton.addActionListener(new WithdrawListener(dialog, aClient, requester, userRequested));
 					
 				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+				dialog.setLocationRelativeTo(aFrame);
+				dialog.pack();
+				
+				aClient.sendRequest(new Request(LobbyRequest.REQUEST,requester,userRequested));
+				
+				dialog.setVisible(true);
+            }
+         }
+    }
+}
+// write listener for games list
+class GamesListMouseAdapter extends MouseAdapter
+{
+	private JList<LobbyMessageGameSummary> aList;
+	private String requester;
+	private ClientLobby aClient;
+	public GamesListMouseAdapter(JList<LobbyMessageGameSummary> pList, String pRequester, ClientLobby pClient)
+	{
+		this.aClient = pClient;
+		this.aList = pList;
+		this.requester = pRequester;
+	}
+    public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+            int index = aList.locationToIndex(e.getPoint());
+            System.out.println("Double clicked on Item " + index);
+            if(index != -1)
+            {
+            	//get user to request
+            	String userRequested = "";
+            	if(aList.getSelectedValue().getPlayer1().equals(aClient.getAccount()))
+            	{
+            		userRequested = aList.getSelectedValue().getPlayer2().getUsername();
+            	}
+            	else
+            	{
+            		userRequested = aList.getSelectedValue().getPlayer1().getUsername();
+            	}
+            	
+	            SpringLayout layout = new SpringLayout();
+	            
+	            final JPanel requestPane = new JPanel();
+	            JLabel waitLabel = new JLabel("Waiting for response from: ");
+	            JLabel userLabel = new JLabel(userRequested);
+	            requestPane.add(waitLabel);
+	            requestPane.add(userLabel);
+	            JButton withdrawButton = new JButton("Withdraw Request");
+	            requestPane.add(withdrawButton);
+	            
+	            layout.putConstraint(SpringLayout.NORTH, waitLabel, 10, SpringLayout.NORTH, requestPane);
+	            layout.putConstraint(SpringLayout.WEST, waitLabel, 10, SpringLayout.WEST, requestPane);
+	
+	            layout.putConstraint(SpringLayout.NORTH, userLabel, 10, SpringLayout.SOUTH, waitLabel);
+	            layout.putConstraint(SpringLayout.WEST, userLabel, 10, SpringLayout.WEST, requestPane);
+	            layout.putConstraint(SpringLayout.NORTH, withdrawButton, 10, SpringLayout.SOUTH, userLabel);
+	            
+	            layout.putConstraint(SpringLayout.WEST, withdrawButton, 10, SpringLayout.WEST, requestPane);
+	            layout.putConstraint(SpringLayout.SOUTH, withdrawButton, -10, SpringLayout.SOUTH, requestPane);
+	            
+	            requestPane.setLayout(layout);
+	            
+				final JDialog dialog = new JDialog();
+				dialog.setTitle("");
+				dialog.setModal(true);
+				dialog.setMinimumSize(new Dimension(225,125));
+				dialog.setMaximumSize(new Dimension(225,125));
+				dialog.setResizable(false);
+		
+				dialog.setContentPane(requestPane);
+				aClient.getLobby().setRequesterDialog(dialog);
+				
+				//add action listener to withdraw
+				withdrawButton.addActionListener(new WithdrawListener(dialog, aClient, requester, userRequested));
+					
+				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+				dialog.setLocationRelativeTo(aClient.getLobby().getFrame());
 				dialog.pack();
 				
 				aClient.sendRequest(new Request(LobbyRequest.REQUEST,requester,userRequested));
@@ -168,9 +251,10 @@ class AcceptListener implements ActionListener
 	private ClientLobby aClient;
 	private String requester;
 	private String requestee;
+	private boolean aNewGame;
 	
 	public AcceptListener(JDialog pWaitingRequest, ClientLobby pClient,
-			String pRequester, String pRequestee)
+			String pRequester, String pRequestee, boolean isNewGame)
 	{
 		this.aClient = pClient;
 		this.requester = pRequester;
@@ -184,8 +268,27 @@ class AcceptListener implements ActionListener
 		aClient.sendRequest(new Request(LobbyRequest.ACCEPT, requester, requestee));
 		aClient.getLobby().getFrame().setVisible(false);
 		aClient.getLobby().getFrame().dispose();
-		//TODO Open game
-		
+		//TODO Open game board
+		Integer gameID = 0;
+		if(aNewGame)	//open new game
+		{
+			ClientGame cg = new ClientGame(requestee);
+			new ClientGamesAndMoves(requestee, null, gameID, cg);
+		}
+		//open game with old game id
+		else 
+		{
+			for(LobbyMessageGameSummary game : aClient.getSavedGames())
+			{
+				if(game.getPlayer1().getUsername().equals(requester) ||
+						game.getPlayer2().getUsername().equals(requester))
+				{
+					gameID = game.getGameID();
+				}
+			}
+			ClientGame cg = new ClientGame(requestee);
+			new ClientGamesAndMoves(requestee, null, gameID, cg);
+		}
 	}
 }
 
@@ -195,9 +298,10 @@ class DeclineListener implements ActionListener
 	private ClientLobby aClient;
 	private String requester;
 	private String requestee;
+	private boolean aNewGame;
 	
 	public DeclineListener(JDialog pWaitingRequest, ClientLobby pClient, 
-			String pRequester, String pRequestee)
+			String pRequester, String pRequestee, boolean isNewGame)
 	{
 		this.aRequest = pWaitingRequest;
 		this.aClient = pClient;
@@ -264,8 +368,11 @@ public class Lobby
 {
 	private ClientLobby aClient;
 	private JList<Account> userList = new JList<Account>();
-	private JPanel listsPanel = new JPanel();
 	private DefaultListModel<Account> userData = new DefaultListModel<Account>();
+	private JList<LobbyMessageGameSummary> gamesList = new JList<LobbyMessageGameSummary>();
+	private DefaultListModel<LobbyMessageGameSummary> gamesData 
+		= new DefaultListModel<LobbyMessageGameSummary>();
+	private JPanel listsPanel = new JPanel();
 	private JDialog aRequesterDialog;
 	private JDialog aRequesteeDialog;
 	private JFrame aFrame;
@@ -287,13 +394,9 @@ public class Lobby
     
     public void requestWithdrawn(String requester)
     {
-    	if(requester.equals(aClient.getUsername()))
+    	if(!requester.equals(aClient.getUsername()))
     	{
-    		
-    	}
-    	else
-    	{
-    		System.out.println(aRequesteeDialog==null);
+    		System.out.println("Requestee exists: "+aRequesteeDialog==null);
 	    	aRequesteeDialog.setVisible(false);
 	    	aRequesteeDialog.dispose();
 	    	JOptionPane.showMessageDialog(null, requester + " has withdrawn their request.",
@@ -301,14 +404,34 @@ public class Lobby
     	}
     }
     
-    public void requestAccepted()
+    public void requestAccepted(String requestee,boolean isNewGame)
     {
     	aRequesterDialog.setVisible(false);
     	aRequesterDialog.dispose();
     	aFrame.setVisible(false);
     	aFrame.dispose();
     	
-    	//TODO: open game
+    	//TODO Open game board
+    	Integer gameID = 0;
+		if(isNewGame)
+		{
+			ClientGame cg = new ClientGame(aClient.getUsername());
+			new ClientGamesAndMoves(aClient.getUsername(), requestee, gameID, cg);
+		}
+		//open game with old game id
+		else 
+		{
+			for(LobbyMessageGameSummary game : aClient.getSavedGames())
+			{
+				if(game.getPlayer1().getUsername().equals(requestee) ||
+						game.getPlayer2().getUsername().equals(requestee))
+				{
+					gameID = game.getGameID();
+				}
+			}
+			ClientGame cg = new ClientGame(aClient.getUsername());
+			new ClientGamesAndMoves(aClient.getUsername(), null, gameID, cg);
+		}
     	
     }
     public void requestDeclined(String requestee)
@@ -319,13 +442,23 @@ public class Lobby
     			"Request Withdrawn", JOptionPane.INFORMATION_MESSAGE);
     }
     
-    public void requestPopup(String requester, String requestee)
+    public void requestPopup(String requester, String requestee, boolean isNewGame)
     {
     	SpringLayout layout = new SpringLayout();
 
     	final JPanel requestPane = new JPanel();
-        JLabel waitLabel = new JLabel("Game request from: ");
-        JLabel userLabel = new JLabel(requester);
+        
+    	JLabel waitLabel;
+    	if(isNewGame)
+    	{
+    		waitLabel = new JLabel("New Game request from: ");
+    	}
+    	else
+    	{
+    		waitLabel = new JLabel("Continue Game request from: ");
+    	}
+        
+    	JLabel userLabel = new JLabel(requester);
         requestPane.add(waitLabel);
         requestPane.add(userLabel);
         JButton acceptButton = new JButton("Accept");
@@ -344,9 +477,10 @@ public class Lobby
         layout.putConstraint(SpringLayout.SOUTH, acceptButton, -10, SpringLayout.SOUTH, requestPane);
         
         layout.putConstraint(SpringLayout.NORTH, declineButton, 10, SpringLayout.SOUTH, userLabel);
-        layout.putConstraint(SpringLayout.WEST, declineButton, 10, SpringLayout.WEST, acceptButton);
+        layout.putConstraint(SpringLayout.WEST, declineButton, 10, SpringLayout.EAST, acceptButton);
         layout.putConstraint(SpringLayout.SOUTH, declineButton, -10, SpringLayout.SOUTH, requestPane);
-        
+        layout.putConstraint(SpringLayout.EAST, declineButton, -10, SpringLayout.EAST, requestPane);
+
         requestPane.setLayout(layout);
         
 		final JDialog dialog = new JDialog();
@@ -359,11 +493,13 @@ public class Lobby
 		dialog.setContentPane(requestPane);
 		
 		//add action listeners
-		acceptButton.addActionListener(new AcceptListener(dialog, aClient, requester, requestee));
-		declineButton.addActionListener(new DeclineListener(dialog,aClient, requester, requestee));
+		acceptButton.addActionListener(new AcceptListener(dialog, aClient, requester, requestee,isNewGame));
+		declineButton.addActionListener(new DeclineListener(dialog,aClient, requester, requestee,isNewGame));
 		
-		//dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setLocationRelativeTo(aFrame);
 		aRequesteeDialog = dialog;
+		aRequesteeDialog.setModalityType(ModalityType.MODELESS);
 		dialog.pack();
 		dialog.setVisible(true);
     }
@@ -379,18 +515,34 @@ public class Lobby
    	        	userData.addElement(acct);
    	        }
     	}
-    	
-    	 /*if(aClient.getAccounts() == null || (aClient.getAccounts().size() ==0))
-         {
-         	userData.addElement("No other players online :(");
-         }   
-     	else
-     	{
- 	        for (Account acct : aClient.getAccounts())
- 	        {
- 	        	userData.addElement(acct.userString());
- 	        }
-         }*/ 
+    }
+    
+    public void  updateSavedGames()
+    {
+    	gamesData.clear();
+    	System.out.println("updating saved games");
+    	if(aClient.getSavedGames() != null)
+    	{
+    		for (LobbyMessageGameSummary game : aClient.getSavedGames())
+   	        {	
+    			if(game.getPlayer1().equals(aClient.getAccount()))
+    			{
+    				if(aClient.getAccounts().contains(game.getPlayer2()))
+    				{
+    					gamesData.addElement(game);
+    					userData.removeElement(game.getPlayer2());
+    				}
+    			}
+    			else
+				{
+    				if(aClient.getAccounts().contains(game.getPlayer1()))
+    				{
+    					gamesData.addElement(game);
+    					userData.removeElement(game.getPlayer1());
+    				}
+				}
+   	        }
+    	}
     }
     
     public void createAndShowLobby()
@@ -406,7 +558,7 @@ public class Lobby
         
         //ArrayList<String> userData = new ArrayList<String>();
         updateOnlineUsers();
-        MouseListener userListListener = new ListMouseAdapter(userList, aClient.getUsername(), aClient);
+        MouseListener userListListener = new UserListMouseAdapter(userList, aClient.getUsername(), aClient, aFrame);
         userList.addMouseListener(userListListener);
         JScrollPane userPane = new JScrollPane(userList);
         listsPanel.add(userPane);
@@ -415,11 +567,10 @@ public class Lobby
         layout.putConstraint(SpringLayout.WEST, userPane, 10, SpringLayout.WEST, listsPanel);
         layout.putConstraint(SpringLayout.EAST, userPane, -10, SpringLayout.EAST, listsPanel);
         
-        //TODO populate save games list
-        String[] testGamesList = {"Game1","Game2","Game3"};
-        JList<String> gamesList = new JList<String>(testGamesList);
-        //TODO write listener for games list
-        //MouseListener gamesListListener = new ListMouseAdapter(gamesList,aClient.getUsername(), aClient);
+        //populate save games list
+        
+        //updateSavedGames();
+        //MouseListener gamesListListener = new GamesListMouseAdapter(gamesList,aClient.getUsername(), aClient);
         //gamesList.addMouseListener(gamesListListener);
         
         JScrollPane gamesPane = new JScrollPane(gamesList);
@@ -482,6 +633,7 @@ public class Lobby
         layout.putConstraint(SpringLayout.SOUTH, accountPanel, -10, SpringLayout.SOUTH, aFrame.getContentPane());
         
         aFrame.getContentPane().setLayout(layout);
+        aFrame.setLocationRelativeTo(null);
         aFrame.pack();
         aFrame.setVisible(true);
 	}
