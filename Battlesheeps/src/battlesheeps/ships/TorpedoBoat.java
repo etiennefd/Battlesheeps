@@ -3,7 +3,6 @@ package battlesheeps.ships;
 import java.util.ArrayList;
 import java.util.List;
 
-import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.server.ServerGame.Direction;
 

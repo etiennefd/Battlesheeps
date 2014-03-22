@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import battlesheeps.board.Coordinate;
-import battlesheeps.accounts.Account;
 import battlesheeps.server.ServerGame.Direction;
 
 public class MineLayer extends Ship 

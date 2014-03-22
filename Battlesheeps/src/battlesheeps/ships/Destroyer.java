@@ -1,7 +1,5 @@
 package battlesheeps.ships;
 
-import battlesheeps.accounts.Account;
-
 public class Destroyer extends Ship 
 {
 	private static final long serialVersionUID = 6501047028829862958L;

@@ -33,7 +33,7 @@ public class ServerGame implements Serializable
 	}
 	
 	public enum Direction {
-		NORTH, SOUTH, EAST, WEST
+		NORTH, SOUTH, EAST, WEST, NO_DIRECTION
 	}
 	
 	public enum ClientInfo {

@@ -23,7 +23,7 @@ public class TestServer {
 		Account a1 = new Account("a", "a");
 		Account a2 = new Account("q", "q");
 		Account a3 = new Account("qwe", "qwe");
-		Account a4 = new Account("bobs", "password");
+		Account a4 = new Account("dinkle", "IamAdinkle");
 		Account player = new Account("player", "abc");
 		Account opponent = new Account("opponent", "def");
 		

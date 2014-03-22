@@ -6,7 +6,7 @@ import battlesheeps.networking.ClientGamesAndMoves;
 public class TestClient {
 	
 	public static void main(String[] args) {
-		ClientGame cl = new ClientGame("opponent");
-		ClientGamesAndMoves manager = new ClientGamesAndMoves("opponent", null, 1, cl); 
+		ClientGame cl = new ClientGame("q");
+		ClientGamesAndMoves manager = new ClientGamesAndMoves("q", null, 1, cl); 
 	}
 }

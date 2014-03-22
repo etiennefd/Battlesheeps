@@ -344,7 +344,7 @@ class FrameListener implements WindowListener
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		aLobby.close();
+//		aLobby.close();
 	}
 
 	@Override
