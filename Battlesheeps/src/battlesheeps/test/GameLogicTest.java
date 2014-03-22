@@ -92,6 +92,12 @@ public class GameLogicTest {
 //		game.computeMoveResult(r, MoveType.TRANSLATE_SHIP, new Coordinate(0, 1));
 //		System.out.println(game.printBoard());
 //		game.computeMoveResult(r, MoveType.FIRE_CANNON, new Coordinate(0, 11));
+		
+		KamikazeBoat k = new KamikazeBoat(null,6);
+		game.setShipPosition(k, new Coordinate(5, 12), new Coordinate(5, 12));
+		System.out.println(game.printBoard());
+		game.computeMoveResult(k, MoveType.SUICIDE_ATTACK, new Coordinate(5, 12));
+		
 		System.out.println(game.printBoard());
 		
 		LinkedList<LogEntry> log = game.getLog();

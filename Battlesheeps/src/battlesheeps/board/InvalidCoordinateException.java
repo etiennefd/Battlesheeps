@@ -1,4 +1,4 @@
-package battlesheeps.exceptions;
+package battlesheeps.board;
 
 public class InvalidCoordinateException extends RuntimeException {
 

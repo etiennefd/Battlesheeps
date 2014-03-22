@@ -12,7 +12,7 @@ public class LogEntry implements Serializable
 	public enum LogType {
 		CANNON_MISS, CANNON_HIT_REEF, CANNON_HIT_SHIP, CANNON_HIT_BASE, CANNON_HIT_MINE, 
 		TORPEDO_HIT_REEF, TORPEDO_HIT_SHIP, TORPEDO_HIT_BASE, TORPEDO_HIT_MINE, 
-		MINE_EXPLOSION, SHIP_SUNK, BASE_DESTROYED, COLLISION
+		MINE_EXPLOSION, SHIP_SUNK, BASE_DESTROYED, COLLISION, SUICIDE_ATTACK
 	}
 	
 	private int aCoordX;
@@ -101,6 +101,8 @@ public class LogEntry implements Serializable
 		case COLLISION: 
 			s = s + "A collision involving a ship occurred on square (" + x + ", " + y + ").";
 			break;
+		case SUICIDE_ATTACK:
+			s = s + "Suicidal explosion detected on square (" + x + ", " + y + "), damaging all around it!";
 		}
 		
 		s = s + "</html>";

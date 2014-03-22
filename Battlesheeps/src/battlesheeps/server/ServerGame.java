@@ -9,11 +9,11 @@ import battlesheeps.accounts.Account;
 import battlesheeps.board.BaseSquare;
 import battlesheeps.board.Coordinate;
 import battlesheeps.board.CoralReef;
+import battlesheeps.board.InvalidCoordinateException;
 import battlesheeps.board.MineSquare;
 import battlesheeps.board.Sea;
 import battlesheeps.board.ShipSquare;
 import battlesheeps.board.Square;
-import battlesheeps.exceptions.InvalidCoordinateException;
 import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.ships.Cruiser;
 import battlesheeps.ships.Destroyer;
@@ -29,11 +29,11 @@ public class ServerGame implements Serializable
 
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 
-		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP
+		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP, SUICIDE_ATTACK
 	}
 	
 	public enum Direction {
-		NORTH, SOUTH, EAST, WEST, NO_DIRECTION
+		NORTH, SOUTH, EAST, WEST
 	}
 	
 	public enum ClientInfo {
@@ -214,6 +214,17 @@ public class ServerGame implements Serializable
 	 */
 	public void setShipPosition(Ship pShip, Coordinate pHead, Coordinate pTail) {
 		
+		//Special case for ships of size 1 (kamikaze boat)
+		if (pShip.getSize() == 1) {
+			if (pHead.getX() == pTail.getX() && pHead.getY() == pTail.getY()) {
+				removeShip(pShip);
+				pShip.setLocation(pHead, pTail);
+				aBoard[pHead.getX()][pHead.getY()] = new ShipSquare(pShip, pShip.getDamageAtIndex(0), false);
+				return;
+			}
+			else throw new InvalidCoordinateException();
+		}
+		
 		//Are the head and the tail on the same X column? Do they correspond to the length of the ship? 
 		//Case NORTH or SOUTH
 		if (pHead.getX() == pTail.getX() && Math.abs(pHead.getY() - pTail.getY()) == pShip.getSize() - 1) {
@@ -377,6 +388,7 @@ public class ServerGame implements Serializable
 		case PICKUP_MINE: pickupMine(pShip, pCoord); break;
 		case TRIGGER_RADAR: triggerRadar(pShip); break;
 		case REPAIR_SHIP: pShip.repair(); break;
+		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord); break;
 		}
 		
 		aTurnNum++;
@@ -1912,7 +1924,23 @@ public class ServerGame implements Serializable
 		if (pShip instanceof RadarBoat) {
 			RadarBoat rb = (RadarBoat) pShip; 
 			rb.triggerRadar();
-			//Recompute visibility
+		}
+	}
+	
+	private void suicideAttack(Ship pShip, Coordinate pCoord) {
+		//First translate ship (might trigger a mine)
+		//Then explode, if the ship still exists
+		if (!pShip.isSunk()) {
+			//Cycle the 9 squares around (and including) pCoord (where the kamikaze boat now is!)
+			//Note that the kamikaze boat itself gets damaged and sunk in the process
+			for (int x = pCoord.getX() - 1; x <= pCoord.getX() + 1; x++) {
+				for (int y = pCoord.getY() - 1; y <= pCoord.getY() + 1; y++) {
+					Square s = aBoard[x][y]; 
+					if (s instanceof ShipSquare) {
+						damageShip(((ShipSquare) s).getShip(), new Coordinate(x, y), true);
+					}
+				}
+			}
 		}
 	}
 	
@@ -1991,7 +2019,7 @@ public class ServerGame implements Serializable
 	 * @param pCoord
 	 * @param pHeavy If true, damage ignores heavy armor and destroys the ship square regardless. 
 	 */
-	private void damageShip(Ship pAttackedShip, Coordinate pCoord, boolean pHeavy) {
+	private void damageShip(Ship pAttackedShip, Coordinate pCoord, boolean pHeavy) {		
 		
 		//Damage the ship
 		boolean damageDealt = pAttackedShip.setDamageAtIndex(pAttackedShip.getDamageIndex(pCoord), pHeavy);
@@ -2158,6 +2186,10 @@ public class ServerGame implements Serializable
 	
 	public LinkedList<LogEntry> getLog() {
 		return aLogEntryList;
+	}
+	
+	public String getWinnerName() {
+		return aWinner;
 	}
 	
 	

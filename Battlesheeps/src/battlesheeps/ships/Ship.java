@@ -6,7 +6,7 @@ import java.util.List;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
-import battlesheeps.exceptions.InvalidCoordinateException;
+import battlesheeps.board.InvalidCoordinateException;
 import battlesheeps.server.ServerGame.Direction;
 
 /**
@@ -248,9 +248,6 @@ public abstract class Ship implements Serializable
 	public Direction getDirection() {
 		if (aLocationHead == null || aLocationTail == null) {
 			return null;
-		}
-		if (aLocationHead.getX() == aLocationTail.getX() && aLocationHead.getY() == aLocationTail.getY()) {
-			return Direction.NO_DIRECTION;
 		}
 		if (aLocationHead.getX() == aLocationTail.getX()) {
 			//Both head and tail in same column: either facing North or South

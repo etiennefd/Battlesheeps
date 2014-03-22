@@ -9,6 +9,7 @@ import battlesheeps.ships.RadarBoat;
 import battlesheeps.ships.Ship;
 import battlesheeps.ships.Ship.Damage;
 import battlesheeps.ships.TorpedoBoat;
+import battlesheeps.ships.KamikazeBoat;
 
 public class ShipSquare implements Square, Serializable 
 {
@@ -35,6 +36,8 @@ public class ShipSquare implements Square, Serializable
 			s = "M";
 		} else if (aShip instanceof RadarBoat) {
 			s = "R";
+		} else if (aShip instanceof KamikazeBoat) {
+			s = "K";
 		} else s = "S";
 		
 		if (aHead) s = s.toLowerCase();
