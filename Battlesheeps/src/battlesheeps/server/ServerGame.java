@@ -1941,6 +1941,7 @@ public class ServerGame implements Serializable
 					}
 				}
 			}
+			aLogEntryList.add(new LogEntry(LogType.SUICIDE_ATTACK, pCoord.getX(), pCoord.getY(), aTurnNum));
 		}
 	}
 	
