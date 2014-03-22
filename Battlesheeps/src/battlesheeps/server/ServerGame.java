@@ -1931,6 +1931,7 @@ public class ServerGame implements Serializable
 		//First translate ship (might trigger a mine)
 		//Then explode, if the ship still exists
 		if (!pShip.isSunk()) {
+			aLogEntryList.add(new LogEntry(LogType.SUICIDE_ATTACK, pCoord.getX(), pCoord.getY(), aTurnNum));
 			//Cycle the 9 squares around (and including) pCoord (where the kamikaze boat now is!)
 			//Note that the kamikaze boat itself gets damaged and sunk in the process
 			for (int x = pCoord.getX() - 1; x <= pCoord.getX() + 1; x++) {
@@ -1941,7 +1942,6 @@ public class ServerGame implements Serializable
 					}
 				}
 			}
-			aLogEntryList.add(new LogEntry(LogType.SUICIDE_ATTACK, pCoord.getX(), pCoord.getY(), aTurnNum));
 		}
 	}
 	
