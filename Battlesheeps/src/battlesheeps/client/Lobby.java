@@ -1,8 +1,7 @@
 package battlesheeps.client;
 
-//TODO filter lists by if saved game or not
 //make pretty
-
+//TODO only allow one selection to be made in lists
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -153,7 +152,6 @@ class UserListMouseAdapter extends MouseAdapter
 // TODO update clicker write listener for games list
 class GamesListMouseAdapter extends MouseAdapter
 {
-	//private JList<LobbyMessageGameSummary> aList;
 	private JList aList;
 	private String requester;
 	private ClientLobby aClient;
@@ -170,16 +168,12 @@ class GamesListMouseAdapter extends MouseAdapter
             if(index != -1)
             {
             	//get user to request
-            	String userRequested = "";
-            	/*if(aList.getSelectedValue().getPlayer1().equals(aClient.getAccount()))
-            	{
-            		userRequested = aList.getSelectedValue().getPlayer2().getUsername();
-            	}
-            	else
-            	{
-            		userRequested = aList.getSelectedValue().getPlayer1().getUsername();
-            	}*/
-            	
+            	String userRequested = (String) aList.getSelectedValue().toString();
+            	int startIndex = userRequested.indexOf(">");
+            	int endIndex = userRequested.indexOf("(");
+	            userRequested = userRequested.substring(startIndex+1, endIndex-1);
+	            System.out.println(userRequested);
+
 	            SpringLayout layout = new SpringLayout();
 	            
 	            final JPanel requestPane = new JPanel();
@@ -559,10 +553,8 @@ public class Lobby
     	    					System.out.println("adding game: "+game.getGameID());
     	    					gamesData.addElement(game);
     	    					
-    	    					//TODO remove opponent from available players
-    	    					userData.removeElement((game.getPlayer2() + " (" 
-    	    					+ game.getPlayer2().getNumGamesWon() + " : " 
-    	    							+ game.getPlayer2().getNumGamesLost() + ")"));
+    	    					//remove opponent from available players list
+    	    					userData.removeElement(acct.toString());
     	    				}
     		   	        }
     		    	}
@@ -584,10 +576,8 @@ public class Lobby
     	    					System.out.println("adding game: "+game.getGameID());
     	    					gamesData.addElement(game);
     	    					
-    	    					//TODO remove opponent from available players
-    	    					userData.removeElement((game.getPlayer1() + " (" 
-    	    	    					+ game.getPlayer1().getNumGamesWon() + " : " 
-    	    	    							+ game.getPlayer1().getNumGamesLost() + ")"));
+    	    					//remove opponent from available players lisr
+    	    					userData.removeElement(acct.toString());
     	    				}
     		   	        }
     		    	}

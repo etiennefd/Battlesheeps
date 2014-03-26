@@ -1,6 +1,6 @@
 package battlesheeps.client;
 //TODO JTextField doesn't always work
-//TODO make slow connection popups in middle
+//TODO disallow < > and ( )
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;

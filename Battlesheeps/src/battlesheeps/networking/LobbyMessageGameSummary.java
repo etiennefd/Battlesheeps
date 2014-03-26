@@ -76,7 +76,7 @@ public class LobbyMessageGameSummary implements Serializable
 		{
 			opponent = aPlayer2;
 		}
-		return opponent.toString() + "\nTurn " + aTurnNum + "\nLast turn played on " +
-					aDateLastPlayed;
+		return "<html>" + opponent.toString() + "<br>Turn " + aTurnNum + "<br>" +
+					"Last turn played on " + aDateLastPlayed;
 	}
 }
