@@ -127,10 +127,25 @@ class ClientConnLogin implements Runnable {
             			Account thisAcct = getAccount(msg.getLogin());
             			if (thisAcct.getPassword().equals(msg.getPassword()))
             			{
+            				System.out.println("Password correct." + thisAcct.getAvailability());
             				// Password correct
-            				thisAcct.setAvailability(Status.AVAILABLE);
-            				aOutput.writeObject(new LoginMessage(LoginType.LOGIN, msg.getLogin(), ""));
-            				// Send lobby?
+            				
+            				if(thisAcct.getAvailability()!=Status.AVAILABLE)
+            				{	
+            					//user not already logged in
+            					thisAcct.setAvailability(Status.AVAILABLE);
+                				aOutput.writeObject(new LoginMessage(LoginType.LOGIN, msg.getLogin(), ""));
+            				}
+            				else
+            				{	
+            					//user already logged in
+            					aOutput.writeObject(new LoginMessage(LoginType.LOGIN, FAILURE, "Already logged in to this server."));
+            				}
+            				//TODO remove check availabilty on server
+            				for(Account a : aAccounts.values())
+            				{
+            					System.out.println(a.getUsername()+" "+ a.getAvailability());
+            				}
             			}
             			else {
             				// Password incorrect
