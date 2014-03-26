@@ -127,7 +127,6 @@ class ClientConnLogin implements Runnable {
             			Account thisAcct = getAccount(msg.getLogin());
             			if (thisAcct.getPassword().equals(msg.getPassword()))
             			{
-            				System.out.println("Password correct." + thisAcct.getAvailability());
             				// Password correct
             				
             				if(thisAcct.getAvailability()!=Status.AVAILABLE)
@@ -141,7 +140,7 @@ class ClientConnLogin implements Runnable {
             					//user already logged in
             					aOutput.writeObject(new LoginMessage(LoginType.LOGIN, FAILURE, "Already logged in to this server."));
             				}
-            				//TODO remove check availabilty on server
+            				//TODO remove this check 
             				for(Account a : aAccounts.values())
             				{
             					System.out.println(a.getUsername()+" "+ a.getAvailability());

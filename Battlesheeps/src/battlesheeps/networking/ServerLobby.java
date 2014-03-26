@@ -1,5 +1,6 @@
 package battlesheeps.networking;
 
+//TODO sometimes the lobby doesn't update properly, threading issue?
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,6 +13,7 @@ import java.util.Iterator;
 import java.util.Queue;
 
 import battlesheeps.accounts.Account;
+import battlesheeps.accounts.Account.Status;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
 import battlesheeps.networking.Request.LobbyRequest;
 import battlesheeps.server.GameManager;
@@ -149,6 +151,10 @@ class ClientConnLobby implements Runnable {
             		{
             			// send acceptance to requester
             			this.respondToAccept(r);
+            			
+            			//TODO test if this works, update status once game is exited out 
+            			GameManager.getInstance().getAccount(r.getRequestee()).setAvailability(Status.IN_GAME);
+            			GameManager.getInstance().getAccount(r.getRequesterName()).setAvailability(Status.IN_GAME);
             		}
             		else 
             		{ 
@@ -162,8 +168,9 @@ class ClientConnLobby implements Runnable {
             			aAccount = GameManager.getInstance().getAccount(aUsername);
             			addConnection(aUsername, this);
             			addAccount(aAccount);
-            			// TODO set user to online? EXECUTIVE DECISION, I'm not using player availability.
-
+            			// set user to online? EXECUTIVE DECISION, I'm not using player availability.
+            			//EDIT^ already done
+            			
             			// update users of new online user
             			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aServer.getOnlineaccounts(), null);
             			updateAllClients(lobbyMsg);
@@ -187,13 +194,24 @@ class ClientConnLobby implements Runnable {
 //            			System.out.println(aUsername + " has connected");
             		}
             		else { // exiting
+            			System.out.println(aUsername + " is disconnecting.");
             			removeConnection(aUsername);
             			removeAccount(aAccount);
-
+            			
+            			//turn availability to offline
+            			GameManager.getInstance().getAccount(aUsername).setAvailability(Status.OFFLINE);
+            			
+            			//TODO remove this check 
+        				for(Account a : GameManager.getInstance().getAccounts().values())
+        				{
+        					System.out.println(a.getUsername()+" "+ a.getAvailability());
+        				}
+            			
             			// update users of new online user
             			LobbyMessageToClient lobbyMsg = new LobbyMessageToClient(aServer.getOnlineaccounts(), null);
             			updateAllClients(lobbyMsg);
-//            			System.out.println(aUsername + " has disconnected");
+            			System.out.println(aUsername + " has disconnected");
+
             			// closed socket execute close()
             		}
             	}

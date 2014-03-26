@@ -1,6 +1,6 @@
 package battlesheeps.client;
 //TODO JTextField doesn't always work
-
+//TODO make slow connection popups in middle
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -60,7 +60,8 @@ class LoginListener implements ActionListener
 
 			dialog.setTitle("");
 			dialog.setModal(true);
-	
+			
+			dialog.setLocationRelativeTo(aLoginFrame);
 			dialog.setContentPane(optionPane);
 			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.pack();
@@ -217,7 +218,7 @@ class CreateAccountListener implements ActionListener {
 			dialog.setModal(true);
 	
 			dialog.setContentPane(optionPane);
-	
+			dialog.setLocationRelativeTo(aLoginFrame);
 			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.pack();
 	

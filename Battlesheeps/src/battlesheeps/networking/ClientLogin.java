@@ -18,7 +18,7 @@ public class ClientLogin
     /* Host to connect to. This can be "localhost" if running both client/server 
      * on your computer, or the IP address of the host. 
      */
-    private static final String HOST = "142.157.113.139"; 
+    private static final String HOST = "localhost"; 
     private static final int PORT = 5002; /* port to connect to */
     private ObjectOutputStream aOutput = null;
     

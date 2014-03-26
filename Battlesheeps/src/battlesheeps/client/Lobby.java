@@ -339,12 +339,14 @@ class FrameListener implements WindowListener
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		System.out.println("Window closed.");
 		aLobby.close();
 	}
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		//aLobby.close();
+		System.out.println("Window closed.");
+		aLobby.close();
 	}
 
 	@Override
@@ -374,14 +376,9 @@ public class Lobby
 	private ClientLobby aClient;
 	
 	private JList userList = new JList();
-	//private JList<Account> userList = new JList<Account>();
 	private DefaultListModel userData = new DefaultListModel();
-	//private DefaultListModel<Account> userData = new DefaultListModel<Account>();
 	
-	//private JList<LobbyMessageGameSummary> gamesList = new JList<LobbyMessageGameSummary>();
 	private JList gamesList = new JList();
-	//private DefaultListModel<LobbyMessageGameSummary> gamesData 
-	//	= new DefaultListModel<LobbyMessageGameSummary>();
 	private DefaultListModel gamesData = new DefaultListModel();
 
 	private JPanel listsPanel = new JPanel();
@@ -534,26 +531,67 @@ public class Lobby
     public void  updateSavedGames()
     {
     	gamesData.clear();
+    	
     	System.out.println("updating saved games");
     	if(aClient.getSavedGames() != null)
     	{
+    		System.out.println("user has saved games");
     		for (LobbyMessageGameSummary game : aClient.getSavedGames())
    	        {	
+    			//below this user is player one in this game
     			if(game.getPlayer1().equals(aClient.getAccount()))
     			{
-    				if(aClient.getAccounts().contains(game.getPlayer2()))
-    				{
-    					gamesData.addElement(game);
-    					userData.removeElement(game.getPlayer2());
-    				}
+
+    				System.out.println("user is player 1, player 2 is "+game.getPlayer2().getUsername());
+    				
+    				//remove this if
+    		    	if(aClient.getAccounts() != null && (aClient.getAccounts().size() !=0))
+    		    	{
+    		    		System.out.println("first element " +aClient.getAccounts().get(0).getUsername());
+    		    		for (Account acct : aClient.getAccounts())
+    		   	        {
+    		   	        	System.out.println(acct.getUsername());
+    		   	        	
+    		   	       //below this checks if player 2 of this game is online
+    	    				if(acct.getUsername().equals(game.getPlayer2().getUsername()))
+    	    				{
+    	    					System.out.println("user is player 1 and player 2 is online");
+    	    					System.out.println("adding game: "+game.getGameID());
+    	    					gamesData.addElement(game);
+    	    					
+    	    					//TODO remove opponent from available players
+    	    					userData.removeElement((game.getPlayer2() + " (" 
+    	    					+ game.getPlayer2().getNumGamesWon() + " : " 
+    	    							+ game.getPlayer2().getNumGamesLost() + ")"));
+    	    				}
+    		   	        }
+    		    	}
     			}
-    			else
+    			else //this user is player two in this game
 				{
-    				if(aClient.getAccounts().contains(game.getPlayer1()))
-    				{
-    					gamesData.addElement(game);
-    					userData.removeElement(game.getPlayer1());
-    				}
+    				System.out.println("user is player 2, player 1 is "+game.getPlayer1().getUsername());
+    				
+    				//remove this if
+    		    	if(aClient.getAccounts() != null && (aClient.getAccounts().size() !=0))
+    		    	{
+    		    		for (Account acct : aClient.getAccounts())
+    		   	        {
+    		   	        	System.out.println(acct.getUsername());
+    		   	       //below checks if player 1 of this game is online
+    	    				if(acct.getUsername().equals(game.getPlayer1().getUsername()))
+    	    				{
+    	    					System.out.println("user is player 2 and player 1 is online");
+    	    					System.out.println("adding game: "+game.getGameID());
+    	    					gamesData.addElement(game);
+    	    					
+    	    					//TODO remove opponent from available players
+    	    					userData.removeElement((game.getPlayer1() + " (" 
+    	    	    					+ game.getPlayer1().getNumGamesWon() + " : " 
+    	    	    							+ game.getPlayer1().getNumGamesLost() + ")"));
+    	    				}
+    		   	        }
+    		    	}
+    				
 				}
    	        }
     	}
@@ -592,6 +630,8 @@ public class Lobby
         //populate save games list
         JLabel gamesTitle = new JLabel("AVAILABLE GAMES TO CONTINUE");
         listsPanel.add(gamesTitle);
+        
+        gamesList.setModel(gamesData);
         
         updateSavedGames();
         MouseListener gamesListListener = new GamesListMouseAdapter(gamesList,aClient.getUsername(), aClient);
