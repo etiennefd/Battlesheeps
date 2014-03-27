@@ -254,6 +254,11 @@ public class ClientGame {
 		
 	}
 	
+	//setup is done!
+	public void setupComplete() {
+		aBoardPanel.startGame();
+	}
+	
 	//method to compute the available base positions 
 	private List<Coordinate> computePositionsAtBase () {
 		List<Coordinate> ls = new ArrayList<Coordinate>();
