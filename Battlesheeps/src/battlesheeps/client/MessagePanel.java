@@ -291,7 +291,7 @@ public class MessagePanel extends JPanel {
 		
 		//finally, if the ship is damaged and touching it's own base, repair ship is an option
 		if (pShip.isDamaged() && pTouchingBase) {
-			JButton baseButton = new JButton("Fire torpedo");
+			JButton baseButton = new JButton("Repair ship");
 			baseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					//tell Client that torpedo was selected for this ship
