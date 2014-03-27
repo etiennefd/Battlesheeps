@@ -785,6 +785,15 @@ public class ClientGame {
 		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
+	protected void suicideSelected(Ship pShip) {
+		aCurrentClickedMove = MoveType.SUICIDE_ATTACK;
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		//TODO
+		
+		
+		aBoardPanel.showAvailableMoves(greenList);
+	}
+	
 	protected void turnExtendedRadarOn () {
 		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
 		//we can tell the server right away that this move was selected
@@ -805,6 +814,7 @@ public class ClientGame {
 		//coordinate doesn't matter
 		greenSelected(null);
 	}
+	
 	
 	/**
 	 * GUI tells Client that a green square was selected. 

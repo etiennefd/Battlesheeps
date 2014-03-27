@@ -47,7 +47,7 @@ public class TestGameBoard{
 		List<Ship> p1ships = myGame.getP1ShipList();
 		List<Ship> p2ships = myGame.getP2ShipList();
 		
-		//0-1 CRUISER, 2-4 DESTROYER, 5-6 TORPEDO, 7-8 MINE, 9 - RADAR
+		//0-1 CRUISER, 2-4 DESTROYER, 5-6 TORPEDO, 7-8 MINE, 9 RADAR, 10 KAMIKAZE
 		
 		//P1 ships 
 		
@@ -71,6 +71,9 @@ public class TestGameBoard{
 		//radar
 		myGame.setShipPosition(p1ships.get(9), new Coordinate(3, 19), new Coordinate(1, 19));
 		
+		//kamikaze
+		myGame.setShipPosition(p1ships.get(10), new Coordinate(0, 20), new Coordinate(0, 20));
+		
 		//P2 ships 
 		
 		//cruisers 
@@ -93,6 +96,8 @@ public class TestGameBoard{
 		//radar
 		myGame.setShipPosition(p2ships.get(9), new Coordinate(26, 19), new Coordinate(28, 19));
 		
+		//kamikaze
+		myGame.setShipPosition(p2ships.get(10), new Coordinate(29, 20), new Coordinate(29, 20));
 
 		
 		//Add some mines
@@ -112,8 +117,10 @@ public class TestGameBoard{
 		new Thread(new ServerGamesAndMoves()).start();
 		
 		client = new ClientGame(player.getUsername());
+		client.setupComplete();
 		ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
 		ClientGame clientO = new ClientGame(opponent.getUsername());
+		clientO.setupComplete();
 		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 1, clientO);
 		
 	}

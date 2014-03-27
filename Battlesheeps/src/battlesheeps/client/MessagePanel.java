@@ -145,41 +145,46 @@ public class MessagePanel extends JPanel {
 		this.removeAll();
 		
 		//show ship details 
-		JLabel nameLabel;
-		JLabel speedLabel;
-		JLabel weaponLabel;
-		JLabel armourLabel;
+		JLabel nameLabel = new JLabel("");
+		JLabel speedLabel = new JLabel("");
+		JLabel weaponLabel = new JLabel("");
+		JLabel armourLabel = new JLabel("");
 		
 		if (pShip instanceof Cruiser) {
-			nameLabel = new JLabel("Cool Cruiser");
-			weaponLabel = new JLabel("Weapon: Cannon");
-			armourLabel = new JLabel("Armour: Heavy");
+			nameLabel.setText("Cruiser");
+			weaponLabel.setText("Weapon: Heavy cannon");
+			armourLabel.setText("Armour: Heavy");
 		} 
 		else if (pShip instanceof Destroyer) {
-			nameLabel = new JLabel("Deadly Destroyer");
-			weaponLabel = new JLabel("Weapon: Cannon");
-			armourLabel = new JLabel("Armour: Normal");
+			nameLabel.setText("Destroyer");
+			weaponLabel.setText("Weapons: Cannon, Torpedoes");
+			armourLabel.setText("Armour: Normal");
 		}
 		else if (pShip instanceof MineLayer) {
-			nameLabel = new JLabel("Magnificent Mine Layer");
+			nameLabel.setText("Mine Layer");
 			int mines = ((MineLayer)pShip).getMineSupply();
-			weaponLabel = new JLabel("Weapons: Cannon, Mines (" + mines + ")");
-			armourLabel = new JLabel("Armour: Heavy");		
+			weaponLabel.setText("Weapons: Cannon, Mines (" + mines + ")");
+			armourLabel.setText("Armour: Heavy");		
 		}
 		else if (pShip instanceof RadarBoat) {
-			nameLabel = new JLabel("Radioactive Radar Boat");
-			weaponLabel = new JLabel("Weapons: Cannon");
-			armourLabel = new JLabel("Armour: Normal");
+			nameLabel.setText("Radar Boat");
+			weaponLabel.setText("Weapons: Cannon");
+			armourLabel.setText("Armour: Normal");
 		} 
-		else /*TORPEDO*/ {
-			nameLabel = new JLabel("Terrifying Torpedo Boat");
-			weaponLabel = new JLabel("Weapons: Cannon, Torpedo");
+		else if (pShip instanceof TorpedoBoat) {
+			nameLabel.setText("Torpedo Boat");
+			weaponLabel = new JLabel("Weapons: Cannon, Torpedoes");
 			armourLabel = new JLabel("Armour: Normal");
+		}
+		else if (pShip instanceof KamikazeBoat) {
+			nameLabel.setText("Kamikaze Boat");
+			weaponLabel.setText("Weapon: Suicide explosion");
+			armourLabel.setText("Armour: Heavy");
 		}
 		
 		int maxSpeed = pShip.getMaxSpeed();
 		int actualSpeed = pShip.getActualSpeed();
-		speedLabel = new JLabel("Speed: " + actualSpeed + "/" + maxSpeed);
+		speedLabel.setText("Speed: " + actualSpeed + "/" + maxSpeed);
 		
 		this.add(nameLabel);
 		this.add(speedLabel);
@@ -213,19 +218,24 @@ public class MessagePanel extends JPanel {
 			}
 		});
 		
+		//Adding the move button
+		//The button is not added if the radar boat's radar is on
 		boolean moveAllowed = true;
 		if (pShip instanceof RadarBoat) {
 			if (((RadarBoat)pShip).isExtendedRadarOn()) {
 				moveAllowed = false;
 			}
 		}
-		
 		if (moveAllowed) this.add(moveButton);
 		
-		this.add(turnButton);
-		this.add(cannonButton);
+		//Adding the turn and cannon buttons: all ships have them except the kamikaze
+		if (!(pShip instanceof KamikazeBoat)) {
+			this.add(turnButton);
+			this.add(cannonButton);
+		}
 		
 		//Mine layers can lay mines as well as do all the normal moves
+		//So we create and add a lay mine and a retrieve mine button
 		if (pShip instanceof MineLayer) {
 			//you can only lay a mine if you have at least 1
 			if (((MineLayer)pShip).getMineSupply() > 0) {
@@ -237,10 +247,9 @@ public class MessagePanel extends JPanel {
 						aClient.layMineSelected(aCurrentShip);
 					}
 				});
-				
 				this.add(layMineButton);
 			}
-			//but you can always retrieve a mine... 
+			//you can always retrieve a mine... 
 			//well, the client will determine if that's possible, not the message panel 
 			JButton retrieveMineButton = new JButton("Retrieve mine in vicinity");
 			retrieveMineButton.addActionListener(new ActionListener() {
@@ -251,7 +260,9 @@ public class MessagePanel extends JPanel {
 			});
 			
 			this.add(retrieveMineButton);
-		} //Radar Boats can extend its radar 
+		} 
+		
+		//Radar Boats can extend their radar
 		else if (pShip instanceof RadarBoat){
 			if (((RadarBoat)pShip).isExtendedRadarOn()) {
 				
@@ -264,8 +275,8 @@ public class MessagePanel extends JPanel {
 				});
 				
 				this.add(turnOffButton);
-				
-			}else {
+			}
+			else {
 				JButton turnOnButton = new JButton("Turn on extended radar");
 				turnOnButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -276,8 +287,9 @@ public class MessagePanel extends JPanel {
 				
 				this.add(turnOnButton);
 			}
-		} //Torpedo boats can fire torpedos 
-		else if (pShip instanceof TorpedoBoat) {
+		}
+		//Torpedo boats and destroyers can fire torpedos 
+		else if (pShip instanceof TorpedoBoat || pShip instanceof Destroyer) {
 			JButton torpedoButton = new JButton("Fire torpedo");
 			torpedoButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -287,6 +299,18 @@ public class MessagePanel extends JPanel {
 			});
 			
 			this.add(torpedoButton);
+		}
+		
+		else if (pShip instanceof KamikazeBoat) {
+			JButton suicideButton = new JButton("Suicide attack");
+			suicideButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//tell Client that suicide attack was selected for this ship
+					aClient.suicideSelected(aCurrentShip);
+				}
+			});
+			
+			this.add(suicideButton);
 		}
 		
 		//finally, if the ship is damaged and touching it's own base, repair ship is an option

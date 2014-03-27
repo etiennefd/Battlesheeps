@@ -115,6 +115,7 @@ public class ServerGame implements Serializable
 		aShipListP1.add(new MineLayer(aPlayer1, 7));
 		aShipListP1.add(new MineLayer(aPlayer1, 8));
 		aShipListP1.add(new RadarBoat(aPlayer1, 9));
+		aShipListP1.add(new KamikazeBoat(aPlayer1, 10));
 		
 		aShipListP2 = new ArrayList<Ship>();
 		aShipListP2.add(new Cruiser(aPlayer2, 0));
@@ -127,6 +128,7 @@ public class ServerGame implements Serializable
 		aShipListP2.add(new MineLayer(aPlayer2, 7));
 		aShipListP2.add(new MineLayer(aPlayer2, 8));
 		aShipListP2.add(new RadarBoat(aPlayer2, 9));
+		aShipListP2.add(new KamikazeBoat(aPlayer2, 10));
 
 		/* TODO
 		 * THIS SHOULD BE REMOVED AND REMPLACED WITH THE SETUP PHASE!
@@ -389,7 +391,7 @@ public class ServerGame implements Serializable
 		case DROP_MINE: dropMine(pShip, pCoord); break;
 		case PICKUP_MINE: pickupMine(pShip, pCoord); break;
 		case TRIGGER_RADAR: triggerRadar(pShip); break;
-		case REPAIR_SHIP: pShip.repair(); break;
+		case REPAIR_SHIP: repairShip(pShip); break;
 		default: throw new InvalidMoveReceivedException();
 		}
 		
@@ -2002,6 +2004,11 @@ public class ServerGame implements Serializable
 			RadarBoat rb = (RadarBoat) pShip; 
 			rb.triggerRadar();
 		}
+	}
+	
+	private void repairShip(Ship pShip) {
+		pShip.repair();
+		setShipPosition(pShip, pShip.getHead(), pShip.getTail());
 	}
 	
 	/**
