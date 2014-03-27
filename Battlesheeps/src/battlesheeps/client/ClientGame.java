@@ -241,6 +241,30 @@ public class ClientGame {
 	public void setManager(ClientGamesAndMoves pManager) {
 		myManager = pManager;
 	}
+	
+	/***********************SETUP SECTION ****************************/
+	
+	public void showAvailablePositions(Ship s) {
+		
+		//let's keep track of which ship we want to show the moves for 
+		aCurrentClickedShip = s;
+		//TODO
+		//let's compute the available 
+		//and now let's tell the board to display the green squares 
+		
+	}
+	
+	//method to compute the available base positions 
+	private List<Coordinate> computePositionsAtBase () {
+		List<Coordinate> ls = new ArrayList<Coordinate>();
+		//TODO
+		return ls;
+	}
+	
+	//call startGame() in GameBoard once setup is done... 
+	
+	/**********************IN GAME SECTION****************************/
+	
 	/*After each move, 
 	 * 1. the board will be updated 
 	 * 2. the log entries will be updated 
@@ -286,7 +310,7 @@ public class ClientGame {
 	}
 	
 	/**
-	 * Client tells message panel to display menu for ship 
+	 * Client tells message panel to display action menu for ship 
 	 * @param pShip
 	 */
 	public void showShipMenu(Ship pShip) {
@@ -733,7 +757,7 @@ public class ClientGame {
 		aCurrentClickedMove = MoveType.DROP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		//CANNOT DROP MINE NEXT TO ANOTHER SHIP OR BASE
-		
+		//TODO
 		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
@@ -741,7 +765,7 @@ public class ClientGame {
 	protected void retrieveMineSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.PICKUP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		
+		//TODO
 		
 		
 		aBoardPanel.showAvailableMoves(greenList);
@@ -750,7 +774,7 @@ public class ClientGame {
 	protected void torpedoSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.FIRE_TORPEDO;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		
+		//TODO
 		
 		
 		aBoardPanel.showAvailableMoves(greenList);
@@ -788,7 +812,12 @@ public class ClientGame {
 		//send as Move Object to Server
 		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove, null);
 		System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
-		aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
+		
+		if (aCurrentClickedMove == MoveType.REPAIR_SHIP || aCurrentClickedMove == MoveType.TRIGGER_RADAR) {
+			aMessagePanel.displayMessage("" + aCurrentClickedMove +"");
+		} else {
+			aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
+		}
 		myManager.sendMove(move);
 	}
 	

@@ -55,6 +55,9 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private boolean aGreenPhase; //true if aGreenList is not empty
 	private boolean aChosenMove; //true if player has chosen a move this turn
 								//this is to stop the player from choosing more than one
+	
+	private boolean aGameInProgress = false; //this is false for setup, and true for game in progress 
+	
 	//The Colours 
 	private MinuetoColor aOceanColour = new MinuetoColor(new Color(53, 106, 172));
 	private MinuetoColor aYourBaseColour = new MinuetoColor(new Color(253, 159, 55));
@@ -174,6 +177,12 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		}
 		aMinuetoPanel.close(); //not sure if I should be closing it? 
 		dispose(); // or disposing of it? 
+	}
+	/**
+	 * Method to be called when setup is over. 
+	 */
+	public void startGame() {
+		aGameInProgress = true;
 	}
 	
 	/**
@@ -442,42 +451,64 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 	@Override
 	public void handleMousePress(int arg0, int arg1, int arg2) {
+		
+		if (!aGameInProgress) {
+			//TODO
+			// Case 1. Button pressed 
+			//Client will tell you to show the proper green squares 
+			//if 
+			
+			//Case 2. Ship clicked on board 
+			//Tell client. 
+			//Client will tell you to show the proper green squares. 
+			
+			//If someone clicks on a green square
+			//then tell client ==> setShipPosition
+			
+			//if someone clicks another ship (not the current one)
+			//then tell client 
+			
+			//if someone clicks on the current ship
+			//or on anywhere else 
+			//then revert to no green squares (tell client) 
+		
+		}
+		else {
+			//we only allow key presses if it's this player's turn! 
+			if (aMyTurn) {
+				Coordinate coord = convertToSquare(arg0, arg1);
 
-		//we only allow key presses if it's this player's turn! 
-		if (aMyTurn) {
-			Coordinate coord = convertToSquare(arg0, arg1);
+				if (coord.inBounds()) {
 
-			if (coord.inBounds()) {
-				
-				Square currentSquare = aVisibleBoard[coord.getX()][coord.getY()];
-				
-				if (currentSquare instanceof ShipSquare) {
-					if (!aChosenMove) {
-						ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
-						Ship ship = shipSquare.getShip();
-						//if the ship is this player's ship, then display menu
-						if (ship.getUsername().compareTo(aUsername) == 0) {
-						aMyClient.showShipMenu(ship);
+					Square currentSquare = aVisibleBoard[coord.getX()][coord.getY()];
+
+					if (currentSquare instanceof ShipSquare) {
+						if (!aChosenMove) {
+							ShipSquare shipSquare = (ShipSquare)aVisibleBoard[coord.getX()][coord.getY()];
+							Ship ship = shipSquare.getShip();
+							//if the ship is this player's ship, then display menu
+							if (ship.getUsername().compareTo(aUsername) == 0) {
+								aMyClient.showShipMenu(ship);
+							}
 						}
 					}
-				}
-				
-				if (aGreenPhase) {
-					if (aGreenList.contains(coord) && !aChosenMove){
-						//tell Client about choice
-						aChosenMove = true;
-						aMyClient.greenSelected(coord); 
-						//and getting rid of ship menu
+
+					if (aGreenPhase) {
+						if (aGreenList.contains(coord) && !aChosenMove){
+							//tell Client about choice
+							aChosenMove = true;
+							aMyClient.greenSelected(coord); 
+							//and getting rid of ship menu
+						}
+						//In any case, resetting the green list
+						aGreenList = new ArrayList<Coordinate>();
+						aGreenPhase = false;
+						//and redrawing the board 
+						drawBoard();		
 					}
-					//In any case, resetting the green list
-					aGreenList = new ArrayList<Coordinate>();
-					aGreenPhase = false;
-					//and redrawing the board 
-					drawBoard();		
 				}
-			}
-		} 
-		
+			} 
+		}
 		
 	}
 
