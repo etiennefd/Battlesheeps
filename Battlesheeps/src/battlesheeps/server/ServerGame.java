@@ -17,6 +17,7 @@ import battlesheeps.board.Square;
 import battlesheeps.server.LogEntry.LogType;
 import battlesheeps.ships.Cruiser;
 import battlesheeps.ships.Destroyer;
+import battlesheeps.ships.KamikazeBoat;
 import battlesheeps.ships.MineLayer;
 import battlesheeps.ships.RadarBoat;
 import battlesheeps.ships.Ship;
@@ -29,7 +30,8 @@ public class ServerGame implements Serializable
 
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 
-		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP, SUICIDE_ATTACK
+		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP, 
+		SUICIDE_ATTACK, TRANSLATE_KAMIKAZE
 	}
 	
 	public enum Direction {
@@ -126,7 +128,7 @@ public class ServerGame implements Serializable
 		aShipListP2.add(new MineLayer(aPlayer2, 8));
 		aShipListP2.add(new RadarBoat(aPlayer2, 9));
 
-		/*
+		/* TODO
 		 * THIS SHOULD BE REMOVED AND REMPLACED WITH THE SETUP PHASE!
 		 * THIS IS JUST DEFAULT SHIP POSITIONS FOR THE DEMO
 		 */
@@ -388,10 +390,29 @@ public class ServerGame implements Serializable
 		case PICKUP_MINE: pickupMine(pShip, pCoord); break;
 		case TRIGGER_RADAR: triggerRadar(pShip); break;
 		case REPAIR_SHIP: pShip.repair(); break;
-		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord); break;
+		default: throw new InvalidMoveReceivedException();
 		}
 		
 		aTurnNum++;
+		aDateLastPlayed = new Date();
+		
+		return aGameComplete; //Eventually we might want to return the winner instead (Null if game still going on). 
+							  //Then we would probably not need the field aGameComplete
+	}
+	
+	/**
+	 * Overload of the previous method, accepting two coordinates (relevant only for the kamikaze boat)
+	 */
+	public synchronized boolean computeMoveResult(Ship pShip, MoveType pMove, Coordinate pCoord1, Coordinate pCoord2) { 
+		
+		switch (pMove) {
+		case TRANSLATE_KAMIKAZE: translateKamikaze(pShip, pCoord1, pCoord2); break;
+		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord1, pCoord2); break;
+		default: computeMoveResult(pShip, pMove, pCoord1);
+		}
+		
+		aTurnNum++;
+		aDateLastPlayed = new Date();
 		
 		return aGameComplete; //Eventually we might want to return the winner instead (Null if game still going on). 
 							  //Then we would probably not need the field aGameComplete
@@ -1023,6 +1044,62 @@ public class ServerGame implements Serializable
 		setShipPosition(pShip, finalDestinationHead, finalDestinationTail);
 	}
 	
+	/**
+	 * Special method for moving the kamikaze boat
+	 * @param pShip
+	 * @param pDestination
+	 */
+	private void translateKamikaze(Ship pShip, Coordinate pIntermediateDest, Coordinate pFinalDest) {
+		//Make sure the ship is a kamikaze
+		if (!(pShip instanceof KamikazeBoat)) {
+			throw new InvalidMoveReceivedException();
+		}
+		
+		int x = pIntermediateDest.getX();
+		int y = pIntermediateDest.getY();
+		
+		//Is there a mine exploding when the ship gets to its intermediate square? 
+		if (x-1 >= 0 && aBoard[x-1][y] instanceof MineSquare) {
+			mineExplode(new Coordinate(x-1, y), pIntermediateDest, pShip);
+		}
+		if (x+1 < aBoard.length && aBoard[x+1][y] instanceof MineSquare) {
+			mineExplode(new Coordinate(x+1, y), pIntermediateDest, pShip);
+		}
+		if (y-1 >= 0 && aBoard[x][y-1] instanceof MineSquare) {
+			mineExplode(new Coordinate(x, y-1), pIntermediateDest, pShip);
+		}
+		if (y+1 < aBoard.length && aBoard[x][y+1] instanceof MineSquare) {
+			mineExplode(new Coordinate(x, y+1), pIntermediateDest, pShip);
+		}
+		
+		//If a mine destroyed the ship, there's no point in moving further
+		if (pShip.isSunk()) {
+			return;
+		}
+		
+		x = pFinalDest.getX();
+		y = pFinalDest.getY();
+		
+		//Is there a mine exploding when the ship gets to its final square? 
+		if (x-1 >= 0 && aBoard[x-1][y] instanceof MineSquare) {
+			mineExplode(new Coordinate(x-1, y), pFinalDest, pShip);
+		}
+		if (x+1 < aBoard.length && aBoard[x+1][y] instanceof MineSquare) {
+			mineExplode(new Coordinate(x+1, y), pFinalDest, pShip);
+		}
+		if (y-1 >= 0 && aBoard[x][y-1] instanceof MineSquare) {
+			mineExplode(new Coordinate(x, y-1), pFinalDest, pShip);
+		}
+		if (y+1 < aBoard.length && aBoard[x][y+1] instanceof MineSquare) {
+			mineExplode(new Coordinate(x, y+1), pFinalDest, pShip);
+		}
+		
+		//If ship is still afloat, update the board
+		if (!pShip.isSunk()) {
+			setShipPosition(pShip, pFinalDest, pFinalDest);
+		}
+	}
+
 	/**
 	 * Changes the position of a ship by rotating it. 
 	 * Assumes the pCoord input is valid (given the type of ship) and represents the new position of the head. 
@@ -1927,15 +2004,27 @@ public class ServerGame implements Serializable
 		}
 	}
 	
-	private void suicideAttack(Ship pShip, Coordinate pCoord) {
-		//First translate ship (might trigger a mine)
-		//Then explode, if the ship still exists
+	/**
+	 * First moves the kamikaze boat, then explodes it (if it still exists). 
+	 * @param pShip
+	 * @param pCoord
+	 */
+	private void suicideAttack(Ship pShip, Coordinate pIntermediateDest, Coordinate pFinalDest) {
+		//Make sure the ship is a kamikaze
+		if (!(pShip instanceof KamikazeBoat)) {
+			throw new InvalidMoveReceivedException();
+		}
+		
+		//Then we attempt to move the ship
+		translateKamikaze(pShip, pIntermediateDest, pFinalDest);
+		
+		//Then explode, if the ship still exists (i.e. has not been blown out by a mine)
 		if (!pShip.isSunk()) {
-			aLogEntryList.add(new LogEntry(LogType.SUICIDE_ATTACK, pCoord.getX(), pCoord.getY(), aTurnNum));
-			//Cycle the 9 squares around (and including) pCoord (where the kamikaze boat now is!)
+			aLogEntryList.add(new LogEntry(LogType.SUICIDE_ATTACK, pFinalDest.getX(), pFinalDest.getY(), aTurnNum));
+			//Cycle the 9 squares around (and including) pFinalDest (where the kamikaze boat now is)
 			//Note that the kamikaze boat itself gets damaged and sunk in the process
-			for (int x = pCoord.getX() - 1; x <= pCoord.getX() + 1; x++) {
-				for (int y = pCoord.getY() - 1; y <= pCoord.getY() + 1; y++) {
+			for (int x = pFinalDest.getX() - 1; x <= pFinalDest.getX() + 1; x++) {
+				for (int y = pFinalDest.getY() - 1; y <= pFinalDest.getY() + 1; y++) {
 					Square s = aBoard[x][y]; 
 					if (s instanceof ShipSquare) {
 						damageShip(((ShipSquare) s).getShip(), new Coordinate(x, y), true);
@@ -2199,7 +2288,7 @@ public class ServerGame implements Serializable
 	 * @return
 	 */
 	public String printBoard() {
-		String s = "\nTurn number: " + aTurnNum + "\n";
+		String s = "\nTurn number: " + aTurnNum + "\nTime: "+ getDateLastPlayed() + "\n";
 		s = s + "                       1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2\n";
 		s = s + "   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 x\n";
 		for (int y = 0; y<aBoard.length; y++) {

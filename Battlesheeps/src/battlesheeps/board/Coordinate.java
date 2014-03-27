@@ -21,7 +21,7 @@ public class Coordinate implements Serializable
 		return y;
 	}
 
-	/*
+	/**
 	 * Returns true if X and Y are between 0 and 29, inclusive. 
 	 */
 	public boolean inBounds() {
@@ -31,9 +31,9 @@ public class Coordinate implements Serializable
 				return true;
 			}
 		}
-		
 		return false;
 	}
+	
 	/**
 	 * Generates a new Coordinate whose x and y components are randomly selected within a range. 
 	 * There is a range for x and a range for y. 
