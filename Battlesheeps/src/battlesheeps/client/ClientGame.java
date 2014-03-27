@@ -249,7 +249,7 @@ public class ClientGame {
 		//let's keep track of which ship we want to show the moves for 
 		aCurrentClickedShip = s;
 		//TODO
-		//let's compute the available 
+		//let's compute the available green squares
 		//and now let's tell the board to display the green squares 
 		
 	}
@@ -1192,10 +1192,8 @@ public class ClientGame {
 		
 		Direction myDirection = pShip.getDirection();
 		int startX, startY;
-		
-		if (myDirection == Direction.NORTH || myDirection == Direction.SOUTH) {
 			
-			if (myDirection == Direction.NORTH) { 
+			if (myDirection == Direction.NORTH || myDirection == Direction.WEST) { 
 				startX = pShip.getHead().getX() - 1;
 				startY = pShip.getHead().getY() - 1;
 			} else {
@@ -1226,8 +1224,6 @@ public class ClientGame {
 				
 				if (atHome) break;
 			}
-			
-		}
 		
 		return atHome;
 		
