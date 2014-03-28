@@ -440,11 +440,34 @@ public class ClientGame {
 	//or it sends the info straight to the Server in the case of radar changes 
 	
 	protected void translateSelected(Ship pShip) {
+		
+		//First, special case for kamikaze boat
+		if (pShip instanceof KamikazeBoat) {
+			aCurrentClickedMove = MoveType.TRANSLATE_KAMIKAZE;
+			List<Coordinate> greenList = new ArrayList<Coordinate>();
+			
+			int headX = pShip.getHead().getX();
+			int headY = pShip.getHead().getY();
+			for (int x = headX-1; x <= headX+1; x++) {
+				for (int y = headY-1; y <= headY+1; y++) {
+					if (new Coordinate(x, y).inBounds()) {
+						Square s = aCurrentVisibleBoard[x][y];
+						if (clearSquare(s)) {
+							greenList.add(new Coordinate(x, y));
+						}
+					}
+				}
+			}
+			aBoardPanel.showAvailableMoves(greenList);
+			return;
+		}
+		
 		/*Translate ship allows the ship to be moved 
 		 * a) back one square, as long as that square is Sea
 		 * b) to either side, provided the length of the ship is all Sea
 		 * c) to the front, for as far as their actual speed allows, and it's Sea
 		 */
+		
 		aCurrentClickedMove = MoveType.TRANSLATE_SHIP;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		
@@ -837,7 +860,7 @@ public class ClientGame {
 	}
 	
 	protected void retrieveMineSelected(Ship pShip) {
-		aCurrentClickedMove = MoveType.DROP_MINE;
+		aCurrentClickedMove = MoveType.PICKUP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
 		List<Coordinate> tempList = new ArrayList<Coordinate>();
 		
@@ -902,8 +925,79 @@ public class ClientGame {
 	protected void torpedoSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.FIRE_TORPEDO;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		//TODO
 		
+		Direction torpedoDirection = pShip.getDirection(); 
+		int headX = pShip.getHead().getX();
+		int headY = pShip.getHead().getY();
+		int x, y;
+		
+		//There is a case for each direction. 
+		//For each case, loop over the 10 squares in front of the ship. 
+		//If a square is: a coral reef/your own base/your own ship, stop looping. 
+		//If the square is something else, add it to the greenList. 
+		//If the square is not clear (sea/radar/sonar) stop looping (but after adding to the green list). 
+		switch (torpedoDirection) {
+		case NORTH: 
+			x = headX;
+			for (y = headY - 1; y >= 0 && y >= headY - 10; y--) {
+				Square s = aCurrentVisibleBoard[x][y]; 
+				if ((s instanceof BaseSquare && ((BaseSquare) s).getOwner().equals(pShip.getUsername()))
+						|| s instanceof ShipSquare && ((ShipSquare) s).getShip().getUsername().equals(pShip.getUsername())
+						|| s instanceof CoralReef) {
+					break;
+				}
+				else {
+					greenList.add(new Coordinate(x, y));
+					if (!clearSquare(s)) break;
+				}
+			}
+			break;
+		case SOUTH: 
+			x = headX;
+			for (y = headY + 1; y < aCurrentVisibleBoard.length && y <= headY + 10; y++) {
+				Square s = aCurrentVisibleBoard[x][y]; 
+				if ((s instanceof BaseSquare && ((BaseSquare) s).getOwner().equals(pShip.getUsername()))
+						|| s instanceof ShipSquare && ((ShipSquare) s).getShip().getUsername().equals(pShip.getUsername())
+						|| s instanceof CoralReef) {
+					break;
+				}
+				else {
+					greenList.add(new Coordinate(x, y));
+					if (!clearSquare(s)) break;
+				}
+			}
+			break;
+		case WEST: 
+			y = headY;
+			for (x = headX - 1; x >= 0 && x >= headX - 10; x--) {
+				Square s = aCurrentVisibleBoard[x][y]; 
+				if ((s instanceof BaseSquare && ((BaseSquare) s).getOwner().equals(pShip.getUsername()))
+						|| s instanceof ShipSquare && ((ShipSquare) s).getShip().getUsername().equals(pShip.getUsername())
+						|| s instanceof CoralReef) {
+					break;
+				}
+				else {
+					greenList.add(new Coordinate(x, y));
+					if (!clearSquare(s)) break;
+				}
+			}
+			break;
+		case EAST: 
+			y = headY;
+			for (x = headX + 1; x < aCurrentVisibleBoard.length && x <= headX + 10; x++) {
+				Square s = aCurrentVisibleBoard[x][y]; 
+				if ((s instanceof BaseSquare && ((BaseSquare) s).getOwner().equals(pShip.getUsername()))
+						|| s instanceof ShipSquare && ((ShipSquare) s).getShip().getUsername().equals(pShip.getUsername())
+						|| s instanceof CoralReef) {
+					break;
+				}
+				else {
+					greenList.add(new Coordinate(x, y));
+					if (!clearSquare(s)) break;
+				}
+			}
+			break;
+		}
 		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
@@ -921,34 +1015,34 @@ public class ClientGame {
 		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
 		//we can tell the server right away that this move was selected
 		//coordinate doesn't matter
-		greenSelected(null);
+		greenSelected(null, null);
 	}
 
 	protected void turnExtendedRadarOff () {
 		aCurrentClickedMove = MoveType.TRIGGER_RADAR;
 		//we can tell the server right away that this move was selected
 		//coordinate doesn't matter
-		greenSelected(null);
+		greenSelected(null, null);
 	}
 	
 	protected void baseRepairSelected() {
 		aCurrentClickedMove = MoveType.REPAIR_SHIP;
 		//we can tell the server right away that this move was selected
 		//coordinate doesn't matter
-		greenSelected(null);
+		greenSelected(null, null);
 	}
 	
 	
 	/**
-	 * GUI tells Client that a green square was selected. 
+	 * GUI tells Client that a green square (possibly two) was selected. 
 	 * This indicates that the Player wants to move/fire/whatever in that square,
 	 * so Client sends the info to the Server. 
 	 * @param pCoord
 	 */
-	protected void greenSelected(Coordinate pCoord) {
+	protected void greenSelected(Coordinate pCoord, Coordinate pSecondaryCoord) {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
-		Move move = new Move(pCoord, aCurrentClickedShip, aCurrentClickedMove, null);
+		Move move = new Move(pCoord, pSecondaryCoord, aCurrentClickedShip, aCurrentClickedMove, null);
 		System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
 		
 		if (aCurrentClickedMove == MoveType.REPAIR_SHIP || aCurrentClickedMove == MoveType.TRIGGER_RADAR) {

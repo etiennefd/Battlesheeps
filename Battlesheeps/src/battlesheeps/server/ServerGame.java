@@ -47,7 +47,7 @@ public class ServerGame implements Serializable
 	private String aPlayer1;
 	private String aPlayer2;
 	private int aTurnNum;			//Odd -> it is P1's turn. Even -> it is P2's turn.  
-	private Date aDateLastPlayed;	//TODO update this when a turn is done.
+	private Date aDateLastPlayed;	
 	private ClientInfo aClientInfo;
 	
 	//Fields related to the contents of the game
@@ -410,7 +410,7 @@ public class ServerGame implements Serializable
 		switch (pMove) {
 		case TRANSLATE_KAMIKAZE: translateKamikaze(pShip, pCoord1, pCoord2); break;
 		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord1, pCoord2); break;
-		default: computeMoveResult(pShip, pMove, pCoord1);
+		default: return computeMoveResult(pShip, pMove, pCoord1); 
 		}
 		
 		aTurnNum++;

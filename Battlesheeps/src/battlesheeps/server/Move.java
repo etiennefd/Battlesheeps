@@ -14,12 +14,14 @@ public class Move implements Serializable
 	}
 	
 	private Coordinate aCoord;
+	private Coordinate aSecondaryCoord; //for Kamikaze moves
 	private Ship aShip;
 	private MoveType aMoveType;
 	private ServerInfo aServerInfo;
 	
-	public Move(Coordinate pCoord, Ship pShip, MoveType pMoveType, ServerInfo pServerInfo){
+	public Move(Coordinate pCoord, Coordinate pSecondaryCoord, Ship pShip, MoveType pMoveType, ServerInfo pServerInfo){
 		this.aCoord = pCoord;
+		this.aSecondaryCoord = pSecondaryCoord;
 		this.aShip = pShip;
 		this.aMoveType = pMoveType;
 		this.aServerInfo = pServerInfo;
@@ -38,6 +40,21 @@ public class Move implements Serializable
 	 */
 	public void setCoord(Coordinate pCoord) {
 		this.aCoord = pCoord;
+	}
+
+	/**
+	 * Getter for this move's coordinate. 
+	 * @return coordinate 
+	 */
+	public Coordinate getSecondaryCoord() {
+		return aSecondaryCoord;
+	}
+	/**
+	 * Setter for coordinate 
+	 * @param pCoord
+	 */
+	public void setSecondaryCoord(Coordinate pCoord) {
+		this.aSecondaryCoord = pCoord;
 	}
 	/**
 	 * Getter for this move's ship. 

@@ -222,7 +222,7 @@ class ClientConnGame implements Runnable {
         			}
         			else if (msg.getServerInfo() == ServerInfo.SHIP_INIT) {
         				// TODO is this correct? probably not.
-        				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord());
+        				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
         				aOutput.writeObject(aGame);
         			}
         		}
@@ -232,7 +232,7 @@ class ClientConnGame implements Runnable {
             while ((msg = (Move) aInput.readObject()) != null) 
             {
             	// TODO is THIS correct? It might be actually.
-            	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord());
+            	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
             	System.out.println(aGame.printBoard());
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
