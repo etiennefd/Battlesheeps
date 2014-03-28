@@ -896,7 +896,6 @@ public class ClientGame {
 				}
 			}
 		}
-		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
