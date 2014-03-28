@@ -1,7 +1,7 @@
 package battlesheeps.client;
 
 //make pretty
-//TODO only allow one selection to be made in lists
+
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 
 import battlesheeps.accounts.Account;
@@ -149,7 +150,7 @@ class UserListMouseAdapter extends MouseAdapter
          }
     }
 }
-// TODO update clicker write listener for games list
+//listener for games list
 class GamesListMouseAdapter extends MouseAdapter
 {
 	private JList aList;
@@ -600,6 +601,7 @@ public class Lobby
         listsPanel.add(listTitle);
         
         userList.setModel(userData);
+        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                
         //ArrayList<String> userData = new ArrayList<String>();
         updateOnlineUsers();
@@ -622,6 +624,7 @@ public class Lobby
         listsPanel.add(gamesTitle);
         
         gamesList.setModel(gamesData);
+        gamesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         updateSavedGames();
         MouseListener gamesListListener = new GamesListMouseAdapter(gamesList,aClient.getUsername(), aClient);
