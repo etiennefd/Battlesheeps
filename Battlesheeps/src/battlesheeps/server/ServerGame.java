@@ -1042,8 +1042,10 @@ public class ServerGame implements Serializable
 			break; //from case EAST
 		}
 		
-		//After computing the ship's new position, we change the board accordingly. 
-		setShipPosition(pShip, finalDestinationHead, finalDestinationTail);
+		//After computing the ship's new position, we change the board accordingly, if it's not sunk. 
+		if (!pShip.isSunk()) {
+			setShipPosition(pShip, finalDestinationHead, finalDestinationTail);
+		}
 	}
 	
 	/**

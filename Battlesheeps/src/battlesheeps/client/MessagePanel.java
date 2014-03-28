@@ -134,7 +134,7 @@ public class MessagePanel extends JPanel {
 	}
 	
 	/**
-	 * Displays a menu for the given ship.  TODO : addActionListeners
+	 * Displays a menu for the given ship. 
 	 * @param pShip
 	 */
 	public void displayShipMenu(Ship pShip, boolean pTouchingBase){

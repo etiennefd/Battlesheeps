@@ -761,17 +761,141 @@ public class ClientGame {
 	protected void layMineSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.DROP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		List<Coordinate> tempList = new ArrayList<Coordinate>();
+		
 		//CANNOT DROP MINE NEXT TO ANOTHER SHIP OR BASE
-		//TODO
+		//We first add to the tempList the 6 squares in the mine area, 
+		//Then select (for the green list) only those that are
+		//- outside the board
+		//- not sea
+		//- too close to some other ship or base
+		
+		Direction direction = pShip.getDirection();
+		
+		Coordinate head = pShip.getHead();
+		int headX = head.getX();
+		int headY = head.getY();
+		
+		Coordinate tail = pShip.getTail();
+		int tailX = tail.getX();
+		int tailY = tail.getY();
+		
+		switch(direction) {
+		case NORTH: 
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			break;
+		case SOUTH: 
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			break;
+		case WEST: 
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			break;
+		case EAST: 
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			break;
+		}
+		
+		for (Coordinate c : tempList) {
+			if (c.inBounds()) {
+				if (aCurrentVisibleBoard[c.getX()][c.getY()] instanceof SonarSquare) {
+					boolean tooCloseToShipOrBase = false;
+					for (int x = c.getX()-1; x <= c.getX()+1; x++) {
+						for (int y = c.getY()-1; y <= c.getY()+1; y++) {
+							Square s = aCurrentVisibleBoard[x][y];
+							if (s instanceof BaseSquare || 
+									s instanceof ShipSquare && !((ShipSquare) s).getShip().equals(pShip)) {
+								tooCloseToShipOrBase = true;
+							}
+						}
+					}
+					if (!tooCloseToShipOrBase) greenList.add(c);
+				}
+			}
+		}
 		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
 	
 	protected void retrieveMineSelected(Ship pShip) {
-		aCurrentClickedMove = MoveType.PICKUP_MINE;
+		aCurrentClickedMove = MoveType.DROP_MINE;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		//TODO
+		List<Coordinate> tempList = new ArrayList<Coordinate>();
 		
+		//We first add to the tempList the 6 squares in the mine area, 
+		//Then select (for the green list) only those that contain a mine
+		
+		Direction direction = pShip.getDirection();
+		
+		Coordinate head = pShip.getHead();
+		int headX = head.getX();
+		int headY = head.getY();
+		
+		Coordinate tail = pShip.getTail();
+		int tailX = tail.getX();
+		int tailY = tail.getY();
+		
+		switch(direction) {
+		case NORTH: 
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			break;
+		case SOUTH: 
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			break;
+		case WEST: 
+			tempList.add(new Coordinate(headX-1, headY));
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(tailX+1, tailY));
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			break;
+		case EAST: 
+			tempList.add(new Coordinate(headX+1, headY));
+			tempList.add(new Coordinate(headX, headY-1));
+			tempList.add(new Coordinate(tailX, tailY-1));
+			tempList.add(new Coordinate(tailX-1, tailY));
+			tempList.add(new Coordinate(headX, headY+1));
+			tempList.add(new Coordinate(tailX, tailY+1));
+			break;
+		}
+		
+		for (Coordinate c : tempList) {
+			if (c.inBounds()) {
+				if (aCurrentVisibleBoard[c.getX()][c.getY()] instanceof MineSquare) {
+					greenList.add(c);
+				}
+			}
+		}
 		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
@@ -1199,43 +1323,43 @@ public class ClientGame {
 		//if yes, then the ship is at home base 
 		
 		boolean atHome = false;
-		
+
 		Direction myDirection = pShip.getDirection();
 		int startX, startY;
-			
-			if (myDirection == Direction.NORTH || myDirection == Direction.WEST) { 
-				startX = pShip.getHead().getX() - 1;
-				startY = pShip.getHead().getY() - 1;
-			} else {
-				startX = pShip.getTail().getY() - 1;
-				startY = pShip.getTail().getY() - 1;
-			}
 
-			for (int i = startX; i < (startX + pShip.getSize() + 2); i++) {
-				for (int j = startY; j < (startY + pShip.getSize() + 2); j++) {
-					Coordinate c = new Coordinate(i,j);
-					//if the coordinate is in bounds 
-					if (c.inBounds()) {
-						//then we check if its a base square 
-						if (aCurrentVisibleBoard[i][j] instanceof BaseSquare) {
-							BaseSquare base = (BaseSquare) aCurrentVisibleBoard[i][j];
-							//checking that the base square is undamaged 
-							if (base.getDamage() == Damage.UNDAMAGED) { 
-								String owner = base.getOwner();
-								//and if so, we check if the base belongs to this user
-								if (owner.compareTo(aMyUser) == 0) {
-									atHome = true;
-									break;
-								}
+		if (myDirection == Direction.NORTH || myDirection == Direction.WEST) { 
+			startX = pShip.getHead().getX() - 1;
+			startY = pShip.getHead().getY() - 1;
+		} else {
+			startX = pShip.getTail().getX() - 1;
+			startY = pShip.getTail().getY() - 1;
+		}
+
+		for (int i = startX; i < (startX + pShip.getSize() + 2); i++) {
+			for (int j = startY; j < (startY + pShip.getSize() + 2); j++) {
+				Coordinate c = new Coordinate(i,j);
+				//if the coordinate is in bounds 
+				if (c.inBounds()) {
+					//then we check if its a base square 
+					if (aCurrentVisibleBoard[i][j] instanceof BaseSquare) {
+						BaseSquare base = (BaseSquare) aCurrentVisibleBoard[i][j];
+						//checking that the base square is undamaged 
+						if (base.getDamage() == Damage.UNDAMAGED) { 
+							String owner = base.getOwner();
+							//and if so, we check if the base belongs to this user
+							if (owner.compareTo(aMyUser) == 0) {
+								atHome = true;
+								break;
 							}
 						}
 					}
 				}
-				
-				if (atHome) break;
 			}
-		
+
+			if (atHome) break;
+		}
+
 		return atHome;
-		
+
 	}
 }
