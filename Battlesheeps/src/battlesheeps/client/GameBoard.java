@@ -213,20 +213,43 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		
 		MinuetoRectangle greenRectangle = new MinuetoRectangle(aIncrement, aIncrement, aMoveColour, true);
 		MinuetoRectangle darkRectangle = new MinuetoRectangle(aIncrement, aIncrement, aCanHitColour, true);
+		
 		for (Coordinate c : aGreenList) {
 		
 			int x = c.getX();
 			int y = c.getY();
 			
-			if (aVisibleBoard[x][y] instanceof ShipSquare) {
-				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
-			} 
-			else if (aVisibleBoard[x][y] instanceof MineSquare) {
+			if (aVisibleBoard[x][y] instanceof MineSquare) {
 				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
 			} else {
 			aBoard.draw(greenRectangle,x*aIncrement, y*aIncrement);
 			}
 			
+			if (aVisibleBoard[x][y] instanceof ShipSquare) {
+				ShipSquare sq = (ShipSquare)aVisibleBoard[x][y];
+				Ship s = sq.getShip();
+
+				if (!sq.isHead() ) {
+					aBoard.draw(darkRectangle,x*aIncrement, y*aIncrement);
+				} else {
+					//drawing head
+					switch (s.getDirection()) {
+					case NORTH: 
+						drawShipHeadNorth(x, y, aCanHitColour);
+						break;
+					case SOUTH:
+						drawShipHeadSouth(x, y, aCanHitColour);
+						break;
+					case WEST:
+						drawShipHeadWest(x, y, aCanHitColour);
+						break;
+					default : //EAST
+						drawShipHeadEast(x, y, aCanHitColour);
+						break;
+					}
+				}
+			} 
+
 		}
 		
 		this.drawLines();
