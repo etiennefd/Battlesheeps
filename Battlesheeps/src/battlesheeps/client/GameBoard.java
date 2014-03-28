@@ -500,7 +500,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						if (aGreenList.contains(coord) && !aChosenMove){
 							//tell Client about choice
 							aChosenMove = true;
-							aMyClient.greenSelected(coord); 
+							aMyClient.greenSelected(coord, null); 
 							//and getting rid of ship menu
 						}
 						//In any case, resetting the green list
