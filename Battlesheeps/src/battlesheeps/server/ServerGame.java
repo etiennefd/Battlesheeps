@@ -505,7 +505,7 @@ public class ServerGame implements Serializable
 					}
 					
 				}
-				finalDestinationTail = new Coordinate (pDestination.getX(), finalDestinationHead.getY() + pShip.getSize() - 1);
+				finalDestinationTail = new Coordinate (finalDestinationHead.getX(), finalDestinationHead.getY() + pShip.getSize() - 1);
 				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
@@ -652,7 +652,7 @@ public class ServerGame implements Serializable
 						}
 					}
 				}
-				finalDestinationTail = new Coordinate (pDestination.getX(), finalDestinationHead.getY() - pShip.getSize() + 1);
+				finalDestinationTail = new Coordinate (finalDestinationHead.getX(), finalDestinationHead.getY() - pShip.getSize() + 1);
 				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
@@ -800,7 +800,7 @@ public class ServerGame implements Serializable
 						}
 					}
 				}
-				finalDestinationTail = new Coordinate (pDestination.getX() + pShip.getSize() - 1, finalDestinationHead.getY());
+				finalDestinationTail = new Coordinate (finalDestinationHead.getX() + pShip.getSize() - 1, finalDestinationHead.getY());
 				
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
@@ -947,7 +947,7 @@ public class ServerGame implements Serializable
 						}
 					}
 				}
-				finalDestinationTail = new Coordinate (pDestination.getX() - pShip.getSize() + 1, finalDestinationHead.getY());
+				finalDestinationTail = new Coordinate (finalDestinationHead.getX() - pShip.getSize() + 1, finalDestinationHead.getY());
 			}
 			//***Case backward: remember, pDestination is where the tail tries to reach
 			else if (pDestination.getX() < tailX) {
@@ -1922,6 +1922,10 @@ public class ServerGame implements Serializable
 						(targetDirection == Direction.NORTH || targetDirection == Direction.SOUTH)) {
 					leftOrTop = new Coordinate (pX, pY-1);
 					rightOrBottom = new Coordinate (pX, pY+1); 
+				}
+				else {
+					//We return because the ship was hit on the head or tail, so no additional damage
+					return true;
 				}
 				
 				int leftDamageIndex = -1, rightDamageIndex = -1;
