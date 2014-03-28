@@ -73,6 +73,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private MinuetoColor aOpponentShipDestroyed = new MinuetoColor(new Color(134, 17, 37)); //dark red
 	private MinuetoColor aYourShipDestroyed = new MinuetoColor(Color.RED);
 	private MinuetoColor aMoveColour = new MinuetoColor(new Color(72, 234, 92)); //green
+	private MinuetoColor aCanHitColour = new MinuetoColor(new Color(19, 102, 44)); //dark green
 	
 	private MinuetoFont aFont = new MinuetoFont (MinuetoFont.SansSerif, 12, true, false);
 
@@ -151,7 +152,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		this.drawBoard();
 		
 		while(open) {
-			//synchronized (aMinuetoPanel) {
+			synchronized (aMinuetoPanel) {
 				if (aMinuetoPanel.isVisible()) {
 					
 					// Handle all the events in the event queue.
@@ -172,7 +173,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						e.printStackTrace();
 					}
 				}
-		//	}
+			}
 			Thread.yield();
 		}
 		aMinuetoPanel.close(); //not sure if I should be closing it? 
@@ -211,19 +212,21 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aGreenPhase = true;
 		
 		MinuetoRectangle greenRectangle = new MinuetoRectangle(aIncrement, aIncrement, aMoveColour, true);
+		MinuetoRectangle darkRectangle = new MinuetoRectangle(aIncrement, aIncrement, aCanHitColour, true);
 		for (Coordinate c : aGreenList) {
+		
 			int x = c.getX();
 			int y = c.getY();
-			aBoard.draw(greenRectangle,x*aIncrement, y*aIncrement);
 			
-			//re-drawing the ships on top
 			if (aVisibleBoard[x][y] instanceof ShipSquare) {
-				this.addShip(x, y);
-			}//as well as any mines 
+				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
+			} 
 			if (aVisibleBoard[x][y] instanceof MineSquare) {
-				MinuetoRectangle mine = new MinuetoRectangle(aIncrement, aIncrement, aMineColour, true);
-				aBoard.draw(mine, x*aIncrement, y*aIncrement);
+				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
+			} else {
+			aBoard.draw(greenRectangle,x*aIncrement, y*aIncrement);
 			}
+			
 		}
 		
 		this.drawLines();
