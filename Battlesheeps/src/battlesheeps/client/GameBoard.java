@@ -221,7 +221,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 			if (aVisibleBoard[x][y] instanceof ShipSquare) {
 				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
 			} 
-			if (aVisibleBoard[x][y] instanceof MineSquare) {
+			else if (aVisibleBoard[x][y] instanceof MineSquare) {
 				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
 			} else {
 			aBoard.draw(greenRectangle,x*aIncrement, y*aIncrement);
