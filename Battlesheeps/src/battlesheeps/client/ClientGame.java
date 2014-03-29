@@ -448,6 +448,7 @@ public class ClientGame {
 			
 			int headX = pShip.getHead().getX();
 			int headY = pShip.getHead().getY();
+			greenList.add(pShip.getHead());
 			for (int x = headX-1; x <= headX+1; x++) {
 				for (int y = headY-1; y <= headY+1; y++) {
 					if (new Coordinate(x, y).inBounds()) {
@@ -1032,25 +1033,64 @@ public class ClientGame {
 		greenSelected(null, null);
 	}
 	
+	/**
+	 * Used for the selection of the second square in the kamikaze boat's translation or suicide attack. 
+	 * Returns all nine square around and including pCenter. 
+	 */
+	protected void selectSecondSquare(Coordinate pCenter) {
+		List<Coordinate> greenList = new ArrayList<Coordinate>();
+		
+		int cX = pCenter.getX();
+		int cY = pCenter.getY();
+		greenList.add(pCenter);
+		for (int x = cX-1; x <= cX+1; x++) {
+			for (int y = cY-1; y <= cY+1; y++) {
+				if (new Coordinate(x, y).inBounds()) {
+					Square s = aCurrentVisibleBoard[x][y];
+					if (clearSquare(s) || s instanceof ShipSquare ) {
+						greenList.add(new Coordinate(x, y));
+					}
+				}
+			}
+		}
+		aBoardPanel.showAvailableMoves(greenList);
+	}
+	
 	
 	/**
 	 * GUI tells Client that a green square (possibly two) was selected. 
 	 * This indicates that the Player wants to move/fire/whatever in that square,
 	 * so Client sends the info to the Server. 
+	 * 
+	 * NEW: this method now returns true if a move was completed, and false if the move is not done. 
+	 * (E.g. only first half of the kamikaze translation was done)
 	 * @param pCoord
 	 */
-	protected void greenSelected(Coordinate pCoord, Coordinate pSecondaryCoord) {
+	protected boolean greenSelected(Coordinate pCoord, Coordinate pSecondaryCoord) {
 		//Will send move type, coordinate & ship to Server
 		//send as Move Object to Server
-		Move move = new Move(pCoord, pSecondaryCoord, aCurrentClickedShip, aCurrentClickedMove, null);
-		System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
 		
-		if (aCurrentClickedMove == MoveType.REPAIR_SHIP || aCurrentClickedMove == MoveType.TRIGGER_RADAR) {
-			aMessagePanel.displayMessage("" + aCurrentClickedMove +"");
-		} else {
-			aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
+		if (pSecondaryCoord == null 
+				&& (aCurrentClickedMove == MoveType.TRANSLATE_KAMIKAZE || aCurrentClickedMove == MoveType.SUICIDE_ATTACK)) {
+			//We still need to select a 2nd green square. 
+			selectSecondSquare(pCoord);
+			return false;
 		}
-		myManager.sendMove(move);
+		else {
+			//Send the move to the server!
+			Move move = new Move(pCoord, pSecondaryCoord, aCurrentClickedShip, aCurrentClickedMove, null);
+			System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
+			
+			if (aCurrentClickedMove == MoveType.REPAIR_SHIP || aCurrentClickedMove == MoveType.TRIGGER_RADAR) {
+				aMessagePanel.displayMessage("" + aCurrentClickedMove +"");
+			} else {
+				aMessagePanel.displayMessage(aCurrentClickedMove + " at " + "[" + pCoord.getX() + "," + pCoord.getY() + "]");
+			}
+			myManager.sendMove(move);
+			
+			return true;
+		}
+		
 	}
 	
 	/**
@@ -1455,4 +1495,5 @@ public class ClientGame {
 		return atHome;
 
 	}
+	
 }

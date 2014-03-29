@@ -56,6 +56,11 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private boolean aChosenMove; //true if player has chosen a move this turn
 								//this is to stop the player from choosing more than one
 	
+	//The following two coordinates are important for the kamikaze ship. The first is set on the first click on a 
+	//green square, and the second is set on the second click on a green square. 
+	private Coordinate aFirstChosenCoord = null;
+	private Coordinate aSecondChosenCoord = null;
+	
 	private boolean aGameInProgress = false; //this is false for setup, and true for game in progress 
 	
 	//The Colours 
@@ -520,17 +525,37 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 					}
 
 					if (aGreenPhase) {
+						//If a valid move was chosen (i.e. clicked on a green square)
 						if (aGreenList.contains(coord) && !aChosenMove){
+							//Updating either the first or the second coord
+							if (aFirstChosenCoord == null) {
+								aFirstChosenCoord = coord;
+							}
+							else {
+								aSecondChosenCoord = coord;
+							}
 							//tell Client about choice
-							aChosenMove = true;
-							aMyClient.greenSelected(coord, null); 
-							//and getting rid of ship menu
+							aChosenMove = aMyClient.greenSelected(aFirstChosenCoord, aSecondChosenCoord);
+							//If a move was actually chosen (and completed) we reset the chosen coordinates and end the green phase
+							if (aChosenMove) {
+								aFirstChosenCoord = null;
+								aSecondChosenCoord = null;
+								aGreenPhase = false;
+							}
 						}
-						//In any case, resetting the green list
+						else {
+							//Clicked on a non-green square? Then reset the chosen coords and end the green phase
+							aFirstChosenCoord = null;
+							aSecondChosenCoord = null;
+							aGreenPhase = false;
+						}
+						
+						//In all cases, resetting the green list
 						aGreenList = new ArrayList<Coordinate>();
-						aGreenPhase = false;
+						
 						//and redrawing the board 
-						drawBoard();		
+						drawBoard();
+							
 					}
 				}
 			} 
