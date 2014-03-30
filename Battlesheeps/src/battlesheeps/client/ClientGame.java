@@ -1166,8 +1166,7 @@ public class ClientGame {
 			}
 			//Now we iterate over the list of coordinates we built
 			for (Coordinate c : listOfCoords) {
-				Square s = aCurrentVisibleBoard[c.getX()][c.getY()];
-				if (!clearSquare(s)) {
+				if (!c.inBounds() || !clearSquare(aCurrentVisibleBoard[c.getX()][c.getY()])) {
 					turnSuccess = false;
 					break;
 				}
@@ -1181,6 +1180,7 @@ public class ClientGame {
 			case NORTH: 
 				//Case turning left/port (west)
 				if (pDestination.getX() < tailX) {
+					if (headX == 0 || headX == aCurrentVisibleBoard.length-1) return false; //left/right border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY]);
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY+1]);
@@ -1188,6 +1188,7 @@ public class ClientGame {
 				}
 				//Case turning right/starboard (east)
 				else if (pDestination.getX() > tailX) {
+					if (headX == 0 || headX == aCurrentVisibleBoard.length-1) return false; //left/right border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY]);
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY+1]);
@@ -1197,6 +1198,7 @@ public class ClientGame {
 			case SOUTH: 
 				//Case turning right/starboard (west)
 				if (pDestination.getX() < tailX) {
+					if (headX == 0 || headX == aCurrentVisibleBoard.length-1) return false; //left/right border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX+1][tailY]);
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY-1]);
@@ -1204,6 +1206,7 @@ public class ClientGame {
 				}
 				//Case turning left/port (east)
 				else if (pDestination.getX() > tailX) {
+					if (headX == 0 || headX == aCurrentVisibleBoard.length-1) return false; //left/right border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX-1][tailY]);
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY-1]);
@@ -1213,6 +1216,7 @@ public class ClientGame {
 			case EAST: 
 				//Case turning left/port (north)
 				if (pDestination.getY() < tailY) {
+					if (headY == 0 || headY == aCurrentVisibleBoard.length-1) return false; //top/bottom border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX][headY-1]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY+1]);
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY-1]);
@@ -1220,6 +1224,7 @@ public class ClientGame {
 				}
 				//Case turning right/starboard (south)
 				else if (pDestination.getY() > tailY) {
+					if (headY == 0 || headY == aCurrentVisibleBoard.length-1) return false; //top/bottom border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX][headY+1]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY-1]);
 					listOfSquares.add(aCurrentVisibleBoard[headX-1][headY+1]);
@@ -1229,6 +1234,7 @@ public class ClientGame {
 			case WEST: 
 				//Case turning right/starboard (north)
 				if (pDestination.getY() < tailY) {
+					if (headY == 0 || headY == aCurrentVisibleBoard.length-1) return false; //top/bottom border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX][headY-1]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY+1]);
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY-1]);
@@ -1236,6 +1242,7 @@ public class ClientGame {
 				}
 				//Case turning left/port (south)
 				else if (pDestination.getY() > tailY) {
+					if (headY == 0 || headY == aCurrentVisibleBoard.length-1) return false; //top/bottom border of the board
 					listOfSquares.add(aCurrentVisibleBoard[headX][headY+1]);
 					listOfSquares.add(aCurrentVisibleBoard[tailX][tailY-1]);
 					listOfSquares.add(aCurrentVisibleBoard[headX+1][headY+1]);
@@ -1266,6 +1273,9 @@ public class ClientGame {
 					for (int x = tailX-1; x >= tailX-aCurrentClickedShip.getSize()+1 && i>0; x--) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int y = tailY; y >= tailY-i; y--) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1287,6 +1297,9 @@ public class ClientGame {
 					for (int x = tailX+1; x <= tailX+aCurrentClickedShip.getSize()-1 && i>0; x++) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int y = tailY; y >= tailY-i; y--) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1294,9 +1307,9 @@ public class ClientGame {
 								broke = true;
 								break; 
 							}
-							i--;
 						}
 						if (broke) break;
+						i--;
 					}
 				}
 				break; //from case NORTH
@@ -1311,6 +1324,9 @@ public class ClientGame {
 					for (int x = tailX-1; x >= tailX-aCurrentClickedShip.getSize()+1 && i>0; x--) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int y = tailY; y <= tailY+i; y++) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1318,9 +1334,9 @@ public class ClientGame {
 								broke = true;
 								break; 
 							}
-						i--;
 						}
 						if (broke) break;
+						i--;
 					}
 				}
 				//Case turning left/port (east) 
@@ -1332,6 +1348,9 @@ public class ClientGame {
 					for (int x = tailX+1; x <= tailX+aCurrentClickedShip.getSize()-1 && i>0; x++) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int y = tailY; y <= tailY+i; y++) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1357,6 +1376,9 @@ public class ClientGame {
 					for (int y = tailY-1; y >= tailY-aCurrentClickedShip.getSize()+1 && i>0; y--) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int x = tailX; x <= tailX+i; x++) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1378,6 +1400,9 @@ public class ClientGame {
 					for (int y = tailY+1; y <= tailY+aCurrentClickedShip.getSize()-1 && i>0; y++) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int x = tailX; x <= tailX+i; x++) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1403,6 +1428,9 @@ public class ClientGame {
 					for (int y = tailY-1; y >= tailY-aCurrentClickedShip.getSize()+1 && i>0; y--) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int x = tailX; x >= tailX-i; x--) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {
@@ -1424,6 +1452,9 @@ public class ClientGame {
 					for (int y = tailY+1; y <= tailY+aCurrentClickedShip.getSize()-1 && i>0; y++) {
 						//Inner loop: looking along the ship's axis for every x, but with a limit i
 						for (int x = tailX; x >= tailX-i; x--) {
+							if (x < 0 || y < 0 || x >= aCurrentVisibleBoard.length || y >= aCurrentVisibleBoard.length) {
+								return false; //too close to the edge of the board
+							}
 							Square s = aCurrentVisibleBoard[x][y];
 							//Looking for obstacles
 							if (!clearSquare(s)) {

@@ -738,7 +738,7 @@ public class ServerGame implements Serializable
 							mineExplode(new Coordinate(finalDestinationHead.getX(), finalDestinationHead.getY() + 1), headCoord, pShip);
 						}
 					}
-					if (finalDestinationHead.getY() - 1 >= 0) {
+					if (finalDestinationTail.getY() - 1 >= 0) {
 						Square sf2 = aBoard[finalDestinationTail.getX()][finalDestinationTail.getY() - 1];
 						if (sf2 instanceof MineSquare) {
 							mineExplode(new Coordinate(finalDestinationTail.getX(), finalDestinationTail.getY() - 1), tailCoord, pShip);
@@ -888,7 +888,7 @@ public class ServerGame implements Serializable
 							mineExplode(new Coordinate(finalDestinationHead.getX() - 1, finalDestinationHead.getY()), headCoord, pShip);
 						}
 					}
-					if (finalDestinationHead.getX() + 1 < aBoard.length) {
+					if (finalDestinationTail.getX() + 1 < aBoard.length) {
 						Square sf2 = aBoard[finalDestinationTail.getX() + 1][finalDestinationTail.getY()];
 						if (sf2 instanceof MineSquare) {
 							mineExplode(new Coordinate(finalDestinationTail.getX() + 1, finalDestinationTail.getY()), tailCoord, pShip);
@@ -1031,7 +1031,7 @@ public class ServerGame implements Serializable
 							mineExplode(new Coordinate(finalDestinationHead.getX() + 1, finalDestinationHead.getY()), headCoord, pShip);
 						}
 					}
-					if (finalDestinationHead.getX() - 1 >= 0) {
+					if (finalDestinationTail.getX() - 1 >= 0) {
 						Square sf2 = aBoard[finalDestinationTail.getX() - 1][finalDestinationTail.getY()];
 						if (sf2 instanceof MineSquare) {
 							mineExplode(new Coordinate(finalDestinationTail.getX() - 1, finalDestinationTail.getY()), tailCoord, pShip);
