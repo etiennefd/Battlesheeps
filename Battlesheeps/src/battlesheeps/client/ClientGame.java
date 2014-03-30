@@ -57,11 +57,14 @@ public class ClientGame {
 
 	private JDesktopPane aDesktop; //outer window
 	private JFrame aMainFrame; //main 
-	private GameBoard aBoardPanel;
+	private JPanel aDummyBoard;
 	private MessagePanel aMessagePanel;
 	private LogPanel aLogPanel;
 	private JPanel aChatPanel;
-
+	private GameBoard aBoardPanel;
+	
+	private JSplitPane aSplitPane;
+	
 	//should know who it's player is 
 	private String aMyUser;
 	
@@ -110,15 +113,15 @@ public class ClientGame {
 		JPanel background = new JPanel();
 		background.setLayout(new BoxLayout(background, BoxLayout.X_AXIS));
 		
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setResizeWeight(0.8);
+		aSplitPane = new JSplitPane();
+		aSplitPane.setResizeWeight(0.8);
 		
-		background.add(splitPane);
+		background.add(aSplitPane);
 		
 		JSplitPane sidePanel = new JSplitPane();
 		sidePanel.setResizeWeight(0.5);
 		sidePanel.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		splitPane.setRightComponent(sidePanel);
+		aSplitPane.setRightComponent(sidePanel);
 		
 		JSplitPane sideBottom = new JSplitPane();
 		sideBottom.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -137,6 +140,25 @@ public class ClientGame {
 		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
 		sidePanel.setLeftComponent(aMessagePanel);
 		
+		//and creating the board panel 
+		aDummyBoard = new JPanel();
+		
+		aDummyBoard.setPreferredSize(new Dimension(600, 600));
+		aSplitPane.setLeftComponent(aDummyBoard);
+
+		this.aDesktop.add(background);
+		
+		this.aMainFrame.pack();
+		this.aMainFrame.setVisible(true);
+		
+		aSplitPane.setDividerLocation(0.7);		
+		
+	}
+
+	public void addBoard(String pPlayer) {
+		
+		aSplitPane.remove(aDummyBoard);
+		
 		//sending a board full of sea to the gui
 		Square[][] aCurrentVisibleBoard = new Square[30][30];
 		
@@ -145,22 +167,21 @@ public class ClientGame {
 				aCurrentVisibleBoard[i][j] = new Sea();
 			}
 		}
-	
-		//and creating the board panel 
+
 		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, this);
+	
+		aSplitPane.setLeftComponent(aBoardPanel);		
 		
-		aBoardPanel.setPreferredSize(new Dimension(600, 600));
-		splitPane.setLeftComponent(aBoardPanel);
-		
-		this.aMainFrame.add(background);
-		
-		this.aMainFrame.pack();
-		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
 		
-		splitPane.setDividerLocation(0.8);
+		aSplitPane.repaint();
+		aSplitPane.validate();
+		
+		aSplitPane.setDividerLocation(0.7);
+		
 	}
 
+	
 	/*
 	 * Menu will contain: 
 	 * ... 
