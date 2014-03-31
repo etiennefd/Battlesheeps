@@ -121,11 +121,11 @@ public class TestGameBoard{
 		client.setupComplete();
 		ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
 		
-		ClientGame clientO = new ClientGame(opponent.getUsername());
-		clientO.addBoard(opponent.getUsername());
-		clientO.setupComplete();
-		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 1, clientO);
-		
+//		ClientGame clientO = new ClientGame(opponent.getUsername());
+//		clientO.addBoard(opponent.getUsername());
+//		clientO.setupComplete();
+//		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 1, clientO);
+//		
 	}
 	
 	public static void main(String[] args) {
