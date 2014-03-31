@@ -102,17 +102,31 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aMyClient = pClient;
 		aChosenMove = false;
 		
-		createBoard();
+		createFrame();
 		
 		//will be used later on to show which squares are clickable 
 		aGreenList = new ArrayList<Coordinate>(); 
+		
+		//creating a bigger rectangle so as to show the numbers 
+		aBorder = new MinuetoRectangle(aBoardSize+25, aBoardSize+25, MinuetoColor.WHITE, true);
+
+		//adding the numbers beside the board: 
+		for (int i = 0; i < 30; i++) {
+			Integer in = new Integer(i);
+			MinuetoText number = new MinuetoText(in.toString(), aFont, MinuetoColor.BLACK, false);
+			aBorder.draw(number, aBoardSize+5, (i)*aIncrement);
+			aBorder.draw(number, ((i)*(aIncrement))+4, aBoardSize+5);
+		}
+		
+		//and here's the actual board
+		aBoard = new MinuetoRectangle(aBoardSize, aBoardSize, aOceanColour, true);
 		
 		Thread thread = new Thread(this);
 		thread.start();
 		
 	}
 	
-	private void createBoard() {
+	private void createFrame() {
 		
 		JInternalFrame boardFrame = this;
 
@@ -140,19 +154,6 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	}
 	
 	public void run() {
-		//creating a bigger rectangle so as to show the numbers 
-		aBorder = new MinuetoRectangle(aBoardSize+25, aBoardSize+25, MinuetoColor.WHITE, true);
-
-		//adding the numbers beside the board: 
-		for (int i = 0; i < 30; i++) {
-			Integer in = new Integer(i);
-			MinuetoText number = new MinuetoText(in.toString(), aFont, MinuetoColor.BLACK, false);
-			aBorder.draw(number, aBoardSize+5, (i)*aIncrement);
-			aBorder.draw(number, ((i)*(aIncrement))+4, aBoardSize+5);
-		}
-		
-		//and here's the actual board
-		aBoard = new MinuetoRectangle(aBoardSize, aBoardSize, aOceanColour, true);
 		
 		this.drawBoard();
 		
