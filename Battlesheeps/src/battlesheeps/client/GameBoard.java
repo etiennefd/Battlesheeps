@@ -158,7 +158,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		this.drawBoard();
 		
 		while(open) {
-		//	synchronized (aMinuetoPanel) {
+			synchronized (aMinuetoPanel) {
 				if (aMinuetoPanel.isVisible()) {
 					
 					// Handle all the events in the event queue.
@@ -179,7 +179,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 						e.printStackTrace();
 					}
 				}
-			//}
+			}
 			Thread.yield();
 		}
 		aMinuetoPanel.close(); //not sure if I should be closing it? 

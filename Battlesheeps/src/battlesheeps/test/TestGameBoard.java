@@ -117,7 +117,7 @@ public class TestGameBoard{
 		new Thread(new ServerGamesAndMoves()).start();
 		
 		client = new ClientGame(player.getUsername());
-		client.addBoard(player.getUsername());
+
 		client.setupComplete();
 		ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
 		
