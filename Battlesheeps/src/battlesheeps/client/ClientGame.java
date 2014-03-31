@@ -57,7 +57,6 @@ public class ClientGame {
 
 	private JDesktopPane aDesktop; //outer window
 	private JFrame aMainFrame; //main 
-	private JPanel aDummyBoard;
 	private MessagePanel aMessagePanel;
 	private LogPanel aLogPanel;
 	private JPanel aChatPanel;
@@ -141,27 +140,9 @@ public class ClientGame {
 		sidePanel.setLeftComponent(aMessagePanel);
 		
 		//and creating the board panel 
-		aDummyBoard = new JPanel();
-		
-		aDummyBoard.setPreferredSize(new Dimension(600, 600));
-		aSplitPane.setLeftComponent(aDummyBoard);
-
-		this.aDesktop.add(background);
-		
-		this.aMainFrame.pack();
-		this.aMainFrame.setVisible(true);
-		
-		aSplitPane.setDividerLocation(0.7);		
-		
-	}
-
-	public void addBoard(String pPlayer) {
-		
-		aSplitPane.remove(aDummyBoard);
-		
 		//sending a board full of sea to the gui
 		Square[][] aCurrentVisibleBoard = new Square[30][30];
-		
+
 		for(int i = 0; i < 30; i++) { 
 			for (int j = 0; j<30; j++) {
 				aCurrentVisibleBoard[i][j] = new Sea();
@@ -169,15 +150,16 @@ public class ClientGame {
 		}
 
 		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, this);
-	
-		aSplitPane.setLeftComponent(aBoardPanel);		
+
+		aBoardPanel.setPreferredSize(new Dimension(600, 600));
+		aSplitPane.setLeftComponent(aBoardPanel);
+
+		this.aDesktop.add(background);
 		
+		this.aMainFrame.pack();
+		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
-		
-		aSplitPane.repaint();
-		aSplitPane.validate();
-		
-		aSplitPane.setDividerLocation(0.7);
+		aSplitPane.setDividerLocation(0.7);		
 		
 	}
 
