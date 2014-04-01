@@ -1061,6 +1061,7 @@ public class ServerGame implements Serializable
 		
 		int x = pIntermediateDest.getX();
 		int y = pIntermediateDest.getY();
+		setShipPosition(pShip, pIntermediateDest, pIntermediateDest);
 		
 		//Is there a mine exploding when the ship gets to its intermediate square? 
 		if (x-1 >= 0 && aBoard[x-1][y] instanceof MineSquare) {
@@ -1083,7 +1084,8 @@ public class ServerGame implements Serializable
 		
 		x = pFinalDest.getX();
 		y = pFinalDest.getY();
-		
+		setShipPosition(pShip, pFinalDest, pFinalDest);
+
 		//Is there a mine exploding when the ship gets to its final square? 
 		if (x-1 >= 0 && aBoard[x-1][y] instanceof MineSquare) {
 			mineExplode(new Coordinate(x-1, y), pFinalDest, pShip);
@@ -1098,10 +1100,7 @@ public class ServerGame implements Serializable
 			mineExplode(new Coordinate(x, y+1), pFinalDest, pShip);
 		}
 		
-		//If ship is still afloat, update the board
-		if (!pShip.isSunk()) {
-			setShipPosition(pShip, pFinalDest, pFinalDest);
-		}
+		
 	}
 
 	/**

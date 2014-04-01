@@ -542,6 +542,10 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 								aFirstChosenCoord = null;
 								aSecondChosenCoord = null;
 								aGreenPhase = false;
+								//Resetting the green list
+								aGreenList = new ArrayList<Coordinate>();
+								//Redrawing the board 
+								drawBoard();
 							}
 						}
 						else {
@@ -549,13 +553,13 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 							aFirstChosenCoord = null;
 							aSecondChosenCoord = null;
 							aGreenPhase = false;
+							//Resetting the green list
+							aGreenList = new ArrayList<Coordinate>();
+							//Redrawing the board 
+							drawBoard();
 						}
 						
-						//In all cases, resetting the green list
-						aGreenList = new ArrayList<Coordinate>();
 						
-						//and redrawing the board 
-						drawBoard();
 							
 					}
 				}

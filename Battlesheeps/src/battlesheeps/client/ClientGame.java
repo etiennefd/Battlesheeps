@@ -449,7 +449,6 @@ public class ClientGame {
 			
 			int headX = pShip.getHead().getX();
 			int headY = pShip.getHead().getY();
-			greenList.add(pShip.getHead());
 			for (int x = headX-1; x <= headX+1; x++) {
 				for (int y = headY-1; y <= headY+1; y++) {
 					if (new Coordinate(x, y).inBounds()) {
@@ -1007,8 +1006,20 @@ public class ClientGame {
 	protected void suicideSelected(Ship pShip) {
 		aCurrentClickedMove = MoveType.SUICIDE_ATTACK;
 		List<Coordinate> greenList = new ArrayList<Coordinate>();
-		//TODO
 		
+		int headX = pShip.getHead().getX();
+		int headY = pShip.getHead().getY();
+		greenList.add(pShip.getHead());
+		for (int x = headX-1; x <= headX+1; x++) {
+			for (int y = headY-1; y <= headY+1; y++) {
+				if (new Coordinate(x, y).inBounds()) {
+					Square s = aCurrentVisibleBoard[x][y];
+					if (clearSquare(s)) {
+						greenList.add(new Coordinate(x, y));
+					}
+				}
+			}
+		}
 		
 		aBoardPanel.showAvailableMoves(greenList);
 	}
@@ -1048,7 +1059,7 @@ public class ClientGame {
 			for (int y = cY-1; y <= cY+1; y++) {
 				if (new Coordinate(x, y).inBounds()) {
 					Square s = aCurrentVisibleBoard[x][y];
-					if (clearSquare(s) || s instanceof ShipSquare ) {
+					if (clearSquare(s)) {
 						greenList.add(new Coordinate(x, y));
 					}
 				}
@@ -1064,7 +1075,7 @@ public class ClientGame {
 	 * so Client sends the info to the Server. 
 	 * 
 	 * NEW: this method now returns true if a move was completed, and false if the move is not done. 
-	 * (E.g. only first half of the kamikaze translation was done)
+	 * (E.g. only first half of the kamikaze translation was done means return false)
 	 * @param pCoord
 	 */
 	protected boolean greenSelected(Coordinate pCoord, Coordinate pSecondaryCoord) {
