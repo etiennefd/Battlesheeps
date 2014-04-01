@@ -59,7 +59,7 @@ public class ClientGame {
 	private JFrame aMainFrame; //main 
 	private MessagePanel aMessagePanel;
 	private LogPanel aLogPanel;
-	private JPanel aChatPanel;
+	private ChatPanel aChatPanel; // TODO needs to be closed.
 	private GameBoard aBoardPanel;
 	
 	private JSplitPane aSplitPane;
@@ -132,8 +132,8 @@ public class ClientGame {
 		sideBottom.setLeftComponent(aLogPanel);
 		
 		//CHAT
-		JPanel chat = new JPanel();
-		sideBottom.setRightComponent(chat);
+		aChatPanel = new ChatPanel(aMyUser);
+		sideBottom.setRightComponent(aChatPanel);
 		
 		//MESSAGES
 		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
@@ -256,10 +256,12 @@ public class ClientGame {
 		if (isP1) {
 			myList = pGame.getP1ShipList();
 			oppList = pGame.getP2ShipList();
+			aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
 		}
 		else {
 			myList = pGame.getP2ShipList();
 			oppList = pGame.getP1ShipList();
+			aChatPanel.setOpponent(pGame.getP1Username());
 		}
 		
 		Square[][] tempBoard = computeVisibility(pGame.getBoard(), myList);

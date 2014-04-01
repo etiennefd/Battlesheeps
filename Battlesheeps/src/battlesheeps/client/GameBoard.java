@@ -185,6 +185,17 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aMinuetoPanel.close(); //not sure if I should be closing it? 
 		dispose(); // or disposing of it? 
 	}
+	
+	/**
+	 * Method to redraw the board
+	 * @param pVisibleBoard
+	 */
+	public void redrawBoard(Square[][] pVisibleBoard) {
+
+		aVisibleBoard = pVisibleBoard;
+		drawBoard();
+	}
+	
 	/**
 	 * Method to be called when setup is over. 
 	 */

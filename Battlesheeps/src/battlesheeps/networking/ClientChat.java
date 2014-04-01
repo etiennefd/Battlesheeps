@@ -1,14 +1,5 @@
 package battlesheeps.networking;
 
-/* Need a port for
- * 1 Game
- * 2 game Request
- * 3 Move
- * 4 Chat
- */
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,11 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class ClientChat {
 	/* Host to connect to. This can be "localhost" if running both client/server 
@@ -71,7 +58,7 @@ public class ClientChat {
 //		t.setVisible(true);
 //    }
     
-    public ClientChat(String pUsername, String pOpponentUsername, OutputBox pOutput) {
+    public ClientChat(String pUsername, String pOpponentUsername, JTextArea pOutput) {
     	aOpponentUsername = pOpponentUsername;
         try {
             Socket server = new Socket(HOST, PORT);
@@ -131,9 +118,9 @@ public class ClientChat {
  
 class ServerConn implements Runnable {
     private BufferedReader aInput = null;
-    private OutputBox aOutput = null;
+    private JTextArea aOutput = null;
  
-    public ServerConn(Socket pServer, OutputBox pOutput) throws IOException {
+    public ServerConn(Socket pServer, JTextArea pOutput) throws IOException {
         aInput = new BufferedReader(new InputStreamReader(pServer.getInputStream()));
         aOutput = pOutput;
     }
@@ -142,7 +129,8 @@ class ServerConn implements Runnable {
 		try {
 			String msg;
 			while ((msg = aInput.readLine()) != null) { /* loop reading messages from the server and show them on stdout */
-				aOutput.append(msg);
+				aOutput.append("\n" + msg);
+				aOutput.setCaretPosition(aOutput.getDocument().getLength()); // moves the pane to the bottom.
 			}
 		} 
 		catch (IOException e) { /* executed when StdIn reads QUIT message and closes the socket. */
@@ -153,47 +141,5 @@ class ServerConn implements Runnable {
 				System.err.println("Error closing ServerIn: " + e1);
 			}
 		}
-	}
-}
-
-@SuppressWarnings("serial")
-class InputBox extends JPanel implements ActionListener
-{
-	private static final String YOU = "You: ";
-	private JTextField aText = new JTextField(30);
-	private ClientChat aChatInput = null;
-	private OutputBox aOutput = null;
-	
-	public InputBox(ClientChat pChatInput, OutputBox pOutput){
-		aChatInput = pChatInput;
-		aOutput = pOutput;
-		aText.setText("");
-		aText.addActionListener(this);
-		add(aText);
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent arg0)
-	{
-		aChatInput.sendMessage(aText.getText());
-		aOutput.append(YOU + aText.getText());
-		aText.setText("");
-	}
-}
-
-@SuppressWarnings("serial")
-class OutputBox extends JPanel
-{
-	private JTextArea aText= new JTextArea(6, 30);
-	
-	public OutputBox(){
-		aText.setLineWrap(true);
-		aText.setEditable(false);
-		add(new JScrollPane(aText));
-	}
-	
-	public void append(String pAppendedText){
-		aText.append("\n" + pAppendedText);
-		aText.setCaretPosition(aText.getDocument().getLength()); // moves the pane to the bottom.
 	}
 }

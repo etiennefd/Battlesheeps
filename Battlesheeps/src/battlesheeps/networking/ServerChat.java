@@ -22,9 +22,9 @@ public class ServerChat implements Runnable
      * 	5. In the Frames that open up, type into the bottom one.
      */
     
-//    public static void main (String[] args) {
-//    	(new ServerChat()).acceptClients(); 	/* Example creation of ServerChat */
-//    }
+    public static void main (String[] args) {
+    	(new ServerChat()).acceptClients(); 	/* Example creation of ServerChat */
+    }
     
     /**
      * Creates serverSocket on specified port.
@@ -103,7 +103,7 @@ class ClientConn implements Runnable {
             	{
             		aUsernames.put(msg.getMessage(), this);
             		aUser = msg.getMessage();
-            		System.out.println("User \"" + aUser + "\" has connected.");
+            		System.out.println("User \"" + aUser + "\" has connected to CHAT.");
             	}
             	else 
             	{
@@ -137,6 +137,6 @@ class ClientConn implements Runnable {
 		try {aInput.close();}
 		catch (IOException e1) { /* do nothing, resource already closed. */ }
 		
-		System.out.println("User \"" + aUser + "\" has disconnected.");
+		System.out.println("User \"" + aUser + "\" has disconnected from CHAT.");
 	}
 }
