@@ -170,50 +170,29 @@ public class ClientGame {
 
 		JMenuBar menuBar = new JMenuBar();
 
-		JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-
-		JMenuItem newItem = new JMenuItem("Item1");
-		newItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//do something  
-			}
+		JMenu mainMenu = new JMenu("Menu");
+		menuBar.add(mainMenu);
+		
+		JMenuItem aboutItem = new JMenuItem("About");
+		aboutItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(aMainFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", "About", JOptionPane.PLAIN_MESSAGE);
+			}		
 		});
-		fileMenu.add(newItem);
+		mainMenu.add(aboutItem);
+
+		mainMenu.addSeparator();
 		
-		fileMenu.addSeparator();
-		
-		JMenuItem newItem2 = new JMenuItem("Item2");
+		JMenuItem newItem2 = new JMenuItem("Help");
 		newItem2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//do something
+				JOptionPane.showMessageDialog(aMainFrame, "Click on a ship, then on a move button.\n" +
+						"Then click on a green square, and wait for your turn to come again.", "Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
-		fileMenu.add(newItem2);
+		mainMenu.add(newItem2);
 		
-		fileMenu.addSeparator();
-		
-		JMenuItem newItem3 = new JMenuItem("Item3");
-		newItem3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//do something
-			}
-		});
-		fileMenu.add(newItem3);
-		 
-		fileMenu.addSeparator();
-		
-		JMenuItem hideItem = new JMenuItem("Item4");
-		hideItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-					//do something
-			}
-		});
-		fileMenu.add(hideItem);	
-		
-		fileMenu.addSeparator();
-		
-		fileMenu.addSeparator();
+		mainMenu.addSeparator();
 
 		JMenuItem exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(new ActionListener() {
@@ -222,18 +201,7 @@ public class ClientGame {
 				System.exit(0);
 			}
 		});
-		fileMenu.add(exitItem);
-
-		JMenu helpMenu = new JMenu("Help");
-		menuBar.add(helpMenu);
-
-		JMenuItem aboutItem = new JMenuItem("About");
-		aboutItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(aMainFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", "About", JOptionPane.PLAIN_MESSAGE);
-			}		
-		});
-		helpMenu.add(aboutItem);
+		mainMenu.add(exitItem);	
 
 		return menuBar;
 
