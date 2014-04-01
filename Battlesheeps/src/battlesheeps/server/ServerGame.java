@@ -2249,6 +2249,11 @@ public class ServerGame implements Serializable
 		this.aClientInfo = pClientInfo;
 	}
 
+	public boolean isGameComplete()
+	{
+		return aGameComplete;
+	}
+
 	public Square[][] getBoard() {
 		return aBoard;
 	}

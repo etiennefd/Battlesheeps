@@ -108,7 +108,7 @@ class ClientConnGame implements Runnable {
         	aUsername = init.getUsername();
         	aGameID = init.getGameID(); // if gameID is zero, new game requested
         	addConnection(aUsername, this);
-        	System.out.println(aUsername + " has connected.");
+        	System.out.println(aUsername + " has connected to GAME.");
         	
         	boolean isNewGame = false;
         	if (init.getGameID() == 0) isNewGame = true;
@@ -137,6 +137,7 @@ class ClientConnGame implements Runnable {
         		System.out.println(aUsername + " has joined game " + aGameID);
         	}
         	aOutput.writeObject(aGame);
+        	aOutput.reset();
         	
         	// Set aOpponent
         	if (aGame.getP1Username().equals(aUsername)){
@@ -169,9 +170,10 @@ class ClientConnGame implements Runnable {
         				while (!opponentRespondedToCoral) {/*WAIT*/}
         				
         				if (!opponentAcceptedCoral || !p1acceptedGame){
-        					aGame.generateCoralReefs(); // TODO ask ettienne if coral reef is wiped.
+        					aGame.generateCoralReefs();
         					aGame.setClientInfo(ClientInfo.NEW_CORAL);
         					aOutput.writeObject(aGame);
+        					aOutput.reset();
         					
         					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
         					p1acceptedGame = false;
@@ -185,6 +187,7 @@ class ClientConnGame implements Runnable {
         					aOpponent.opponentAcceptedCoral = true;
         					aOpponent.opponentRespondedToCoral = true;
         					aOutput.writeObject(aGame);
+        					aOutput.reset();
         					
         					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
         					break;
@@ -204,10 +207,12 @@ class ClientConnGame implements Runnable {
         				
         				if (opponentAcceptedCoral){
         					aOutput.writeObject(aGame);
+        					aOutput.reset();
         					break;
         				}
         				else {
         					aOutput.writeObject(aGame);
+        					aOutput.reset();
         					opponentRespondedToCoral = false;
         				}
         			}
@@ -224,20 +229,28 @@ class ClientConnGame implements Runnable {
         				// TODO is this correct? probably not.
         				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
         				aOutput.writeObject(aGame);
+        				aOutput.reset();
         			}
         		}
         	}
-        	aOutput.reset();
+        	
         	aGame.setClientInfo(ClientInfo.GAME_UPDATE);
             while ((msg = (Move) aInput.readObject()) != null) 
             {
-            	// TODO is THIS correct? It might be actually.
             	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
-            	System.out.println(aGame.printBoard());
+            	// System.out.println(aGame.printBoard());
+            	
+            	
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
             	aOutput.reset();
             	aOpponent.aOutput.reset();
+            	
+            	if (aGame.isGameComplete()){
+            		gm.endGame(aGameID);
+            		close();
+            		break;
+            	}
             }
         }
         catch (EOFException e) {
@@ -264,7 +277,7 @@ class ClientConnGame implements Runnable {
     }
     
     private void close(){
-    	System.out.println(aUsername + " has disconnected.");
+    	System.out.println(aUsername + " has disconnected from GAME.");
     	removeConnection(aUsername);
 		try {
 			aInput.close();

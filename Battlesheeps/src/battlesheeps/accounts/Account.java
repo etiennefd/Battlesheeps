@@ -47,8 +47,16 @@ public class Account implements Serializable
 		return aNumGamesWon;
 	}
 	
+	public void incrementGamesWon(){
+		aNumGamesWon++;
+	}
+	
 	public int getNumGamesLost(){
 		return aNumGamesLost;
+	}
+	
+	public void incrementGamesLost(){
+		aNumGamesLost++;
 	}
 	
 	public Iterator<Integer> getCurrentGames(){
@@ -64,12 +72,12 @@ public class Account implements Serializable
 		aAvailability = pAvailability;
 	}
 	
-	public boolean addNewGame(int aGame){
-		return aCurrentGames.add(aGame);
+	public boolean addNewGame(int pGameID){
+		return aCurrentGames.add(pGameID);
 	}
 	
-	public void removeFinishedGame(int aGame){
-		aCurrentGames.remove(aGame);
+	public void removeFinishedGame(int pGameID){
+		aCurrentGames.remove(aCurrentGames.indexOf(pGameID));
 	}
 	
 	@Override
