@@ -34,15 +34,19 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SpringLayout;
 
 
 /* This will open a window with the following panels:
@@ -238,6 +242,86 @@ public class ClientGame {
 	//call startGame() in GameBoard once setup is done... 
 	
 	/**********************IN GAME SECTION****************************/
+	/*
+	 * This is called when a game update contains a newly completed game.
+	 * It will open a popup and close the appropriate windows when the
+	 * "Return to Lobby" button is clicked.
+	 */
+	public void gameComplete(ServerGame pGame)	{
+		System.out.println("game done");
+		String endMessage;
+		if(pGame.getWinnerName().equals(aMyUser))
+		{
+			//open notification that says you win!
+			endMessage = "You won!";
+		}
+		else
+		{
+			//open notification that says you lose 
+			endMessage = "You lost ";
+		}
+
+		final JPanel endGamePane = new JPanel();
+		SpringLayout layout = new SpringLayout();
+		JLabel messageLabel = new JLabel(endMessage);
+		endGamePane.add(messageLabel);
+		JButton backButton = new JButton("Return to Lobby");
+		endGamePane.add(backButton);
+
+		layout.putConstraint(SpringLayout.NORTH, messageLabel, 10, SpringLayout.NORTH, endGamePane);
+       layout.putConstraint(SpringLayout.WEST, messageLabel, 10, SpringLayout.WEST, endGamePane);
+
+       layout.putConstraint(SpringLayout.NORTH, backButton, 10, SpringLayout.SOUTH, messageLabel);
+       layout.putConstraint(SpringLayout.WEST, backButton, 10, SpringLayout.WEST, endGamePane);
+       layout.putConstraint(SpringLayout.SOUTH, backButton, -10, SpringLayout.SOUTH, endGamePane);
+       
+       endGamePane.setLayout(layout);
+       
+		final JDialog dialog = new JDialog();
+		dialog.setTitle("Game Complete");
+		dialog.setModal(true);
+		dialog.setMinimumSize(new Dimension(225,125));
+		dialog.setMaximumSize(new Dimension(225,125));
+		dialog.setResizable(false);
+
+		dialog.setContentPane(endGamePane);
+		
+		//add action listener to return to Lobby
+		backButton.addActionListener(new ToLobbyListener(dialog, this));
+			
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setLocationRelativeTo(aMainFrame);
+		dialog.pack();
+		
+		dialog.setVisible(true);
+	}
+	
+	/* Listener for end of game message to go back to the Lobby*/
+	class ToLobbyListener implements ActionListener
+	{
+		private JDialog aDialog;
+		private ClientGame aGame;
+	
+		public ToLobbyListener(JDialog pDialog, ClientGame pGame)
+		{
+			this.aDialog = pDialog;
+			this.aGame = pGame;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			aDialog.setVisible(false);
+			aDialog.dispose();
+			aGame.aMainFrame.setVisible(false);
+			aGame.aMainFrame.dispose();
+			
+			aGame.aBoardPanel.dispose();
+			aGame.myManager.close();
+				
+			new Lobby(aGame.aMyUser);
+		}
+	}
+	
 	
 	/*After each move, 
 	 * 1. the board will be updated 
@@ -245,44 +329,48 @@ public class ClientGame {
 	 * 3. a message may be displayed  
 	 */
 	public void updateGame (ServerGame pGame) {
-	
-		boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
-		
-		List<Ship> myList;
-		List<Ship> oppList;
-		
-		boolean isP1 = aMyUser.equals(pGame.getP1Username());
-		
-		if (isP1) {
-			myList = pGame.getP1ShipList();
-			oppList = pGame.getP2ShipList();
-			aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+		if (pGame.isGameComplete()) {
+			gameComplete(pGame);
 		}
 		else {
-			myList = pGame.getP2ShipList();
-			oppList = pGame.getP1ShipList();
-			aChatPanel.setOpponent(pGame.getP1Username());
-		}
-		
-		Square[][] tempBoard = computeVisibility(pGame.getBoard(), myList);
-		for (int i = 0; i <30; i++) {
-			for (int j = 0; j<30; j++) {
-				aCurrentVisibleBoard[i][j] = tempBoard[i][j]; 
+			boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
+			
+			List<Ship> myList;
+			List<Ship> oppList;
+			
+			boolean isP1 = aMyUser.equals(pGame.getP1Username());
+			
+			if (isP1) {
+				myList = pGame.getP1ShipList();
+				oppList = pGame.getP2ShipList();
+				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
 			}
+			else {
+				myList = pGame.getP2ShipList();
+				oppList = pGame.getP1ShipList();
+				aChatPanel.setOpponent(pGame.getP1Username());
+			}
+			
+			Square[][] tempBoard = computeVisibility(pGame.getBoard(), myList);
+			for (int i = 0; i <30; i++) {
+				for (int j = 0; j<30; j++) {
+					aCurrentVisibleBoard[i][j] = tempBoard[i][j]; 
+				}
+			}
+			
+					
+			if (myTurn){
+				//my turn 
+				aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
+				aMessagePanel.setYourTurn();
+			} 
+			else {
+				aBoardPanel.updateTurn(aCurrentVisibleBoard, false);
+				aMessagePanel.setNotYourTurn(myList, oppList);
+			}
+			
+			aLogPanel.updateLogEntries(pGame.getLog());	
 		}
-		
-				
-		if (myTurn){
-			//my turn 
-			aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
-			aMessagePanel.setYourTurn();
-		} 
-		else {
-			aBoardPanel.updateTurn(aCurrentVisibleBoard, false);
-			aMessagePanel.setNotYourTurn(myList, oppList);
-		}
-		
-		aLogPanel.updateLogEntries(pGame.getLog());
 	}
 	
 	/**
