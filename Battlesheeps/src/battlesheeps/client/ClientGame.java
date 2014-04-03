@@ -421,6 +421,13 @@ public class ClientGame {
 	 * 3. a message may be displayed  
 	 */
 	public void updateGame (ServerGame pGame) {
+		
+		//if the game is restarted, we need to tell board panel 
+		if (!aBoardPanel.getStatus()){
+			aBoardPanel.startGame();
+			if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
+		}
+		
 		if (pGame.isGameComplete()) {
 			gameComplete(pGame);
 		}

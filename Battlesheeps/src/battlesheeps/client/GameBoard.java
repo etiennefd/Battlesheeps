@@ -207,6 +207,10 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aGameInProgress = true;
 	}
 	
+	public boolean getStatus() {
+		return aGameInProgress;
+	}
+	
 	/**
 	 * Updates the game board and the Message panel depending on whose turn it is
 	 * @param pNewBoard : the new game board 
