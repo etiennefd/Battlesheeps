@@ -7,13 +7,15 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import battlesheeps.server.GameManager;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame;
 import battlesheeps.server.ServerGame.ClientInfo;
-import battlesheeps.ships.Ship;
 
 public class ServerGamesAndMoves implements Runnable 
 {
@@ -76,14 +78,23 @@ public class ServerGamesAndMoves implements Runnable
 class ClientConnGame implements Runnable {
 	private static final Hashtable<String, ClientConnGame> aClientList = new Hashtable<String, ClientConnGame>();
 	
+//	private final Lock lock = new ReentrantLock();
+//	private final Condition opponentResponded  = lock.newCondition(); 
+	
     private ObjectInputStream aInput;
     private ObjectOutputStream aOutput;
     private String aUsername;
     private ClientConnGame aOpponent;
+
     private int aGameID;
-    private boolean opponentRespondedToCoral = false;
-    private boolean opponentAcceptedCoral = false;
+    private ServerGame aGame = null;
+    private GameManager gm = GameManager.getInstance();
+
     private boolean isP1 = false;
+    private boolean isNewGame = false;
+    
+    private boolean opponentAcceptedCoral = false;
+    private boolean opponentRespondedToCoral = false;
     
     /**
      * Client connections on the server side will receive ChatMessage objects and
@@ -110,137 +121,28 @@ class ClientConnGame implements Runnable {
         	addConnection(aUsername, this);
         	System.out.println(aUsername + " has connected to GAME.");
         	
-        	boolean isNewGame = false;
         	if (init.getGameID() == 0) isNewGame = true;
         	
-        	ServerGame aGame = null;
-        	GameManager gm = GameManager.getInstance();
-        	
         	// Requestee will only send their own username, opponent should be null
-        	if (aGameID == 0 && init.getOpponent() != null)
-        	{
-        		// The requester is always the one who makes the game.
-        		aGameID = gm.generateGameID();
-        		aGame = new ServerGame(aGameID, gm.getAccount(aUsername), gm.getAccount(init.getOpponent()));
-        		gm.addGame(aGame);
-        		System.out.println(aUsername + " has created game " + aGameID);
-        		
-        		while (!aClientList.containsKey(init.getOpponent())) {/*WAIT for requestee to connect*/}
-        		aClientList.get(init.getOpponent()).aGameID = this.aGameID;
-        		System.out.println(aUsername + " has informed opponent of GameID");
-        	} 
-        	else {
-        		System.out.println(aUsername + " is finding game");
-        		while (aGame == null){
-        			aGame = gm.getGame(aGameID);
-        		}
-        		System.out.println(aUsername + " has joined game " + aGameID);
-        	}
-        	aOutput.writeObject(aGame);
-        	aOutput.reset();
+        	sendInitialGame(init);
         	
-        	// Set aOpponent
-        	if (aGame.getP1Username().equals(aUsername)){
-        		while (!aClientList.containsKey(aGame.getP2Username())) {/*WAIT for requestee to connect*/}
-        		aOpponent = aClientList.get(aGame.getP2Username());
-        		isP1 = true;
-        	}
-        	else {
-        		while (!aClientList.containsKey(aGame.getP1Username())) {/*WAIT for requestee to connect*/}
-        		aOpponent = aClientList.get(aGame.getP1Username());
-        	}
-        	if (aOpponent == null) System.out.println(aUsername + " opponent connection null.");
+        	setOpponent();
         	
-        	Move msg;
         	if (isNewGame){
-        		// Coral reef config.
-        		System.out.println(aUsername + " CORAL REEF CONFIG");
-        		if (isP1)
-        		{
-        			// P1 is the controller. It waits for p1 Move, then waits for p2 move.
-        			// After that it either generates new coral or exits loop.
-        			boolean p1acceptedGame = false;
-        			
-        			while ((msg = (Move) aInput.readObject()) != null)
-        			{
-        				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
-        					p1acceptedGame = true;
-        				}
-        				
-        				while (!opponentRespondedToCoral) {/*WAIT*/}
-        				
-        				if (!opponentAcceptedCoral || !p1acceptedGame){
-        					aGame.generateCoralReefs();
-        					aGame.setClientInfo(ClientInfo.NEW_CORAL);
-        					aOutput.writeObject(aGame);
-        					aOutput.reset();
-        					
-        					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
-        					p1acceptedGame = false;
-        					opponentAcceptedCoral = false;
-        					opponentRespondedToCoral = false;
-        					
-        					aOpponent.opponentRespondedToCoral = true;
-        				}
-        				else {
-        					aGame.setClientInfo(ClientInfo.FINAL_CORAL);
-        					aOpponent.opponentAcceptedCoral = true;
-        					aOpponent.opponentRespondedToCoral = true;
-        					aOutput.writeObject(aGame);
-        					aOutput.reset();
-        					
-        					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
-        					break;
-        				}
-        			}
-        		}
-        		else {
-        			// P2 will tell p1 accept/decline, then wait for p1 to respond.
-        			while ((msg = (Move) aInput.readObject()) != null)
-        			{
-        				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
-        					aOpponent.opponentAcceptedCoral = true;
-        				}
-        				aOpponent.opponentRespondedToCoral = true;
-        				
-        				while (!opponentRespondedToCoral) {/*WAIT*/}
-        				
-        				if (opponentAcceptedCoral){
-        					aOutput.writeObject(aGame);
-        					aOutput.reset();
-        					break;
-        				}
-        				else {
-        					aOutput.writeObject(aGame);
-        					aOutput.reset();
-        					opponentRespondedToCoral = false;
-        				}
-        			}
-        		}
+        		System.out.println("CORAL REEF CONFIG for user: " + aUsername);
+        		coralReefConfig();
         		
         		System.out.println("SHIP SETUP for user: " + aUsername);
-        		// Ship setup, moves ships into place until it is told player is done.
-        		aGame.setClientInfo(ClientInfo.SHIP_INIT);
-        		while ((msg = (Move) aInput.readObject()) != null){
-        			if (msg.getServerInfo() == ServerInfo.SHIP_INIT_COMPLETE){
-        				break;
-        			}
-        			else if (msg.getServerInfo() == ServerInfo.SHIP_INIT) {
-        				// TODO is this correct? probably not.
-        				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
-        				aOutput.writeObject(aGame);
-        				aOutput.reset();
-        			}
-        		}
+        		shipInit();
         	}
         	
+        	Move msg;
         	aGame.setClientInfo(ClientInfo.GAME_UPDATE);
             while ((msg = (Move) aInput.readObject()) != null) 
             {
             	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
             	// System.out.println(aGame.printBoard());
-            	
-            	
+
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
             	aOutput.reset();
@@ -267,6 +169,159 @@ class ClientConnGame implements Runnable {
 			System.err.println("Error reading in Move, or casting it." + e);
 		}
     }
+	private void shipInit() throws IOException, ClassNotFoundException
+	{
+		// Ship setup, moves ships into place until it is told player is done.
+		Move msg;
+		aGame.setClientInfo(ClientInfo.SHIP_INIT);
+		while ((msg = (Move) aInput.readObject()) != null){
+			if (msg.getServerInfo() == ServerInfo.SHIP_INIT_COMPLETE){
+				break;
+			}
+			else if (msg.getServerInfo() == ServerInfo.SHIP_INIT) {
+				// TODO is this correct? probably not.
+				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
+				aOutput.writeObject(aGame);
+				aOutput.reset();
+			}
+		}
+		return;
+	}
+	private void coralReefConfig() throws IOException, ClassNotFoundException
+	{
+		Move msg;
+		if (isP1)
+		{
+			// P1 is the controller. It waits for p1 Move, then waits for p2 move.
+			// After that it either generates new coral or exits loop.
+			boolean p1acceptedGame = false;
+			
+			while ((msg = (Move) aInput.readObject()) != null)
+			{
+				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
+					p1acceptedGame = true;
+				}
+				
+//				lock.lock();
+//				try{
+					while (!opponentRespondedToCoral) {
+//						p2responded.await();
+					}
+//				}
+//				catch (InterruptedException e){
+//					e.printStackTrace();
+//				}
+//				finally {
+//					lock.unlock();
+//				}
+				
+				if (!opponentAcceptedCoral || !p1acceptedGame){
+					aGame.generateCoralReefs();
+					aGame.setClientInfo(ClientInfo.NEW_CORAL);
+					
+					aOutput.writeObject(aGame);
+					aOutput.reset();
+					aOpponent.aOutput.writeObject(aGame);
+					aOpponent.aOutput.reset();
+					
+					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
+					p1acceptedGame = false;
+					opponentAcceptedCoral = false;
+					opponentRespondedToCoral = false;
+					
+					aOpponent.opponentAcceptedCoral = false;
+					aOpponent.opponentRespondedToCoral = true;
+//					opponentResponded.signalAll();
+				}
+				else {
+					aGame.setClientInfo(ClientInfo.FINAL_CORAL);
+					aOpponent.opponentAcceptedCoral = true;
+					aOpponent.opponentRespondedToCoral = true;
+//					opponentResponded.signalAll();
+					
+					aOutput.writeObject(aGame);
+					aOutput.reset();
+					aOpponent.aOutput.writeObject(aGame);
+					aOpponent.aOutput.reset();
+					
+					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
+					break;
+				}
+			}
+		}
+		else {
+			// P2 will tell p1 accept/decline, then wait for p1 to respond.
+			while ((msg = (Move) aInput.readObject()) != null)
+			{
+				if (msg.getServerInfo() == ServerInfo.CORAL_REEF_ACCEPT){
+					aOpponent.opponentAcceptedCoral = true;
+				}
+				aOpponent.opponentRespondedToCoral = true;
+//				p2responded.signalAll();
+				
+				System.out.println("p2 before");
+//				lock.lock();
+//				try{
+					while (!opponentRespondedToCoral) {
+//						opponentResponded.await();
+					}
+//				}
+//				catch (InterruptedException e){
+//					e.printStackTrace();
+//				}
+//				finally {
+//					lock.unlock();
+//				}
+				System.out.println("p2 after");
+				
+				if (opponentAcceptedCoral){
+					break;
+				}
+				else {
+					opponentRespondedToCoral = false;
+				}
+			}
+		}
+		return;
+	}
+	private void setOpponent()
+	{
+		if (aGame.getP1Username().equals(aUsername)){
+			while (!aClientList.containsKey(aGame.getP2Username())) {/*WAIT for requestee to connect*/}
+			aOpponent = aClientList.get(aGame.getP2Username());
+			isP1 = true;
+		}
+		else {
+			while (!aClientList.containsKey(aGame.getP1Username())) {/*WAIT for requestee to connect*/}
+			aOpponent = aClientList.get(aGame.getP1Username());
+		}
+		if (aOpponent == null) System.out.println(aUsername + " opponent connection null.");
+	}
+    
+	private void sendInitialGame(GameInit init) throws IOException
+	{
+		if (aGameID == 0 && init.getOpponent() != null)
+		{
+			// The requester is always the one who makes the game.
+			aGameID = gm.generateGameID();
+			aGame = new ServerGame(aGameID, gm.getAccount(aUsername), gm.getAccount(init.getOpponent()));
+			gm.addGame(aGame);
+			System.out.println(aUsername + " has created game " + aGameID);
+			
+			while (!aClientList.containsKey(init.getOpponent())) {/*WAIT for requestee to connect*/}
+			aClientList.get(init.getOpponent()).aGameID = this.aGameID;
+			System.out.println(aUsername + " has informed opponent of GameID");
+		} 
+		else {
+			System.out.println(aUsername + " is finding game");
+			while (aGame == null){
+				aGame = gm.getGame(aGameID);
+			}
+			System.out.println(aUsername + " has joined game " + aGameID);
+		}
+		aOutput.writeObject(aGame);
+		aOutput.reset();
+	}
     
     private static synchronized void addConnection(String pUsername, ClientConnGame aConnection){
     	aClientList.put(pUsername, aConnection);
