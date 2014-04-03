@@ -1,10 +1,12 @@
 package battlesheeps.client;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import battlesheeps.board.*;
 import battlesheeps.networking.ClientGamesAndMoves;
+import battlesheeps.server.LogEntry;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame.Direction;
@@ -46,9 +48,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 
 /* This will open a window with the following panels:
@@ -79,6 +83,8 @@ public class ClientGame {
 	private MoveType aCurrentClickedMove;
 	
 	private ClientGamesAndMoves myManager;
+	
+	private int aNumOfLogEntries = 0;
 	
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
@@ -166,7 +172,6 @@ public class ClientGame {
 		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
 		aSplitPane.setDividerLocation(0.66);		
-			
 	}
 	
 	/*
@@ -176,14 +181,16 @@ public class ClientGame {
  	private JMenuBar createMenu() {
 
 		JMenuBar menuBar = new JMenuBar();
-
+		
 		JMenu mainMenu = new JMenu("Menu");
 		menuBar.add(mainMenu);
 		
 		JMenuItem aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(aMainFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", "About", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(aMainFrame, 
+				"Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", 
+				"About", JOptionPane.PLAIN_MESSAGE);
 			}		
 		});
 		mainMenu.add(aboutItem);
@@ -193,8 +200,19 @@ public class ClientGame {
 		JMenuItem newItem2 = new JMenuItem("Help");
 		newItem2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(aMainFrame, "Click on a ship, then on a move button.\n" +
-						"Then click on a green square, and wait for your turn to come again.", "Help", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(aMainFrame, 
+						"Setup Phase: A new obstacle configuration is generated.\n" +
+						"You must agree or decline the configuration.\n" +
+						"This process is repeated until both players agree.\n" +
+						"Afterwards, you enter ship setup. \n " + 
+						"Ship Setup: Click on a Place Ship button and then on a green square. \n" +
+						"Repeat for all ships and then indicate that you are done.\n" +
+						"You may rearrange ships by clicking on the ones already placed on the board.\n" +
+						"Once both players are done, the game begins.\n"+
+						"Move Phase: Click on a ship, then on a move button.\n" +
+						"Then click on a green square, and wait for your turn to come again.\n" +
+						"The game ends when one player's ships are all sunk.", 
+						"Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 		mainMenu.add(newItem2);
@@ -226,7 +244,7 @@ public class ClientGame {
 	 */
 	public void setupCoral(ServerGame pGame) {
 		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Do you like the coral configuration?");
+		aMessagePanel.setupCoral("Do you like the obstacle configuration?");
 		
 		//and just initializing who has which base 
 		//East = false by default
@@ -405,7 +423,12 @@ public class ClientGame {
 				aMessagePanel.setNotYourTurn(myList, oppList);
 			}
 			
-			aLogPanel.updateLogEntries(pGame.getLog());	
+			LinkedList<LogEntry> logs = pGame.getLog();
+			if (logs.size() != aNumOfLogEntries) {
+				aLogPanel.updateLogEntries(pGame.getLog());
+				aNumOfLogEntries = logs.size();
+			}
+				
 		}
 	}
 	

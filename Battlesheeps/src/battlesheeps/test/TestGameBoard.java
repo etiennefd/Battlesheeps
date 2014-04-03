@@ -23,6 +23,7 @@ import battlesheeps.ships.Ship.Damage;
 public class TestGameBoard{
 
 	private ClientGame client;
+	private ClientGame client2;
 	private ServerGame myGame;
 	
 	public TestGameBoard() {
@@ -32,7 +33,7 @@ public class TestGameBoard{
 		Account a3 = new Account("dinkle", "IamAdinkle");
 		Account a4 = new Account("bobs", "password");
 		final Account player = new Account("Julius Caesar", "abc");
-		Account opponent = new Account("Alexander the Great", "def");
+		final Account opponent = new Account("Alexander the Great", "def");
 		
 		GameManager gm = GameManager.getInstance();
 		Hashtable<String,Account> accts = gm.getAccounts();
@@ -131,6 +132,19 @@ public class TestGameBoard{
 				
 				ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
 				client.setupComplete();
+			}
+			
+		});
+		
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				client2 = new ClientGame(opponent.getUsername());
+				
+				ClientGamesAndMoves pManager2 = new ClientGamesAndMoves(opponent.getUsername(), null, 1, client2);
+				client2.setupComplete();
 			}
 			
 		});

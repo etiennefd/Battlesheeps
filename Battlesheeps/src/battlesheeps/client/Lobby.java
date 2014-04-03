@@ -707,19 +707,32 @@ public class Lobby
         exitButton.addActionListener(new ExitActionListener(aFrame, aClient));
         battlesheepMenu.add(exitButton);
         
-        JMenu settingsMenu = new JMenu("Settings");
-        JMenuItem soundButton = new JMenuItem("Sound");
-        settingsMenu.add(soundButton);
-        
         JMenu helpMenu = new JMenu("Help");
         JMenuItem instructionsButton = new JMenuItem("Game Instructions");
+        instructionsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(aFrame, "Select a player to send a game request. If a player with whom\n" +
+						"you have already started a game is available, you can continue that game.\n" +
+						"Once a game starts, both players must accept the obstacle configuration. \n" +
+						"Then they can place their ships, and then play. \n\nThe goal is to sink every enemy ship.", 
+						"Help", JOptionPane.PLAIN_MESSAGE);
+			}		
+		});
         helpMenu.add(instructionsButton);
         JMenuItem creditsButton = new JMenuItem("Credits");
+        creditsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(aFrame, "Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung\n\n" +
+						"Designed by Joerg Kienzle.\n" +
+						"Images from Pokemon Crystal version (Copyright Game Freak Inc. 2001)\n" +
+						"Sounds?\n\n" +
+						"Montreal, 2014", "About", JOptionPane.PLAIN_MESSAGE);
+			}		
+		});
         helpMenu.add(creditsButton);
         
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(battlesheepMenu);
-        menuBar.add(settingsMenu);
         menuBar.add(helpMenu);
         aFrame.setJMenuBar(menuBar);
 
