@@ -6,6 +6,7 @@ import java.util.List;
 import battlesheeps.board.*;
 import battlesheeps.networking.ClientGamesAndMoves;
 import battlesheeps.server.Move;
+import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame.Direction;
 import battlesheeps.server.ServerGame.MoveType;
 import battlesheeps.ships.*;
@@ -70,6 +71,7 @@ public class ClientGame {
 	
 	//should know who it's player is 
 	private String aMyUser;
+	private boolean aHasWestBase = false;
 	
 	private Square[][] aCurrentVisibleBoard = new Square[30][30];
 	private Ship aCurrentClickedShip; 
@@ -136,8 +138,8 @@ public class ClientGame {
 		sideBottom.setLeftComponent(aLogPanel);
 		
 		//CHAT
-		aChatPanel = new ChatPanel(aMyUser);
-		sideBottom.setRightComponent(aChatPanel);
+//		aChatPanel = new ChatPanel(aMyUser);
+//		sideBottom.setRightComponent(aChatPanel);
 		
 		//MESSAGES
 		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
@@ -215,112 +217,123 @@ public class ClientGame {
 		myManager = pManager;
 	}
 	
-	/***********************SETUP SECTION ****************************/
+/***********************SETUP SECTION ****************************/
 	
-	public void showAvailablePositions(Ship s) {
+	/**
+	 * Setup coral for the first time. 
+	 * @param pGame
+	 */
+	public void setupCoral(ServerGame pGame) {
+		//tell MessagePanel to display an Accept or Decline message
+		aMessagePanel.setupCoral("Do you like the coral setup?");
+		
+		//and just initializing who has which base 
+		//false by default
+		if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
+		
+		//we can just tell aBoardPanel to draw the given board
+		//since no ships will be on it yet
+		aBoardPanel.redrawBoard(pGame.getBoard());
+		
+	}
+	
+	/**
+	 * Setup coral for the nth time. 
+	 * @param pGame
+	 */
+	public void resetupCoral(ServerGame pGame) {
+		//tell MessagePanel to display an Accept or Decline message
+		aMessagePanel.setupCoral("Both players must agree on the setup.");
+		
+		//we can just tell aBoardPanel to draw the given board
+		//since no ships will be on it yet
+		aBoardPanel.redrawBoard(pGame.getBoard());
+		
+	}
+	
+	public void coralAccepted(boolean pAccepted){
+		Move coralMessage;
+		if (pAccepted) coralMessage = new Move(null, null, null, null, ServerInfo.CORAL_REEF_ACCEPT);
+		else coralMessage = new Move(null, null, null, null, ServerInfo.CORAL_REEF_DECLINE);
+		myManager.sendMove(coralMessage);
+	}
+	
+	//TODO
+	/**
+	 * Moving on to ship setup. 
+	 * This method will also be called whenever one ship 
+	 * is placed on the board.
+	 * @param pGame
+	 */
+	public void setupShips(ServerGame pGame){
+		
+		aMessagePanel.displayMessage("Place your ships!");
+		
+		ArrayList<Ship> myList;
+		
+		if (aMyUser.equals(pGame.getP1Username())) {
+			myList = pGame.getP1ShipList();
+		}
+		else {
+			myList = pGame.getP2ShipList();
+		}
+		int done = 0;
+		//for each ship, we have to tell MessagePanel
+		//to display a button for it
+		for (Ship ship : myList) {
+			if (!ship.onBoard()) {
+				aMessagePanel.displayShipSetupOption(ship);
+				done++;
+			}
+		}
+		
+		if (done == 0) {
+			aMessagePanel.shipSetupComplete();
+		}
+		
+		//getting the current visible board 
+		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
+		
+		//and telling board panel to draw it 
+		aBoardPanel.redrawBoard(aCurrentVisibleBoard);
+	}
+
+	//TODO
+	public void showAvailableBasePositions(Ship s) {
+		
+		aMessagePanel.displayMessage("Click on a green square to place ship.");
 		
 		//let's keep track of which ship we want to show the moves for 
 		aCurrentClickedShip = s;
 		//TODO
 		//let's compute the available green squares
+		int x; 
+		if (aHasWestBase) {
+			x = 0;
+		}else {//East Base
+			x = 29;
+		}
+		//let's first check the outer squares: (x,9) and (x, 20) 
+		if (aCurrentVisibleBoard[x][9] instanceof ShipSquare) {
+			//TODO
+		}
+		
+		
 		//and now let's tell the board to display the green squares 
 		
 	}
 	
-	//setup is done!
+	/**
+	 * MessagePanel will call this method when the User says setup is complete. 
+	 * Client tells BoardGame that setup is now complete, and informs ServerGame.
+	 */
 	public void setupComplete() {
 		aBoardPanel.startGame();
+		myManager.sendMove(new Move(null, null, null, null, ServerInfo.SHIP_INIT_COMPLETE));
 	}
 	
-	//method to compute the available base positions 
-	private List<Coordinate> computePositionsAtBase () {
-		List<Coordinate> ls = new ArrayList<Coordinate>();
-		//TODO
-		return ls;
-	}
-	
-	//call startGame() in GameBoard once setup is done... 
 	
 	/**********************IN GAME SECTION****************************/
-	/*
-	 * This is called when a game update contains a newly completed game.
-	 * It will open a popup and close the appropriate windows when the
-	 * "Return to Lobby" button is clicked.
-	 */
-	public void gameComplete(ServerGame pGame)	{
-		System.out.println("game done");
-		String endMessage;
-		if(pGame.getWinnerName().equals(aMyUser))
-		{
-			//open notification that says you win!
-			endMessage = "You won!";
-		}
-		else
-		{
-			//open notification that says you lose 
-			endMessage = "You lost ";
-		}
-
-		final JPanel endGamePane = new JPanel();
-		SpringLayout layout = new SpringLayout();
-		JLabel messageLabel = new JLabel(endMessage);
-		endGamePane.add(messageLabel);
-		JButton backButton = new JButton("Return to Lobby");
-		endGamePane.add(backButton);
-
-		layout.putConstraint(SpringLayout.NORTH, messageLabel, 10, SpringLayout.NORTH, endGamePane);
-       layout.putConstraint(SpringLayout.WEST, messageLabel, 10, SpringLayout.WEST, endGamePane);
-
-       layout.putConstraint(SpringLayout.NORTH, backButton, 10, SpringLayout.SOUTH, messageLabel);
-       layout.putConstraint(SpringLayout.WEST, backButton, 10, SpringLayout.WEST, endGamePane);
-       layout.putConstraint(SpringLayout.SOUTH, backButton, -10, SpringLayout.SOUTH, endGamePane);
-       
-       endGamePane.setLayout(layout);
-       
-		final JDialog dialog = new JDialog();
-		dialog.setTitle("Game Complete");
-		dialog.setModal(true);
-		dialog.setMinimumSize(new Dimension(225,125));
-		dialog.setMaximumSize(new Dimension(225,125));
-		dialog.setResizable(false);
-
-		dialog.setContentPane(endGamePane);
-		
-		//add action listener to return to Lobby
-		backButton.addActionListener(new ToLobbyListener(dialog, this));
-			
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.setLocationRelativeTo(aMainFrame);
-		dialog.pack();
-		
-		dialog.setVisible(true);
-	}
-	
-	/* Listener for end of game message to go back to the Lobby*/
-	class ToLobbyListener implements ActionListener
-	{
-		private JDialog aDialog;
-		private ClientGame aGame;
-	
-		public ToLobbyListener(JDialog pDialog, ClientGame pGame)
-		{
-			this.aDialog = pDialog;
-			this.aGame = pGame;
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			aDialog.setVisible(false);
-			aDialog.dispose();
-			aGame.aMainFrame.setVisible(false);
-			aGame.aMainFrame.dispose();
-			
-			aGame.aBoardPanel.dispose();
-			aGame.myManager.close();
-				
-			new Lobby(aGame.aMyUser);
-		}
-	}
 	
 	
 	/*After each move, 
@@ -351,13 +364,7 @@ public class ClientGame {
 				aChatPanel.setOpponent(pGame.getP1Username());
 			}
 			
-			Square[][] tempBoard = computeVisibility(pGame.getBoard(), myList);
-			for (int i = 0; i <30; i++) {
-				for (int j = 0; j<30; j++) {
-					aCurrentVisibleBoard[i][j] = tempBoard[i][j]; 
-				}
-			}
-			
+			aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
 					
 			if (myTurn){
 				//my turn 
@@ -425,7 +432,7 @@ public class ClientGame {
 
 		//now calculate
 		for (Ship ship : pShipList) {
-			if (!ship.isSunk()) {
+			if (!ship.isSunk() && ship.onBoard()) {
 				List<Coordinate> radarRange = ship.getRadarRange();
 
 				for (Coordinate c : radarRange) {
@@ -1596,5 +1603,89 @@ public class ClientGame {
 		return atHome;
 
 	}
+
+	/**********************END OF GAME **************************/
+	
+	/*
+	 * This is called when a game update contains a newly completed game.
+	 * It will open a popup and close the appropriate windows when the
+	 * "Return to Lobby" button is clicked.
+	 */
+	public void gameComplete(ServerGame pGame)	{
+		System.out.println("game done");
+		String endMessage;
+		if(pGame.getWinnerName().equals(aMyUser))
+		{
+			//open notification that says you win!
+			endMessage = "You won!";
+		}
+		else
+		{
+			//open notification that says you lose 
+			endMessage = "You lost ";
+		}
+
+		final JPanel endGamePane = new JPanel();
+		SpringLayout layout = new SpringLayout();
+		JLabel messageLabel = new JLabel(endMessage);
+		endGamePane.add(messageLabel);
+		JButton backButton = new JButton("Return to Lobby");
+		endGamePane.add(backButton);
+
+		layout.putConstraint(SpringLayout.NORTH, messageLabel, 10, SpringLayout.NORTH, endGamePane);
+       layout.putConstraint(SpringLayout.WEST, messageLabel, 10, SpringLayout.WEST, endGamePane);
+
+       layout.putConstraint(SpringLayout.NORTH, backButton, 10, SpringLayout.SOUTH, messageLabel);
+       layout.putConstraint(SpringLayout.WEST, backButton, 10, SpringLayout.WEST, endGamePane);
+       layout.putConstraint(SpringLayout.SOUTH, backButton, -10, SpringLayout.SOUTH, endGamePane);
+       
+       endGamePane.setLayout(layout);
+       
+		final JDialog dialog = new JDialog();
+		dialog.setTitle("Game Complete");
+		dialog.setModal(true);
+		dialog.setMinimumSize(new Dimension(225,125));
+		dialog.setMaximumSize(new Dimension(225,125));
+		dialog.setResizable(false);
+
+		dialog.setContentPane(endGamePane);
+		
+		//add action listener to return to Lobby
+		backButton.addActionListener(new ToLobbyListener(dialog, this));
+			
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setLocationRelativeTo(aMainFrame);
+		dialog.pack();
+		
+		dialog.setVisible(true);
+	}
+	
+	/* Listener for end of game message to go back to the Lobby*/
+	class ToLobbyListener implements ActionListener
+	{
+		private JDialog aDialog;
+		private ClientGame aGame;
+	
+		public ToLobbyListener(JDialog pDialog, ClientGame pGame)
+		{
+			this.aDialog = pDialog;
+			this.aGame = pGame;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			aDialog.setVisible(false);
+			aDialog.dispose();
+			aGame.aMainFrame.setVisible(false);
+			aGame.aMainFrame.dispose();
+			
+			aGame.aBoardPanel.dispose();
+			aGame.myManager.close();
+				
+			new Lobby(aGame.aMyUser);
+		}
+	}
+		
+	
 	
 }

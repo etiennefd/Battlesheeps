@@ -2,7 +2,9 @@ package battlesheeps.client;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -36,6 +38,124 @@ public class MessagePanel extends JPanel {
 	}
 	
 	/**
+	 * Displays "Accept" and "Decline" buttons for coral setup.
+	 * @param pMessage the message to display
+	 */
+	public void setupCoral(String pMessage) {
+		// TODO Auto-generated method stub
+		this.removeAll();
+		
+		JLabel message = new JLabel(pMessage);
+		
+		JButton acceptButton = new JButton("Accept Coral Configuration");
+		acceptButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.coralAccepted(true);
+			}
+		});
+		
+		JButton declineButton = new JButton("Decline Coral Configuration");
+		declineButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.coralAccepted(false);
+			}
+		});
+		
+		this.add(message);
+		this.add(acceptButton);
+		this.add(declineButton);
+		
+		this.repaint();
+		this.validate();
+	}
+	
+	/**
+	 * Displays a ship placement button for the given ship. 
+	 * @param pShip 
+	 */
+	public void displayShipSetupOption(Ship pShip) {
+		
+		aCurrentShip = pShip;
+		//do not removeAll since we want to keep the other options
+		if (pShip instanceof Cruiser) {
+			JButton shipButton = new JButton("Place Cruiser");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		} 
+		else if (pShip instanceof Destroyer) {
+			JButton shipButton = new JButton("Place Destroyer");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		}
+		else if (pShip instanceof MineLayer) {
+			JButton shipButton = new JButton("Place Mine Layer");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		}
+		else if (pShip instanceof RadarBoat) {
+			JButton shipButton = new JButton("Place Radar Boat");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		}
+		else if (pShip instanceof TorpedoBoat) {
+			JButton shipButton = new JButton("Place Torpedo Boat");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		} else { //Kamikaze
+			JButton shipButton = new JButton("Place Kamikaze");
+			shipButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					aClient.showAvailableBasePositions(aCurrentShip);
+				}
+			});
+			this.add(shipButton);
+		}
+		
+		this.repaint();
+		this.validate();
+	}
+	
+	/**
+	 * Method to display "Done setup" button. 
+	 */
+	public void shipSetupComplete() {
+
+		this.removeAll();
+
+		JLabel message = new JLabel("Are you ready to play?");
+		JButton doneButton = new JButton("Yes!");
+		doneButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.setupComplete();
+			}
+		});
+		this.add(message);
+		this.add(doneButton);
+		this.repaint();
+		this.validate();
+	}
+	
+	/**
 	 * Displays a message for this player's turn. 
 	 */
 	public void setYourTurn() {
@@ -65,27 +185,30 @@ public class MessagePanel extends JPanel {
 		JLabel space = new JLabel ("  ");
 		
 		String[] columnNames = {" ", aPlayer, aOpponent};
-		String[][] shipStats = new String[5][3];
+		String[][] shipStats = new String[6][3];
 		
 		shipStats[0][0] = "Cruiser";
 		shipStats[1][0] = "Destroyer";
 		shipStats[2][0] = "Mine Layer";
 		shipStats[3][0] = "Radar Boat";
 		shipStats[4][0] = "Torpedo Boat";
+		shipStats[5][0] = "Kamikaze Boat";
 		
 		Integer numCruiser = new Integer(0);
 		Integer numDestroyer = new Integer(0);
 		Integer numMine = new Integer(0);
 		Integer numRadar = new Integer(0);
 		Integer numTorpedo = new Integer(0);
+		Integer numKamikaze = new Integer(0);
 		
 		for (Ship ship : pYourShips) {
 			if (!ship.isSunk()) {
 				if (ship instanceof Cruiser) numCruiser++;
-				if (ship instanceof Destroyer) numDestroyer++;
-				if (ship instanceof MineLayer) numMine++;
-				if (ship instanceof RadarBoat) numRadar++;
-				if (ship instanceof TorpedoBoat) numTorpedo++;
+				else if (ship instanceof Destroyer) numDestroyer++;
+				else if (ship instanceof MineLayer) numMine++;
+				else if (ship instanceof RadarBoat) numRadar++;
+				else if (ship instanceof TorpedoBoat) numTorpedo++;
+				else numKamikaze++;
 			}
 		}
 		
@@ -94,20 +217,23 @@ public class MessagePanel extends JPanel {
 		shipStats[2][1] = numMine.toString();
 		shipStats[3][1] = numRadar.toString();
 		shipStats[4][1] = numTorpedo.toString();
+		shipStats[5][1] = numKamikaze.toString();
 		
 		numCruiser = 0;
 		numDestroyer = 0;
 		numMine = 0;
 		numRadar = 0;
 		numTorpedo = 0;
+		numKamikaze = 0;
 		
 		for (Ship ship : pOpponentShips) {
 			if(!ship.isSunk()) {
 				if (ship instanceof Cruiser) numCruiser++;
-				if (ship instanceof Destroyer) numDestroyer++;
-				if (ship instanceof MineLayer) numMine++;
-				if (ship instanceof RadarBoat) numRadar++;
-				if (ship instanceof TorpedoBoat) numTorpedo++;
+				else if (ship instanceof Destroyer) numDestroyer++;
+				else if (ship instanceof MineLayer) numMine++;
+				else if (ship instanceof RadarBoat) numRadar++;
+				else if (ship instanceof TorpedoBoat) numTorpedo++;
+				else numKamikaze++;
 			}
 		}
 		
@@ -116,9 +242,10 @@ public class MessagePanel extends JPanel {
 		shipStats[2][2] = numMine.toString();
 		shipStats[3][2] = numRadar.toString();
 		shipStats[4][2] = numTorpedo.toString();		
+		shipStats[5][2] = numKamikaze.toString();
 		
 		String[][] shipData = {columnNames, shipStats[0], shipStats[1], 
-				shipStats[2], shipStats[3], shipStats[4]};
+				shipStats[2], shipStats[3], shipStats[4], shipStats[4]};
 	
 		JTable shipTable = new JTable(shipData, columnNames);
 		shipTable.setEnabled(false);
@@ -340,4 +467,5 @@ public class MessagePanel extends JPanel {
 		this.repaint();
 		this.validate();
 	}
+
 }

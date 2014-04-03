@@ -498,5 +498,14 @@ public abstract class Ship implements Serializable
 	public String toString(){
 		return aPlayer + "   id: " + aShipID;
 	}
+
+	/** 
+	 * 
+	 * @return true if ship is on the board
+	 */
+	public boolean onBoard() {
+		if (aLocationHead == null &&  aLocationTail == null) return false;
+		else return true;
+	}
 	
 }

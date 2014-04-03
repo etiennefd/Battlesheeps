@@ -150,13 +150,16 @@ class ServerConnGame implements Runnable {
 				// TODO update with new ServerGame
 				switch (newGame.getClientInfo()){
 					case NEW_GAME:
-						aMyClient.updateGame(newGame);
+						aMyClient.setupCoral(newGame);
 						break;
 					case NEW_CORAL:
+						aMyClient.resetupCoral(newGame);
 						break;
 					case FINAL_CORAL:
+						aMyClient.setupShips(newGame);
 						break;
 					case SHIP_INIT:
+						aMyClient.setupShips(newGame);
 						break;
 					case GAME_UPDATE:
 						aMyClient.updateGame(newGame);

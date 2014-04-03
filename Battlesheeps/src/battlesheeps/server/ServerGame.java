@@ -130,57 +130,7 @@ public class ServerGame implements Serializable
 		aShipListP2.add(new RadarBoat(aPlayer2, 9));
 		aShipListP2.add(new KamikazeBoat(aPlayer2, 10));
 
-		/* TODO
-		 * THIS SHOULD BE REMOVED AND REMPLACED WITH THE SETUP PHASE!
-		 * THIS IS JUST DEFAULT SHIP POSITIONS FOR THE DEMO
-		 */
-		//0-1 CRUISER, 2-4 DESTROYER, 5-6 TORPEDO, 7-8 MINE, 9 - RADAR
-		//P1 ships 
 
-		//cruisers 
-		setShipPosition(aShipListP1.get(0), new Coordinate(5, 10), new Coordinate(1, 10));
-		setShipPosition(aShipListP1.get(1), new Coordinate(5, 11), new Coordinate(1, 11));
-
-		//destroyer 
-		setShipPosition(aShipListP1.get(2), new Coordinate(4, 12), new Coordinate(1, 12));
-		setShipPosition(aShipListP1.get(3), new Coordinate(4, 13), new Coordinate(1, 13));
-		setShipPosition(aShipListP1.get(4), new Coordinate(4, 14), new Coordinate(1, 14));
-
-		//torpedo
-		setShipPosition(aShipListP1.get(5), new Coordinate(3, 15), new Coordinate(1, 15));
-		setShipPosition(aShipListP1.get(6), new Coordinate(3, 16), new Coordinate(1, 16));
-
-		//mine 
-		setShipPosition(aShipListP1.get(7), new Coordinate(2, 17), new Coordinate(1, 17));
-		setShipPosition(aShipListP1.get(8), new Coordinate(2, 18), new Coordinate(1, 18));
-
-		//radar
-		setShipPosition(aShipListP1.get(9), new Coordinate(3, 19), new Coordinate(1, 19));
-
-		//P2 ships 
-
-		//cruisers 
-		setShipPosition(aShipListP2.get(0), new Coordinate(24, 10), new Coordinate(28, 10));
-		setShipPosition(aShipListP2.get(1), new Coordinate(24, 11), new Coordinate(28, 11));
-
-		//destroyer 
-		setShipPosition(aShipListP2.get(2), new Coordinate(25, 12), new Coordinate(28, 12));
-		setShipPosition(aShipListP2.get(3), new Coordinate(25, 13), new Coordinate(28, 13));
-		setShipPosition(aShipListP2.get(4), new Coordinate(25, 14), new Coordinate(28, 14));
-
-		//torpedo
-		setShipPosition(aShipListP2.get(5), new Coordinate(26, 15), new Coordinate(28, 15));
-		setShipPosition(aShipListP2.get(6), new Coordinate(26, 16), new Coordinate(28, 16));
-
-		//mine 
-		setShipPosition(aShipListP2.get(7), new Coordinate(27, 17), new Coordinate(28, 17));
-		setShipPosition(aShipListP2.get(8), new Coordinate(27, 18), new Coordinate(28, 18));
-
-		//radar
-		setShipPosition(aShipListP2.get(9), new Coordinate(26, 19), new Coordinate(28, 19));
-		/*
-		 * END OF PART TO BE REMOVED
-		 */
 	}
 	
 	/**
@@ -340,6 +290,8 @@ public class ServerGame implements Serializable
 			}
 			break;
 		}
+		
+		pShip.setLocation(null, null);
 	}
 	
 	/**
