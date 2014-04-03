@@ -231,6 +231,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		drawBoard();
 		aGreenList = pList;
 		aGreenPhase = true;
+		aChosenMove = false;
 		
 		MinuetoRectangle greenRectangle = new MinuetoRectangle(aIncrement, aIncrement, aMoveColour, true);
 		MinuetoRectangle darkRectangle = new MinuetoRectangle(aIncrement, aIncrement, aCanHitColour, true);
