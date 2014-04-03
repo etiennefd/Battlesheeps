@@ -4,6 +4,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import battlesheeps.accounts.Account;
 import battlesheeps.board.*;
 import battlesheeps.client.ClientGame;
@@ -29,7 +31,7 @@ public class TestGameBoard{
 		Account a2 = new Account("bob", "password");
 		Account a3 = new Account("dinkle", "IamAdinkle");
 		Account a4 = new Account("bobs", "password");
-		Account player = new Account("Julius Caesar", "abc");
+		final Account player = new Account("Julius Caesar", "abc");
 		Account opponent = new Account("Alexander the Great", "def");
 		
 		GameManager gm = GameManager.getInstance();
@@ -117,16 +119,25 @@ public class TestGameBoard{
 //		myGame.setLogEntry(log3);
 		new Thread(new ServerGamesAndMoves()).start();
 		
-		ServerGame game2 = new ServerGame(2, gm.getAccount("player"), gm.getAccount("opponent"));
-		client = new ClientGame(player.getUsername());
+//		ServerGame game2 = new ServerGame(2, gm.getAccount("Julius Caesar"), gm.getAccount("Alexander the Great"));
+//		game2.setClientInfo(ClientInfo.NEW_GAME);
+//		
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				client = new ClientGame(player.getUsername());
+				
+				ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
+				client.setupComplete();
+			}
+			
+		});
 		
-		ClientGamesAndMoves pManager = new ClientGamesAndMoves(player.getUsername(), null, 1, client);
-		
-		client.setupShips(game2);
-		
+//		
 //		ClientGame clientO = new ClientGame(opponent.getUsername());
-//		clientO.setupComplete();
-//		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 1, clientO);
+//		ClientGamesAndMoves oManager = new ClientGamesAndMoves(opponent.getUsername(), null, 2, clientO);
 		
 	}
 	

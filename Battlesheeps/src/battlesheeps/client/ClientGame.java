@@ -154,29 +154,17 @@ public class ClientGame {
 			}
 		}
 
-	SwingUtilities.invokeLater(new Runnable() {
+		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, ClientGame.this);
 
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, ClientGame.this);
-
-			aBoardPanel.setPreferredSize(new Dimension(600, 600));
-			aSplitPane.setLeftComponent(aBoardPanel);
-			aBoardPanel.setVisible(true);
-			
-		}
-		
-	});
-		
-
+		aBoardPanel.setPreferredSize(new Dimension(600, 600));
+		aSplitPane.setLeftComponent(aBoardPanel);
 		
 		this.aDesktop.add(background);
 		
 		this.aMainFrame.pack();
 		this.aMainFrame.setLocationRelativeTo(null);
 		this.aMainFrame.setVisible(true);
-		
+		aBoardPanel.setVisible(true);
 		aSplitPane.setDividerLocation(0.66);		
 		
 		
@@ -398,12 +386,12 @@ public class ClientGame {
 			if (isP1) {
 				myList = pGame.getP1ShipList();
 				oppList = pGame.getP2ShipList();
-				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+//				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
 			}
 			else {
 				myList = pGame.getP2ShipList();
 				oppList = pGame.getP1ShipList();
-				aChatPanel.setOpponent(pGame.getP1Username());
+//				aChatPanel.setOpponent(pGame.getP1Username());
 			}
 			
 			aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
