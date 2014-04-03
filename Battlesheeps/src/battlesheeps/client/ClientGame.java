@@ -244,12 +244,21 @@ public class ClientGame {
 	 * @param pGame
 	 */
 	public void setupCoral(ServerGame pGame) {
-		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Do you like the obstacle configuration?");
+		
+		boolean isP1 = aMyUser.equals(pGame.getP1Username());
+		if (isP1) {
+			aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+		}
+		else {
+			aChatPanel.setOpponent(pGame.getP1Username());
+		}
 		
 		//and just initializing who has which base 
 		//East = false by default
 		if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
+		
+		//tell MessagePanel to display an Accept or Decline message
+		aMessagePanel.setupCoral("Do you like the obstacle configuration?");
 		
 		//we can just tell aBoardPanel to draw the given board
 		//since no ships will be on it yet
