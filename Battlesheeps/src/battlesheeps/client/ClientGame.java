@@ -437,11 +437,7 @@ public class ClientGame {
 		//plus need to add area around player's base to list
 		int baseX;
 		
-		boolean isBaseWest = false;
-		
-		if (((BaseSquare)pBoard[0][10]).getOwner().equals(aMyUser)) isBaseWest = true;
-		
-		if (isBaseWest) {
+		if (aHasWestBase) {
 			baseX = 1;
 			visibleRadarList.add(new Coordinate(0, 9));
 			visibleRadarList.add(new Coordinate(0, 20));
@@ -451,7 +447,7 @@ public class ClientGame {
 			visibleRadarList.add(new Coordinate(29, 9));
 			visibleRadarList.add(new Coordinate(29, 20));
 		}
-		//make it 9 to 21 if you want the corners to be in radar
+
 		for (int i = 10; i < 20; i++){
 			visibleRadarList.add(new Coordinate(baseX, i));
 		}
