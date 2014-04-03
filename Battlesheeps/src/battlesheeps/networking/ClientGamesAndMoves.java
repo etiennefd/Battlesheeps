@@ -14,14 +14,9 @@ import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
 import battlesheeps.server.ServerGame;
 
-public class ClientGamesAndMoves
+public class ClientGamesAndMoves extends Client
 {
     private static final int PORT = 5001; /* port to connect to */
-    
-    /* Host to connect to. This can be "localhost" if running both client/server 
-     * on your computer, or the IP address of the host. 
-     */
-    private static final String HOST = "localhost"; 
     private ObjectOutputStream aOutput = null;
 
 //    public static void main(String[] args)

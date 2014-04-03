@@ -121,13 +121,6 @@ public class GameManager
 	 */
 	public static GameManager getInstance()
 	{	
-//		if (INSTANCE == null){
-//			synchronized (GameManager.class){
-//				if (INSTANCE == null){
-//					INSTANCE = new GameManager();
-//				}
-//			}
-//		}
 		return INSTANCE;
 	}
 	
@@ -136,7 +129,7 @@ public class GameManager
 		return ALL_ACCOUNTS;
 	}
 	
-	public void close(){
+	public void saveToFile(){
 		// TODO ensure file is overwritten
 		try{
 			OutputStream file = new FileOutputStream("allGames.ser", false);

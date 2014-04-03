@@ -9,11 +9,11 @@ import java.net.UnknownHostException;
 
 import javax.swing.JTextArea;
 
-public class ClientChat {
+public class ClientChat extends Client
+{
 	/* Host to connect to. This can be "localhost" if running both client/server 
 	 * on your computer, or the IP address of the host. 
 	 */
-	private static final String HOST = "localhost"; 
 	private static final String INIT = "INIT"; // This requires that no username be INIT
     private static final int PORT = 5000; /* port to connect to */
     

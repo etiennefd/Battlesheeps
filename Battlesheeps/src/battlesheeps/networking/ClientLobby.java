@@ -12,12 +12,8 @@ import battlesheeps.client.Lobby;
 import battlesheeps.networking.LobbyMessageToServer.LobbyNotification;
 import battlesheeps.networking.Request.LobbyRequest;
 
-public class ClientLobby
+public class ClientLobby extends Client
 {
-    /* Host to connect to. This can be "localhost" if running both client/server 
-     * on your computer, or the IP address of the host. 
-     */
-    private static final String HOST = "localhost"; 
     private static final int PORT = 5003; /* port to connect to */
     
     private String aUsername;

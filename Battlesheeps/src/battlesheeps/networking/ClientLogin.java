@@ -13,12 +13,8 @@ import javax.swing.JOptionPane;
 import battlesheeps.client.Lobby;
 import battlesheeps.networking.LoginMessage.LoginType;
 
-public class ClientLogin
+public class ClientLogin extends Client
 {
-    /* Host to connect to. This can be "localhost" if running both client/server 
-     * on your computer, or the IP address of the host. 
-     */
-    private static final String HOST = "localhost"; 
     private static final int PORT = 5002; /* port to connect to */
     private ObjectOutputStream aOutput = null;
     
