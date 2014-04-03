@@ -40,6 +40,11 @@ public class TestServer {
 		myGame.setClientInfo(ClientInfo.GAME_UPDATE);
 		gm.addGame(myGame);
 		
+		//Also adding a new game 
+		ServerGame game2 = new ServerGame(2, gm.getAccount("a"), gm.getAccount("q"));
+		game2.setClientInfo(ClientInfo.NEW_GAME);
+		gm.addGame(game2);
+		
 		List<Ship> p1ships = myGame.getP1ShipList();
 		List<Ship> p2ships = myGame.getP2ShipList();
 		
