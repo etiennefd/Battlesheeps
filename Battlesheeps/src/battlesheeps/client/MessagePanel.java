@@ -245,7 +245,7 @@ public class MessagePanel extends JPanel {
 		shipStats[5][2] = numKamikaze.toString();
 		
 		String[][] shipData = {columnNames, shipStats[0], shipStats[1], 
-				shipStats[2], shipStats[3], shipStats[4], shipStats[4]};
+				shipStats[2], shipStats[3], shipStats[4], shipStats[5]};
 	
 		JTable shipTable = new JTable(shipData, columnNames);
 		shipTable.setEnabled(false);
