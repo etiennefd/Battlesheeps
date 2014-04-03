@@ -339,6 +339,20 @@ public class ClientGame {
 	}
 	
 	/**
+	 * GameBoard will call this method when a green square is selected. 
+	 * Client tells Server where to place the ship.
+	 */
+	public void placedShip(Coordinate tail) {
+		int x;
+		if (aHasWestBase){
+			x = tail.getX() + (aCurrentClickedShip.getSize()-1);
+		} else x = tail.getX() - (aCurrentClickedShip.getSize()-1);
+		
+		Coordinate head = new Coordinate(x, tail.getY());
+		Move m = new Move(head, tail, aCurrentClickedShip, MoveType.SET_SHIP_POSITION, ServerInfo.SHIP_INIT);
+		myManager.sendMove(m);
+	}
+	/**
 	 * MessagePanel will call this method when the User says setup is complete. 
 	 * Client tells BoardGame that setup is now complete, and informs ServerGame.
 	 */

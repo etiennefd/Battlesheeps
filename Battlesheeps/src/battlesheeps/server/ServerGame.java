@@ -31,7 +31,7 @@ public class ServerGame implements Serializable
 	public enum MoveType {
 		TURN_SHIP, TRANSLATE_SHIP, FIRE_CANNON, FIRE_TORPEDO, 
 		DROP_MINE, PICKUP_MINE, TRIGGER_RADAR, REPAIR_SHIP, 
-		SUICIDE_ATTACK, TRANSLATE_KAMIKAZE
+		SUICIDE_ATTACK, TRANSLATE_KAMIKAZE, SET_SHIP_POSITION
 	}
 	
 	public enum Direction {
@@ -362,6 +362,7 @@ public class ServerGame implements Serializable
 		switch (pMove) {
 		case TRANSLATE_KAMIKAZE: translateKamikaze(pShip, pCoord1, pCoord2); break;
 		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord1, pCoord2); break;
+		case SET_SHIP_POSITION: setShipPosition(pShip, pCoord1, pCoord2);
 		default: return computeMoveResult(pShip, pMove, pCoord1); 
 		}
 		
