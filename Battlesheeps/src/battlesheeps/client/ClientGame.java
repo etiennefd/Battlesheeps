@@ -124,7 +124,7 @@ public class ClientGame {
 		background.add(aSplitPane);
 		
 		JSplitPane sidePanel = new JSplitPane();
-		sidePanel.setResizeWeight(0.5);
+		sidePanel.setResizeWeight(0.53);
 		sidePanel.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		aSplitPane.setRightComponent(sidePanel);
 		
@@ -137,7 +137,7 @@ public class ClientGame {
 		aLogPanel = new LogPanel();
 		sideBottom.setLeftComponent(aLogPanel);
 		
-		//CHAT
+		//CHAT TODO uncomment 
 //		aChatPanel = new ChatPanel(aMyUser);
 //		sideBottom.setRightComponent(aChatPanel);
 		
@@ -161,9 +161,10 @@ public class ClientGame {
 		this.aDesktop.add(background);
 		
 		this.aMainFrame.pack();
+		this.aMainFrame.setLocationRelativeTo(null);
 		this.aMainFrame.setVisible(true);
 		
-		aSplitPane.setDividerLocation(0.7);		
+		aSplitPane.setDividerLocation(0.66);		
 		
 		aBoardPanel.setVisible(true);
 	}
@@ -323,10 +324,13 @@ public class ClientGame {
 			availablePositions.add(new Coordinate(x, 20));
 		}
 		
+		int b;
+		if (x == 0) b = 1;
+		else b = 28;
 		//and now let's tell the board to display the green squares 
 		for (int i = 10; i < 20; i++) {
-			if (!(aCurrentVisibleBoard[x][i] instanceof ShipSquare)) {
-				availablePositions.add(new Coordinate(x, i));
+			if (!(aCurrentVisibleBoard[b][i] instanceof ShipSquare)) {
+				availablePositions.add(new Coordinate(b, i));
 			}
 		}
 		
