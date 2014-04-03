@@ -73,62 +73,29 @@ public class MessagePanel extends JPanel {
 	 * Displays a ship placement button for the given ship. 
 	 * @param pShip 
 	 */
-	public void displayShipSetupOption(final Ship pShip) {
-		
-		//do not removeAll since we want to keep the other options
+	public void displayShipSetupOption(Ship pShip) {
+
+		ShipButton shipButton;
 		if (pShip instanceof Cruiser) {
-			JButton shipButton = new JButton("Place Cruiser");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
-		} 
+			shipButton = new ShipButton("Place Cruiser", pShip, aClient);
+		}
 		else if (pShip instanceof Destroyer) {
-			JButton shipButton = new JButton("Place Destroyer");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
+			shipButton = new ShipButton("Place Destroyer", pShip, aClient);
 		}
 		else if (pShip instanceof MineLayer) {
-			JButton shipButton = new JButton("Place Mine Layer");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
+			shipButton = new ShipButton("Place MineLayer", pShip, aClient);
 		}
-		else if (pShip instanceof RadarBoat) {
-			JButton shipButton = new JButton("Place Radar Boat");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
-		}
+		else if (pShip instanceof RadarBoat){
+			shipButton = new ShipButton("Place Radar Boat", pShip, aClient);
+		} 
 		else if (pShip instanceof TorpedoBoat) {
-			JButton shipButton = new JButton("Place Torpedo Boat");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
-		} else { //Kamikaze
-			JButton shipButton = new JButton("Place Kamikaze");
-			shipButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(pShip);
-				}
-			});
-			this.add(shipButton);
+			shipButton = new ShipButton("Place Torpedo Boat", pShip, aClient);
 		}
+		else {
+			shipButton = new ShipButton("Place Kamikaze", pShip, aClient);
+		}
+		shipButton.addShipListener();
+		this.add(shipButton);
 		
 		this.repaint();
 		this.validate();
