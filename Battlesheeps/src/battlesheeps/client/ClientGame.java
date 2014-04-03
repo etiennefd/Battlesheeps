@@ -145,9 +145,9 @@ public class ClientGame {
 		aLogPanel = new LogPanel();
 		sideBottom.setLeftComponent(aLogPanel);
 		
-		//CHAT TODO uncomment 
-//		aChatPanel = new ChatPanel(aMyUser);
-//		sideBottom.setRightComponent(aChatPanel);
+		//CHAT
+		aChatPanel = new ChatPanel(aMyUser);
+		sideBottom.setRightComponent(aChatPanel);
 		
 		//MESSAGES
 		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
@@ -426,12 +426,12 @@ public class ClientGame {
 			if (isP1) {
 				myList = pGame.getP1ShipList();
 				oppList = pGame.getP2ShipList();
-//				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
 			}
 			else {
 				myList = pGame.getP2ShipList();
 				oppList = pGame.getP1ShipList();
-//				aChatPanel.setOpponent(pGame.getP1Username());
+				aChatPanel.setOpponent(pGame.getP1Username());
 			}
 			
 			aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
