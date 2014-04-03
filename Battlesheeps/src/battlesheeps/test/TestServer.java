@@ -6,6 +6,7 @@ import java.util.List;
 import battlesheeps.accounts.Account;
 import battlesheeps.board.Coordinate;
 import battlesheeps.client.ClientGame;
+import battlesheeps.networking.ServerChat;
 import battlesheeps.networking.ServerGamesAndMoves;
 import battlesheeps.networking.ServerLobby;
 import battlesheeps.networking.ServerLogin;
@@ -99,6 +100,7 @@ public class TestServer {
 		new Thread(new ServerGamesAndMoves()).start();
 		new Thread(new ServerLobby()).start();
 		new Thread(new ServerLogin()).start();
+		new Thread(new ServerChat()).start();
 	}
 	
 	public static void main(String[] args) {

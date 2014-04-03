@@ -14,8 +14,8 @@ public class TestClient {
 			public void run() {
 				// TODO Auto-generated method stub
 				ClientGame cl = new ClientGame("q");
-				cl.setupComplete();
-				ClientGamesAndMoves manager = new ClientGamesAndMoves("q", null, 1, cl);
+				ClientGamesAndMoves manager = new ClientGamesAndMoves("q", null, 2, cl);
+//				cl.setupComplete();
 			}
 			
 		});

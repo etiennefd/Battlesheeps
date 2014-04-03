@@ -47,9 +47,4 @@ public class Server
     	}
 	}
 	
-	public static void main(String[] args)
-	{
-		// Add or modify any games before server starts.
-		new Server().start();
-	}
 }
