@@ -73,15 +73,14 @@ public class MessagePanel extends JPanel {
 	 * Displays a ship placement button for the given ship. 
 	 * @param pShip 
 	 */
-	public void displayShipSetupOption(Ship pShip) {
+	public void displayShipSetupOption(final Ship pShip) {
 		
-		aCurrentShip = pShip;
 		//do not removeAll since we want to keep the other options
 		if (pShip instanceof Cruiser) {
 			JButton shipButton = new JButton("Place Cruiser");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
@@ -90,7 +89,7 @@ public class MessagePanel extends JPanel {
 			JButton shipButton = new JButton("Place Destroyer");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
@@ -99,7 +98,7 @@ public class MessagePanel extends JPanel {
 			JButton shipButton = new JButton("Place Mine Layer");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
@@ -108,7 +107,7 @@ public class MessagePanel extends JPanel {
 			JButton shipButton = new JButton("Place Radar Boat");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
@@ -117,7 +116,7 @@ public class MessagePanel extends JPanel {
 			JButton shipButton = new JButton("Place Torpedo Boat");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
@@ -125,7 +124,7 @@ public class MessagePanel extends JPanel {
 			JButton shipButton = new JButton("Place Kamikaze");
 			shipButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					aClient.showAvailableBasePositions(aCurrentShip);
+					aClient.showAvailableBasePositions(pShip);
 				}
 			});
 			this.add(shipButton);
