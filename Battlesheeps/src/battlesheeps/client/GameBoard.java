@@ -520,16 +520,18 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 				}//Clicked on green square ==> tell Client
 				else if (aGreenList.contains(coord) && !aChosenMove) {
 					aChosenMove = true;
+					aGreenList = new ArrayList<Coordinate>();
 					aMyClient.placedShip(coord);
 				}
 				else { //Clicked somewhere else ==> just redraw board
 					aChosenMove = false; 
+					aGreenList = new ArrayList<Coordinate>();
 					drawBoard();
 					//plus tell Client 
 					aMyClient.reshowShipSetup();
 				}
 				
-				aGreenList = new ArrayList<Coordinate>();
+				
 			}
 		
 		}
