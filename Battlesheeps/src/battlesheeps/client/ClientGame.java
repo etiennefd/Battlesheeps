@@ -399,6 +399,7 @@ public class ClientGame {
 	public void setupComplete() {
 		aBoardPanel.startGame();
 		myManager.sendMove(new Move(null, null, null, null, ServerInfo.SHIP_INIT_COMPLETE));
+		aMessagePanel.displayMessage("Waiting for Opponent");
 	}
 	
 	
