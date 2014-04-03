@@ -101,7 +101,7 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aMyTurn = pTurn;
 		aMyClient = pClient;
 		aChosenMove = false;
-		
+		 
 		createFrame();
 		
 		//will be used later on to show which squares are clickable 
@@ -200,6 +200,10 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	 * Method to be called when setup is over. 
 	 */
 	public void startGame() {
+		//resetting some attributes
+		aGreenPhase = false;
+		aGreenList = new ArrayList<Coordinate>();
+		//and setting game in progress to be true!
 		aGameInProgress = true;
 	}
 	
@@ -495,27 +499,38 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	@Override
 	public void handleMousePress(int arg0, int arg1, int arg2) {
 		
+		//SETUP PHASE
 		if (!aGameInProgress) {
-			//TODO
-			// Case 1. Button pressed 
-			//Client will tell you to show the proper green squares 
-			//if 
 			
-			//Case 2. Ship clicked on board 
-			//Tell client. 
-			//Client will tell you to show the proper green squares. 
+			Coordinate coord = convertToSquare(arg0, arg1);
+
+			if (coord.inBounds()) {
 			
-			//If someone clicks on a green square
-			//then tell client ==> setShipPosition
-			
-			//if someone clicks another ship (not the current one)
-			//then tell client 
-			
-			//if someone clicks on the current ship
-			//or on anywhere else 
-			//then revert to no green squares (tell client) 
+				Square currentSquare = aVisibleBoard[coord.getX()][coord.getY()];
+				
+				//Clicked on ship ==> tell client. 
+				if (currentSquare instanceof ShipSquare) {
+					//haven't yet chosen a move for the ship
+					aChosenMove = false;
+					//it has to be your own ship (enemies are not visible)
+					//so let's tell the client to calculate the base positions
+					Ship s = ((ShipSquare)currentSquare).getShip();
+					aMyClient.showAvailableBasePositions(s);
+				}//Clicked on green square ==> tell Client
+				else if (aGreenList.contains(coord) && !aChosenMove) {
+					aChosenMove = true;
+					aMyClient.placedShip(coord);
+				}
+				else { //Clicked somewhere else ==> just redraw board
+					aChosenMove = false; 
+					drawBoard();
+				}
+				
+				aGreenList = new ArrayList<Coordinate>();
+			}
 		
 		}
+		//GAME IN PROGRESS
 		else {
 			//we only allow key presses if it's this player's turn! 
 			if (aMyTurn) {
