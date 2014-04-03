@@ -166,8 +166,7 @@ public class ClientGame {
 		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
 		aSplitPane.setDividerLocation(0.66);		
-		
-		
+			
 	}
 	
 	/*
