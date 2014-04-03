@@ -525,6 +525,8 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 				else { //Clicked somewhere else ==> just redraw board
 					aChosenMove = false; 
 					drawBoard();
+					//plus tell Client 
+					aMyClient.reshowShipSetup();
 				}
 				
 				aGreenList = new ArrayList<Coordinate>();

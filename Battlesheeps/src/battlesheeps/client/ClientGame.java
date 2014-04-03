@@ -81,6 +81,7 @@ public class ClientGame {
 	private Square[][] aCurrentVisibleBoard = new Square[30][30];
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
+	private ArrayList<Ship> aCurrentShipList;
 	
 	private ClientGamesAndMoves myManager;
 	
@@ -287,18 +288,16 @@ public class ClientGame {
 		
 		aMessagePanel.displayMessage("Place your ships!");
 		
-		ArrayList<Ship> myList;
-		
 		if (aMyUser.equals(pGame.getP1Username())) {
-			myList = pGame.getP1ShipList();
+			aCurrentShipList = pGame.getP1ShipList();
 		}
 		else {
-			myList = pGame.getP2ShipList();
+			aCurrentShipList = pGame.getP2ShipList();
 		}
 		int done = 0;
 		//for each ship, we have to tell MessagePanel
 		//to display a button for it
-		for (Ship ship : myList) {
+		for (Ship ship : aCurrentShipList) {
 			if (!ship.onBoard()) {
 				aMessagePanel.displayShipSetupOption(ship);
 				done++;
@@ -310,19 +309,41 @@ public class ClientGame {
 		}
 		
 		//getting the current visible board 
-		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
+		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), aCurrentShipList);
 		
 		//and telling board panel to draw it 
 		aBoardPanel.redrawBoard(aCurrentVisibleBoard);
 	}
 
-	//TODO
-	public void showAvailableBasePositions(Ship s) {
+	/**
+	 * Called by the GUI to get the ship menu up again. 
+	 */
+	public void reshowShipSetup() {
+		
+		int done = 0;
+		
+		for (Ship ship : aCurrentShipList) {
+			if (!ship.onBoard()) {
+				aMessagePanel.displayShipSetupOption(ship);
+				done++;
+			}
+		}
+		
+		if (done == 0) {
+			aMessagePanel.shipSetupComplete();
+		}
+	}
+	
+	/**
+	 * Calculates which positions are free at the player's base. 
+	 * @param pShip
+	 */
+	public void showAvailableBasePositions(Ship pShip) {
 		
 		aMessagePanel.displayMessage("Click on a green square to place the ship.");
 		
 		//let's keep track of which ship we want to show the moves for 
-		aCurrentClickedShip = s;
+		aCurrentClickedShip = pShip;
 		//TODO
 		//let's compute the available green squares
 		int x; 
@@ -369,7 +390,8 @@ public class ClientGame {
 		Coordinate head = new Coordinate(x, tail.getY());
 		Move m = new Move(head, tail, aCurrentClickedShip, MoveType.SET_SHIP_POSITION, ServerInfo.SHIP_INIT);
 		myManager.sendMove(m);
-	}
+	} 
+	
 	/**
 	 * MessagePanel will call this method when the User says setup is complete. 
 	 * Client tells BoardGame that setup is now complete, and informs ServerGame.
