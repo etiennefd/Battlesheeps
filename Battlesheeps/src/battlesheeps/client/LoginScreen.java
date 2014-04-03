@@ -242,7 +242,7 @@ public class LoginScreen {
     /**
      * Create the GUI and show it.
      */
-    private static void createAndShowLogin() {
+    public static void createAndShowLogin() {
         //Create and set up the window.
     	
         JFrame frame = new JFrame("Battlesheeps Login Screen");
