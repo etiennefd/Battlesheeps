@@ -225,7 +225,7 @@ public class ClientGame {
 	 */
 	public void setupCoral(ServerGame pGame) {
 		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Do you like the coral setup?");
+		aMessagePanel.setupCoral("Do you like the coral configuration?");
 		
 		//and just initializing who has which base 
 		//false by default
@@ -243,7 +243,7 @@ public class ClientGame {
 	 */
 	public void resetupCoral(ServerGame pGame) {
 		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Both players must agree on the setup.");
+		aMessagePanel.setupCoral("Both players must agree on the configuration.");
 		
 		//we can just tell aBoardPanel to draw the given board
 		//since no ships will be on it yet
@@ -258,10 +258,9 @@ public class ClientGame {
 		myManager.sendMove(coralMessage);
 	}
 	
-	//TODO
 	/**
 	 * Moving on to ship setup. 
-	 * This method will also be called whenever one ship 
+	 * This method will also be called whenever a ship 
 	 * is placed on the board.
 	 * @param pGame
 	 */
@@ -301,7 +300,7 @@ public class ClientGame {
 	//TODO
 	public void showAvailableBasePositions(Ship s) {
 		
-		aMessagePanel.displayMessage("Click on a green square to place ship.");
+		aMessagePanel.displayMessage("Click on a green square to place the ship.");
 		
 		//let's keep track of which ship we want to show the moves for 
 		aCurrentClickedShip = s;
@@ -313,13 +312,25 @@ public class ClientGame {
 		}else {//East Base
 			x = 29;
 		}
+		
+		ArrayList<Coordinate> availablePositions = new ArrayList<Coordinate>();
 		//let's first check the outer squares: (x,9) and (x, 20) 
-		if (aCurrentVisibleBoard[x][9] instanceof ShipSquare) {
-			//TODO
+		//if a ship isn't there already, then we add it to the list
+		if (!(aCurrentVisibleBoard[x][9] instanceof ShipSquare)) {
+			availablePositions.add(new Coordinate(x, 9));
+		}
+		if (!(aCurrentVisibleBoard[x][20] instanceof ShipSquare)) {
+			availablePositions.add(new Coordinate(x, 20));
 		}
 		
-		
 		//and now let's tell the board to display the green squares 
+		for (int i = 10; i < 20; i++) {
+			if (!(aCurrentVisibleBoard[x][i] instanceof ShipSquare)) {
+				availablePositions.add(new Coordinate(x, i));
+			}
+		}
+		
+		aBoardPanel.showAvailableMoves(availablePositions);
 		
 	}
 	
