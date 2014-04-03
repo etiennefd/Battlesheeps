@@ -48,6 +48,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 
 
 /* This will open a window with the following panels:
@@ -82,7 +83,7 @@ public class ClientGame {
 	//internal frame
 	private Vector<JInternalFrame> internalFrame = new Vector<JInternalFrame>();
 
-	public ClientGame(String pPlayer) {
+	public ClientGame(final String pPlayer) {
 
 		aMyUser = pPlayer;
 		
@@ -145,7 +146,7 @@ public class ClientGame {
 		aMessagePanel = new MessagePanel(this, pPlayer, "Opponent");
 		sidePanel.setLeftComponent(aMessagePanel);
 
-		Square[][] aCurrentVisibleBoard = new Square[30][30];
+		final Square[][] aCurrentVisibleBoard = new Square[30][30];
 
 		for(int i = 0; i < 30; i++) { 
 			for (int j = 0; j<30; j++) {
@@ -153,10 +154,22 @@ public class ClientGame {
 			}
 		}
 
-		aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, this);
+	SwingUtilities.invokeLater(new Runnable() {
 
-		aBoardPanel.setPreferredSize(new Dimension(600, 600));
-		aSplitPane.setLeftComponent(aBoardPanel);
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			aBoardPanel = new GameBoard(600, pPlayer, aCurrentVisibleBoard, false, ClientGame.this);
+
+			aBoardPanel.setPreferredSize(new Dimension(600, 600));
+			aSplitPane.setLeftComponent(aBoardPanel);
+			aBoardPanel.setVisible(true);
+			
+		}
+		
+	});
+		
+
 		
 		this.aDesktop.add(background);
 		
@@ -166,14 +179,14 @@ public class ClientGame {
 		
 		aSplitPane.setDividerLocation(0.66);		
 		
-		aBoardPanel.setVisible(true);
+		
 	}
 	
 	/*
 	 * Menu will contain: 
 	 * ... 
 	 */
-	private JMenuBar createMenu() {
+ 	private JMenuBar createMenu() {
 
 		JMenuBar menuBar = new JMenuBar();
 
@@ -229,7 +242,7 @@ public class ClientGame {
 		aMessagePanel.setupCoral("Do you like the coral configuration?");
 		
 		//and just initializing who has which base 
-		//false by default
+		//East = false by default
 		if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
 		
 		//we can just tell aBoardPanel to draw the given board
