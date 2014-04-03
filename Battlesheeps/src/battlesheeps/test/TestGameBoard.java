@@ -29,8 +29,8 @@ public class TestGameBoard{
 		Account a2 = new Account("bob", "password");
 		Account a3 = new Account("dinkle", "IamAdinkle");
 		Account a4 = new Account("bobs", "password");
-		Account player = new Account("player", "abc");
-		Account opponent = new Account("opponent", "def");
+		Account player = new Account("Julius Caesar", "abc");
+		Account opponent = new Account("Alexander the Great", "def");
 		
 		GameManager gm = GameManager.getInstance();
 		Hashtable<String,Account> accts = gm.getAccounts();
@@ -41,7 +41,7 @@ public class TestGameBoard{
 		accts.put(player.getUsername(), player);
 		accts.put(opponent.getUsername(), opponent);
 		
-		myGame = new ServerGame(1, gm.getAccount("player"), gm.getAccount("opponent"));
+		myGame = new ServerGame(1, gm.getAccount("Julius Caesar"), gm.getAccount("Alexander the Great"));
 		myGame.setClientInfo(ClientInfo.GAME_UPDATE);
 		gm.addGame(myGame);
 		
