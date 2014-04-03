@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
+import javax.swing.SwingUtilities;
 
 import battlesheeps.accounts.Account;
 import battlesheeps.networking.ClientGamesAndMoves;
@@ -259,6 +260,7 @@ class AcceptListener implements ActionListener
 		this.requester = pRequester;
 		this.requestee = pRequestee;
 		this.aRequestDialog = pWaitingRequest;
+		this.aNewGame = isNewGame;
 	}
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -268,11 +270,19 @@ class AcceptListener implements ActionListener
 		aClient.getLobby().getFrame().setVisible(false);
 		aClient.getLobby().getFrame().dispose();
 		//Open game board
-		Integer gameID = 0;
+		
 		if(aNewGame)	//open new game
 		{
-			ClientGame cg = new ClientGame(requestee);
-			new ClientGamesAndMoves(requestee, null, gameID, cg);
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					ClientGame cg = new ClientGame(requestee);
+					new ClientGamesAndMoves(requestee, null, 0, cg);
+				}
+				
+			});
+			
 		}
 		//open game with old game id
 		else 
@@ -282,12 +292,22 @@ class AcceptListener implements ActionListener
 				if(game.getPlayer1().getUsername().equals(requester) ||
 						game.getPlayer2().getUsername().equals(requester))
 				{
-					gameID = game.getGameID();
+					final int gameID = game.getGameID();
+					System.out.println("Requestee gameID: "+gameID);
+					
+					SwingUtilities.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							ClientGame cg = new ClientGame(requestee);
+							new ClientGamesAndMoves(requestee, null, gameID, cg);
+						}
+						
+					});
+					
 				}
 			}
-			System.out.println("Requestee gameID: "+gameID);
-			ClientGame cg = new ClientGame(requestee);
-			new ClientGamesAndMoves(requestee, null, gameID, cg);
+			
 		}
 	}
 }
@@ -408,7 +428,7 @@ public class Lobby
     	}
     }
     
-    public void requestAccepted(String requestee,boolean isNewGame)
+    public void requestAccepted(final String requestee,boolean isNewGame)
     {
     	aRequesterDialog.setVisible(false);
     	aRequesterDialog.dispose();
@@ -416,12 +436,21 @@ public class Lobby
     	aFrame.dispose();
     	System.out.println("lobby closed.");
     	//Open game board
-    	Integer gameID = 0;
+    	
 		if(isNewGame)
 		{
 			System.out.println("Requester " +aClient.getUsername()+ " new game.");
-			ClientGame cg = new ClientGame(aClient.getUsername());
-			new ClientGamesAndMoves(aClient.getUsername(), requestee, gameID, cg);
+			
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					ClientGame cg = new ClientGame(aClient.getUsername());
+					new ClientGamesAndMoves(aClient.getUsername(), requestee, 0, cg);
+				}
+				
+			});
+			
 		}
 		//open game with old game id
 		else 
@@ -432,11 +461,21 @@ public class Lobby
 				if(game.getPlayer1().getUsername().equals(requestee) ||
 						game.getPlayer2().getUsername().equals(requestee))
 				{
-					gameID = game.getGameID();
+					final int gameID = game.getGameID();
+					
+					SwingUtilities.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							ClientGame cg = new ClientGame(aClient.getUsername());
+							new ClientGamesAndMoves(aClient.getUsername(), null, gameID, cg);
+						}
+					
+					});
+					
 				}
 			}
-			ClientGame cg = new ClientGame(aClient.getUsername());
-			new ClientGamesAndMoves(aClient.getUsername(), null, gameID, cg);
+			
 		}
     	
     }
