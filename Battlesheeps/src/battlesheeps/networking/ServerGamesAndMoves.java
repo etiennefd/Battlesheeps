@@ -96,6 +96,8 @@ class ClientConnGame implements Runnable {
     private boolean opponentAcceptedCoral = false;
     private boolean opponentRespondedToCoral = false;
     
+    private boolean completedShipSetup = false;
+    
     /**
      * Client connections on the server side will receive ChatMessage objects and
      * will send out only Strings.
@@ -136,6 +138,7 @@ class ClientConnGame implements Runnable {
         		shipInit();
         	}
         	
+        	System.out.println("GAME UPDATES for user: " + aUsername);
         	Move msg;
         	aGame.setClientInfo(ClientInfo.GAME_UPDATE);
             while ((msg = (Move) aInput.readObject()) != null) 
@@ -161,7 +164,7 @@ class ClientConnGame implements Runnable {
         catch (IOException e) 
         {
         	close();
-        	e.printStackTrace();
+			System.err.println("Socket closed at other end: " + e);
         }
 		catch (ClassNotFoundException e)
 		{
@@ -179,12 +182,18 @@ class ClientConnGame implements Runnable {
 				break;
 			}
 			else if (msg.getServerInfo() == ServerInfo.SHIP_INIT) {
-				// TODO is this correct? probably not.
 				aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
 				aOutput.writeObject(aGame);
 				aOutput.reset();
 			}
 		}
+		completedShipSetup = true;
+		while (!aOpponent.completedShipSetup) {}
+		
+		aGame.setClientInfo(ClientInfo.GAME_UPDATE);
+		aOutput.writeObject(aGame);
+		aOutput.reset();
+		
 		return;
 	}
 	private void coralReefConfig() throws IOException, ClassNotFoundException

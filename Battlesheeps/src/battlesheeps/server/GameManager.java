@@ -64,55 +64,55 @@ public class GameManager
 	
 	private GameManager()
 	{
-		gameIDcounter = 0;
-		ALL_GAMES = new Hashtable<Integer, ServerGame>();
-		ALL_ACCOUNTS = new Hashtable<String, Account>();
-//		try
-//		{
-//			InputStream file = new FileInputStream("allGames.ser");
-//			InputStream buffer = new BufferedInputStream(file);
-//			ObjectInput input = new ObjectInputStream (buffer);
-//			
-//			try {
-//				gameIDcounter = input.readInt();
-//				ALL_GAMES = (Hashtable<Integer, ServerGame>) input.readObject();
-//			}
-//			finally {
-//				input.close();
-//			}
-//		}
-//		catch (FileNotFoundException e){
-//			e.printStackTrace();
-//		}
-//		catch (IOException e){
-//			e.printStackTrace();
-//		}
-//		catch (ClassNotFoundException e){
-//			e.printStackTrace();
-//		}
-//		
-//		try
-//		{
-//			InputStream file = new FileInputStream("allAccounts.ser");
-//			InputStream buffer = new BufferedInputStream(file);
-//			ObjectInput input = new ObjectInputStream (buffer);
-//			
-//			try {
-//				ALL_ACCOUNTS = (Hashtable<String, Account>) input.readObject();
-//			}
-//			finally {
-//				input.close();
-//			}
-//		}
-//		catch (FileNotFoundException e){
-//			e.printStackTrace();
-//		}
-//		catch (IOException e){
-//			e.printStackTrace();
-//		}
-//		catch (ClassNotFoundException e){
-//			e.printStackTrace();
-//		}
+//		gameIDcounter = 0;
+//		ALL_GAMES = new Hashtable<Integer, ServerGame>();
+//		ALL_ACCOUNTS = new Hashtable<String, Account>();
+		try
+		{
+			InputStream file = new FileInputStream("allGames.ser");
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream (buffer);
+			
+			try {
+				gameIDcounter = input.readInt();
+				ALL_GAMES = (Hashtable<Integer, ServerGame>) input.readObject();
+			}
+			finally {
+				input.close();
+			}
+		}
+		catch (FileNotFoundException e){
+			e.printStackTrace();
+		}
+		catch (IOException e){
+			e.printStackTrace();
+		}
+		catch (ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		
+		try
+		{
+			InputStream file = new FileInputStream("allAccounts.ser");
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream (buffer);
+			
+			try {
+				ALL_ACCOUNTS = (Hashtable<String, Account>) input.readObject();
+			}
+			finally {
+				input.close();
+			}
+		}
+		catch (FileNotFoundException e){
+			e.printStackTrace();
+		}
+		catch (IOException e){
+			e.printStackTrace();
+		}
+		catch (ClassNotFoundException e){
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * Support for singleton

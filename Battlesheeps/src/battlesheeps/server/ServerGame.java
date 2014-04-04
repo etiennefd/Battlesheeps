@@ -362,7 +362,7 @@ public class ServerGame implements Serializable
 		switch (pMove) {
 		case TRANSLATE_KAMIKAZE: translateKamikaze(pShip, pCoord1, pCoord2); break;
 		case SUICIDE_ATTACK: suicideAttack(pShip, pCoord1, pCoord2); break;
-		case SET_SHIP_POSITION: setShipPosition(pShip, pCoord1, pCoord2);
+		case SET_SHIP_POSITION: setShipPosition(pShip, pCoord1, pCoord2); break;
 		default: return computeMoveResult(pShip, pMove, pCoord1); 
 		}
 		
