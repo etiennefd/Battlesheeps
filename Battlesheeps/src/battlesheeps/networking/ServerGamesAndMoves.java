@@ -144,8 +144,8 @@ class ClientConnGame implements Runnable {
             while ((msg = (Move) aInput.readObject()) != null) 
             {
             	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
-            	// System.out.println(aGame.printBoard());
 
+            	// TODO exit if opponent quits
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
             	aOutput.reset();
@@ -328,6 +328,8 @@ class ClientConnGame implements Runnable {
 			}
 			System.out.println(aUsername + " has joined game " + aGameID);
 		}
+		
+		if (!isNewGame) aGame.setClientInfo(ClientInfo.GAME_UPDATE);
 		aOutput.writeObject(aGame);
 		aOutput.reset();
 	}
@@ -344,6 +346,8 @@ class ClientConnGame implements Runnable {
     	System.out.println(aUsername + " has disconnected from GAME.");
     	removeConnection(aUsername);
 		try {
+			aGame.setClientInfo(ClientInfo.OPPONENT_EXIT);
+			aOpponent.aOutput.writeObject(aGame);
 			aInput.close();
 			aOutput.close();
 		}

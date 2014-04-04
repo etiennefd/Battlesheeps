@@ -39,7 +39,7 @@ public class ServerGame implements Serializable
 	}
 	
 	public enum ClientInfo {
-		NEW_GAME, NEW_CORAL, FINAL_CORAL, SHIP_INIT, GAME_UPDATE
+		NEW_GAME, NEW_CORAL, FINAL_CORAL, SHIP_INIT, GAME_UPDATE, OPPONENT_EXIT
 	}
 	
 	//Fields related to the identity of the game

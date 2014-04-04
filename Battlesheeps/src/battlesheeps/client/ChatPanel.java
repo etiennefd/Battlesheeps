@@ -31,7 +31,7 @@ public class ChatPanel extends JPanel implements ActionListener
 		aTextOut.setEditable(false);
 		this.add(new JScrollPane(aTextOut), BorderLayout.CENTER);
 		
-		aTextIn.setText("");
+		aTextIn.setText("Type here to chat!");
 		aTextIn.addActionListener(this);
     	this.add(aTextIn, BorderLayout.SOUTH);
 	}

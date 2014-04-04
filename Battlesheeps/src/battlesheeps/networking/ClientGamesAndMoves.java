@@ -142,7 +142,6 @@ class ServerConnGame implements Runnable {
 		try {
 			ServerGame newGame;
 			while ((newGame = (ServerGame) aInput.readObject()) != null) { 
-				// TODO update with new ServerGame
 				switch (newGame.getClientInfo()){
 					case NEW_GAME:
 						aMyClient.setupCoral(newGame);
@@ -158,6 +157,9 @@ class ServerConnGame implements Runnable {
 						break;
 					case GAME_UPDATE:
 						aMyClient.updateGame(newGame);
+						break;
+					case OPPONENT_EXIT:
+						// TODO display dialog "opponent has quit" with button to go to lobby
 						break;
 				}
 			}

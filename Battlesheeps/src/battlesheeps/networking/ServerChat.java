@@ -103,7 +103,7 @@ class ClientConn implements Runnable {
             	{
             		aUsernames.put(msg.getMessage(), this);
             		aUser = msg.getMessage();
-            		System.out.println("User \"" + aUser + "\" has connected to CHAT.");
+            		System.out.println(aUser + " has connected to CHAT.");
             	}
             	else 
             	{
@@ -137,6 +137,6 @@ class ClientConn implements Runnable {
 		try {aInput.close();}
 		catch (IOException e1) { /* do nothing, resource already closed. */ }
 		
-		System.out.println("User \"" + aUser + "\" has disconnected from CHAT.");
+		System.out.println(aUser + " has disconnected from CHAT.");
 	}
 }
