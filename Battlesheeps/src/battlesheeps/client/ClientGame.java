@@ -77,11 +77,13 @@ public class ClientGame {
 	//should know who it's player is 
 	private String aMyUser;
 	private boolean aHasWestBase = false;
+	private boolean aDefaultSetup = false;
 	
 	private Square[][] aCurrentVisibleBoard = new Square[30][30];
 	private Ship aCurrentClickedShip; 
 	private MoveType aCurrentClickedMove;
 	private ArrayList<Ship> aCurrentShipList;
+	private ServerGame aCurrentGame;
 	
 	private ClientGamesAndMoves myManager;
 	
@@ -285,41 +287,98 @@ public class ClientGame {
 		if (pAccepted) coralMessage = new Move(null, null, null, null, ServerInfo.CORAL_REEF_ACCEPT);
 		else coralMessage = new Move(null, null, null, null, ServerInfo.CORAL_REEF_DECLINE);
 		myManager.sendMove(coralMessage);
+		aMessagePanel.displayMessage("Waiting for opponent");
+	}
+	
+	public void startShipSetup(ServerGame pGame) {
+		
+		aCurrentGame = pGame;
+		aMessagePanel.shipChoice();
+	}
+	
+	public void defaultSetup(boolean pDefault) {
+		aDefaultSetup = pDefault;
+		setupShips(aCurrentGame);
 	}
 	
 	/**
-	 * Moving on to ship setup. 
 	 * This method will also be called whenever a ship 
 	 * is placed on the board.
 	 * @param pGame
 	 */
 	public void setupShips(ServerGame pGame){
-		
-		aMessagePanel.displayMessage("Place your ships!");
-		
+
 		if (aMyUser.equals(pGame.getP1Username())) {
 			aCurrentShipList = pGame.getP1ShipList();
 		}
 		else {
 			aCurrentShipList = pGame.getP2ShipList();
 		}
-		int done = 0;
-		//for each ship, we have to tell MessagePanel
-		//to display a button for it
-		for (Ship ship : aCurrentShipList) {
-			if (!ship.onBoard()) {
-				aMessagePanel.displayShipSetupOption(ship);
-				done++;
-			}
-		}
-		
-		if (done == 0) {
-			aMessagePanel.shipSetupComplete();
-		}
-		
+
 		//getting the current visible board 
 		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), aCurrentShipList);
-		
+
+		//unplaced ships 
+		ArrayList<Ship> unplaced = new ArrayList<Ship>();
+
+		//are we done yet? 
+		int done = 0;
+		for (Ship ship : aCurrentShipList) {
+			if (!ship.onBoard()) {
+				done++;
+				unplaced.add(ship);
+			}
+		}
+
+		if (done == 0) {
+			aMessagePanel.shipSetupComplete();
+		} 
+		else {
+			if (aDefaultSetup) {
+
+				//let's just place the first ship
+				//in the first free spot at the base
+
+				int b; 
+				if (aHasWestBase) {
+					b = 1;
+				}else {//East Base
+					b = 28;
+				}
+
+				Coordinate free = null;
+				//and now let's tell the board to display the green squares 
+				for (int i = 10; i < 20; i++) {
+					if (!(aCurrentVisibleBoard[b][i] instanceof ShipSquare)) {
+						free = new Coordinate(b,i);
+						break;
+					}
+				}
+				if (free == null) {
+					if (aHasWestBase) {
+						free = new Coordinate(0, 9);
+					}
+					else free = new Coordinate(29, 9);
+				}
+
+				aCurrentClickedShip = unplaced.get(0);
+
+				placedShip(free);
+
+			}
+			else {
+				aMessagePanel.displayMessage("Place your ships!");
+
+				//for each ship, we have to tell MessagePanel
+				//to display a button for it
+
+				for (Ship ship : unplaced) {
+					aMessagePanel.displayShipSetupOption(ship);
+				}
+
+			}
+		}	
+
 		//and telling board panel to draw it 
 		aBoardPanel.redrawBoard(aCurrentVisibleBoard);
 	}

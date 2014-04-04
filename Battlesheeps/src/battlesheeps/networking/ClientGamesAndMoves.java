@@ -150,7 +150,7 @@ class ServerConnGame implements Runnable {
 						aMyClient.resetupCoral(newGame);
 						break;
 					case FINAL_CORAL:
-						aMyClient.setupShips(newGame);
+						aMyClient.startShipSetup(newGame);
 						break;
 					case SHIP_INIT:
 						aMyClient.setupShips(newGame);

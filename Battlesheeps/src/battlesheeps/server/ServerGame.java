@@ -253,7 +253,7 @@ public class ServerGame implements Serializable
 	
 	/**
 	 * Changes the squares that were occupied by a ship to sea squares. 
-	 * Does not affect the ship's parameters at all. 
+	 * Also sets the ship's internal parameters to null. 
 	 * Should be called when modifying the position of a ship or when a ship is sunk. 
 	 * @param pShip
 	 */
