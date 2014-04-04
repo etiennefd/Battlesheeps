@@ -101,6 +101,30 @@ public class MessagePanel extends JPanel {
 		this.validate();
 	}
 	
+	public void shipChoice(){
+		this.removeAll();
+		
+		JButton defaultButton = new JButton("I want a default ship setup");
+		defaultButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.defaultSetup(true);
+			}
+		});
+		
+		JButton placeButton = new JButton("I want to place my ships.");
+		placeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				aClient.defaultSetup(false);
+			}
+		});
+		
+		this.add(defaultButton);
+		this.add(placeButton);
+		
+		this.repaint();
+		this.validate();
+	}
+	
 	/**
 	 * Method to display "Done setup" button. 
 	 */
