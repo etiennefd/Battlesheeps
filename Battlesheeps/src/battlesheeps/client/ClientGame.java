@@ -36,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
@@ -181,56 +182,70 @@ public class ClientGame {
 	 * Menu will contain: 
 	 * ... 
 	 */
- 	private JMenuBar createMenu() {
+	private JMenuBar createMenu() {
 
 		JMenuBar menuBar = new JMenuBar();
-		
-		JMenu mainMenu = new JMenu("Menu");
-		menuBar.add(mainMenu);
+
+		JMenuItem lobbyItem = new JMenuItem("Return to Lobby");
+		lobbyItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO
+				//return to lobby here!
+			}
+		});
+		menuBar.add(lobbyItem);	
 		
 		JMenuItem aboutItem = new JMenuItem("About");
+
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				JOptionPane.showMessageDialog(aMainFrame, 
-				"Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", 
-				"About", JOptionPane.PLAIN_MESSAGE);
+						"Battlesheeps game by Stefan Battiston, Etienne Fortier-Dubois, Lei Lopez and Kate Sprung", 
+						"About", JOptionPane.PLAIN_MESSAGE);
 			}		
 		});
-		mainMenu.add(aboutItem);
 
-		mainMenu.addSeparator();
-		
-		JMenuItem newItem2 = new JMenuItem("Help");
-		newItem2.addActionListener(new ActionListener() {
+		menuBar.add(aboutItem);
+
+		JMenuItem helpItem = new JMenuItem("Help");
+
+		helpItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(aMainFrame, 
 						"Setup Phase: A new obstacle configuration is generated.\n" +
-						"You must agree or decline the configuration.\n" +
-						"This process is repeated until both players agree.\n" +
-						"Afterwards, you enter ship setup. \n " + 
-						"Ship Setup: Click on a Place Ship button and then on a green square. \n" +
-						"Repeat for all ships and then indicate that you are done.\n" +
-						"You may rearrange ships by clicking on the ones already placed on the board.\n" +
-						"Once both players are done, the game begins.\n"+
-						"Move Phase: Click on a ship, then on a move button.\n" +
-						"Then click on a green square, and wait for your turn to come again.\n" +
-						"The game ends when one player's ships are all sunk.", 
-						"Help", JOptionPane.PLAIN_MESSAGE);
+								"You must agree or decline the configuration.\n" +
+								"This process is repeated until both players agree.\n" +
+								"Afterwards, you enter ship setup. \n " + 
+								"Ship Setup: Click on a Place Ship button and then on a green square. \n" +
+								"Repeat for all ships and then indicate that you are done.\n" +
+								"You may rearrange ships by clicking on the ones already placed on the board.\n" +
+								"Once both players are done, the game begins.\n"+
+								"Move Phase: Click on a ship, then on a move button.\n" +
+								"Then click on a green square, and wait for your turn to come again.\n" +
+								"The game ends when one player's ships are all sunk.", 
+								"Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
-		mainMenu.add(newItem2);
-		
-		mainMenu.addSeparator();
-
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Need more cleanup here
-				System.exit(0);
-			}
-		});
-		mainMenu.add(exitItem);	
-
+		menuBar.add(helpItem);
+		//really inefficient way of pushing all the menu items over
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(Box.createHorizontalGlue());
 		return menuBar;
 
 	}		
