@@ -5,7 +5,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -248,18 +253,31 @@ public class LoginScreen {
         JFrame frame = new JFrame("Battlesheeps Login Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        frame.setMinimumSize(new Dimension(275,225));
-        frame.setMaximumSize(new Dimension(275,225));
+        //TODO change size according to image
+        frame.setMinimumSize(new Dimension(275,325));
+        frame.setMaximumSize(new Dimension(275,325));
         frame.setResizable(false);
         
         SpringLayout layout = new SpringLayout(); 
         
         Font f = new Font("serif",Font.BOLD,20);
         
+        BufferedImage picture = null;
+		try {
+			picture = ImageIO.read(new File("default.png")); //TODO change default to front image
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        JLabel imageLabel = new JLabel(new ImageIcon(picture));
+        frame.getContentPane().add(imageLabel);
+        
+        layout.putConstraint(SpringLayout.NORTH, imageLabel, 10, SpringLayout.NORTH, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, imageLabel, 40, SpringLayout.WEST, frame.getContentPane());
+        
         JLabel title = new JLabel("BATTLESHEEPS");
         title.setFont(f);
         
-        layout.putConstraint(SpringLayout.NORTH, title, 10, SpringLayout.NORTH, frame.getContentPane());
+        layout.putConstraint(SpringLayout.NORTH, title, 10, SpringLayout.SOUTH, imageLabel);
         layout.putConstraint(SpringLayout.WEST, title, 40, SpringLayout.WEST, frame.getContentPane());
         
         frame.getContentPane().add(title);
