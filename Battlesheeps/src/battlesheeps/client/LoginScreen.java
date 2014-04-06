@@ -254,8 +254,8 @@ public class LoginScreen {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         //TODO change size according to image
-        frame.setMinimumSize(new Dimension(275,325));
-        frame.setMaximumSize(new Dimension(275,325));
+        frame.setMinimumSize(new Dimension(628,600));
+        frame.setMaximumSize(new Dimension(628,600));
         frame.setResizable(false);
         
         SpringLayout layout = new SpringLayout(); 
@@ -264,7 +264,7 @@ public class LoginScreen {
         
         BufferedImage picture = null;
 		try {
-			picture = ImageIO.read(new File("default.png")); //TODO change default to front image
+			picture = ImageIO.read(new File("shepherdess.png")); //TODO change default to front image
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
