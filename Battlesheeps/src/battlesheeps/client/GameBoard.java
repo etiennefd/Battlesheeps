@@ -3,9 +3,13 @@ package battlesheeps.client;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
@@ -14,6 +18,7 @@ import org.minueto.MinuetoEventQueue;
 import org.minueto.handlers.MinuetoFocusHandler;
 import org.minueto.handlers.MinuetoMouseHandler;
 import org.minueto.image.MinuetoFont;
+import org.minueto.image.MinuetoImage;
 import org.minueto.image.MinuetoRectangle;
 import org.minueto.image.MinuetoText;
 import org.minueto.window.MinuetoPanel;
@@ -64,23 +69,41 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	private boolean aGameInProgress = false; //this is false for setup, and true for game in progress 
 	
 	//The Colours 
-	private MinuetoColor aOceanColour = new MinuetoColor(new Color(53, 106, 172));
-	private MinuetoColor aYourBaseColour = new MinuetoColor(new Color(253, 159, 55));
-	private MinuetoColor aOpponentBaseColour = new MinuetoColor(new Color(210, 84, 0));
-	private MinuetoColor aCoralColour = MinuetoColor.YELLOW; 
-	private MinuetoColor aMineColour = new MinuetoColor(new Color(32, 28, 31));
-	private MinuetoColor aRadarColour = new MinuetoColor(new Color(88, 166, 203));
-	private MinuetoColor aSonarColour = new MinuetoColor(new Color(128, 102, 232));
-	private MinuetoColor aOpponentShipUndamaged = new MinuetoColor(Color.DARK_GRAY);
-	private MinuetoColor aYourShipUndamaged = new MinuetoColor(Color.GRAY);
-	private MinuetoColor aOpponentShipDamaged = new MinuetoColor(new Color(232, 77, 104)); //dark pink
-	private MinuetoColor aYourShipDamaged = new MinuetoColor(Color.PINK);
-	private MinuetoColor aOpponentShipDestroyed = new MinuetoColor(new Color(134, 17, 37)); //dark red
-	private MinuetoColor aYourShipDestroyed = new MinuetoColor(Color.RED);
-	private MinuetoColor aMoveColour = new MinuetoColor(new Color(72, 234, 92)); //green
-	private MinuetoColor aCanHitColour = new MinuetoColor(new Color(19, 102, 44)); //dark green
+	private MinuetoColor aMoveColour = new MinuetoColor(new Color(53, 106, 172));
+	private MinuetoColor aRadarColour = new MinuetoColor(new Color(176, 248, 80));
+	private MinuetoColor aSonarColour = new MinuetoColor(new Color(85, 186, 6));
 	
+	//The Font
 	private MinuetoFont aFont = new MinuetoFont (MinuetoFont.SansSerif, 12, true, false);
+	
+	//The Images
+	private MinuetoImage aTree; 
+	private MinuetoImage aGrass;
+	private MinuetoImage aMine;
+	private MinuetoImage aTarget;
+	private MinuetoImage aBase;
+	private MinuetoImage aBaseDestroyed;
+	private MinuetoImage aOpponentBase;
+	private MinuetoImage aOpponentBaseDestroyed;
+	private MinuetoImage aSheep;
+	private MinuetoImage aSheepDamaged;
+	private MinuetoImage aSheepDestroyed;
+	private MinuetoImage aSheepHead;
+	private MinuetoImage aSheepHeadDamaged;
+	private MinuetoImage aSheepHeadDestroyed;
+	private MinuetoImage aSheepRadar;
+	private MinuetoImage aSheepRadarDestroyed;
+	private MinuetoImage aOpponentSheep;
+	private MinuetoImage aOpponentSheepDamaged;
+	private MinuetoImage aOpponentSheepDestroyed;
+	private MinuetoImage aOpponentSheepHead;
+	private MinuetoImage aOpponentSheepHeadDamaged;
+	private MinuetoImage aOpponentSheepHeadDestroyed;
+	private MinuetoImage aOpponentSheepRadar;
+	private MinuetoImage aOpponentSheepRadarDestroyed;
+	
+	private MinuetoRectangle aRadar;
+	private MinuetoRectangle aSonar;
 
 	/**
 	 * Creates a Minueto Panel which acts as the game board. 
@@ -119,7 +142,12 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		}
 		
 		//and here's the actual board
-		aBoard = new MinuetoRectangle(aBoardSize, aBoardSize, aOceanColour, true);
+		aBoard = new MinuetoRectangle(aBoardSize, aBoardSize, aMoveColour, true);
+		
+		//and loading the images - ONCE! 
+		loadImages();
+		
+		/****DANGER ZONE: STARTING THE THREAD!*****/
 		
 		Thread thread = new Thread(this);
 		thread.start();
@@ -144,6 +172,187 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		boardFrame.setContentPane(aMinuetoPanel);
 
 		boardFrame.pack();
+	}
+	
+	private void loadImages() {
+		
+		//Loading the images 
+		BufferedImage img = null;
+		
+		//Tree (Coral)  
+		try {
+			img = ImageIO.read(new File("tree.png"));
+		} catch (IOException e) {
+		}
+		aTree = new MinuetoImage(img);
+		
+		//Grass (Ocean)
+		try {
+			img = ImageIO.read(new File("grass.png"));
+		} catch (IOException e) {
+		}
+		aGrass = new MinuetoImage(img);
+
+		//Mine
+		try {
+			img = ImageIO.read(new File("mine.png"));
+		} catch (IOException e) {
+		}
+		aMine = new MinuetoImage(img);
+		
+		//Target
+		try {
+			img = ImageIO.read(new File("target.png"));
+		} catch (IOException e) {
+		}
+		aTarget = new MinuetoImage(img);
+
+		//Base
+		try {
+			img = ImageIO.read(new File("base.png"));
+		} catch (IOException e) {
+		}
+		aBase = new MinuetoImage(img);
+		
+		//BaseDestroyed
+		try {
+			img = ImageIO.read(new File("basedestroyed.png"));
+		} catch (IOException e) {
+		}
+		aBaseDestroyed = new MinuetoImage(img);
+		
+		//Opponent base
+		try {
+			img = ImageIO.read(new File("baseopponent.png"));
+		} catch (IOException e) {
+		}
+		aOpponentBase = new MinuetoImage(img);
+		
+		//Opponent Base Destroyed
+		try {
+			img = ImageIO.read(new File("baseopponentdestroyed.png"));
+		} catch (IOException e) {
+		}
+		aOpponentBaseDestroyed = new MinuetoImage(img);
+		
+		//Sheep
+		try {
+			img = ImageIO.read(new File("sheep.png"));
+		} catch (IOException e) {
+		}
+		aSheep = new MinuetoImage(img);
+		
+		//Sheep Damaged
+		try {
+			img = ImageIO.read(new File("sheepdamaged.png"));
+		} catch (IOException e) {
+		}
+		aSheepDamaged = new MinuetoImage(img);
+		
+		//Sheep Destroyed
+		try {
+			img = ImageIO.read(new File("sheepdestroyed.png"));
+		} catch (IOException e) {
+		}
+		aSheepDestroyed = new MinuetoImage(img);
+		
+		//Sheep Head
+		try {
+			img = ImageIO.read(new File("sheephead.png"));
+		} catch (IOException e) {
+		}
+		aSheepHead = new MinuetoImage(img);
+		
+		//Sheep Head Damaged
+		try {
+			img = ImageIO.read(new File("sheepheaddamaged.png"));
+		} catch (IOException e) {
+		}
+		aSheepHeadDamaged = new MinuetoImage(img);
+		
+		//Sheep Head Destroyed
+		try {
+			img = ImageIO.read(new File("sheepheaddestroyed.png"));
+		} catch (IOException e) {
+		}
+		aSheepHeadDestroyed = new MinuetoImage(img);
+
+		//Radar Sheep
+		try {
+			img = ImageIO.read(new File("sheepradar.png"));
+		} catch (IOException e) {
+		}
+		aSheepRadar = new MinuetoImage(img);
+		
+		//Radar Sheep Destroyed
+		try {
+			img = ImageIO.read(new File("sheepradardestroyed.png"));
+		} catch (IOException e) {
+		}
+		aSheepRadarDestroyed = new MinuetoImage(img);
+		
+		//Opponent Sheep
+		try {
+			img = ImageIO.read(new File("sheepopponent.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheep = new MinuetoImage(img);
+		
+		//Opponent Sheep Damaged
+		try {
+			img = ImageIO.read(new File("sheepopponentdamaged.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepDamaged = new MinuetoImage(img);
+		
+		//Opponent Sheep Destroyed
+		try {
+			img = ImageIO.read(new File("sheepopponentdestroyed.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepDestroyed = new MinuetoImage(img);
+		
+		//Opponent Sheep Head
+		try {
+			img = ImageIO.read(new File("sheepopponenthead.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepHead = new MinuetoImage(img);
+		
+		//Opponent Sheep Head Damaged
+		try {
+			img = ImageIO.read(new File("sheepopponentheaddamaged.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepHeadDamaged = new MinuetoImage(img);
+		
+		//Opponent Sheep Head Destroyed
+		try {
+			img = ImageIO.read(new File("sheepopponentheaddestroyed.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepHeadDestroyed = new MinuetoImage(img);
+		
+		//Opponent Radar Sheep
+		try {
+			img = ImageIO.read(new File("sheepopponentradar.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepRadar = new MinuetoImage(img);
+		
+		//Opponent Radar Sheep Destroyed
+		try {
+			img = ImageIO.read(new File("sheepopponentradardestroyed.png"));
+		} catch (IOException e) {
+		}
+		aOpponentSheepRadarDestroyed = new MinuetoImage(img);
+		
+		
+		//Radar
+		aRadar = new MinuetoRectangle(aIncrement, aIncrement, aRadarColour, true);
+		//Sonar
+		aSonar = new MinuetoRectangle(aIncrement, aIncrement, aSonarColour, true);
+		
 	}
 	
 	public void setVisible(boolean arg0) {
@@ -237,8 +446,18 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		aGreenPhase = true;
 		aChosenMove = false;
 		
-		MinuetoRectangle greenRectangle = new MinuetoRectangle(aIncrement, aIncrement, aMoveColour, true);
-		MinuetoRectangle darkRectangle = new MinuetoRectangle(aIncrement, aIncrement, aCanHitColour, true);
+		MinuetoRectangle blueRectangle = new MinuetoRectangle(aIncrement, aIncrement, aMoveColour, true);
+		
+		//load available moves
+		String imageFile = "target.png";
+		BufferedImage img = null;
+		try {
+			//System.out.println(imageFile);
+			img = ImageIO.read(new File(imageFile));
+		} catch (IOException e) {
+			System.out.println("fail image reading");
+		}
+		MinuetoImage targetRectangle = new MinuetoImage(img);
 		
 		for (Coordinate c : aGreenList) {
 		
@@ -246,36 +465,16 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 			int y = c.getY();
 			
 			if (aVisibleBoard[x][y] instanceof MineSquare) {
-				aBoard.draw(darkRectangle, x*aIncrement, y*aIncrement);
+				aBoard.draw(targetRectangle, x*aIncrement, y*aIncrement);
 			} else {
-			aBoard.draw(greenRectangle,x*aIncrement, y*aIncrement);
+			aBoard.draw(blueRectangle,x*aIncrement, y*aIncrement);
 			}
 			
 			if (aVisibleBoard[x][y] instanceof ShipSquare) {
 				ShipSquare sq = (ShipSquare)aVisibleBoard[x][y];
 				Ship s = sq.getShip();
-
-				if (!sq.isHead() ) {
-					aBoard.draw(darkRectangle,x*aIncrement, y*aIncrement);
-				} else {
-					//drawing head
-					switch (s.getDirection()) {
-					case NORTH: 
-						drawShipHeadNorth(x, y, aCanHitColour);
-						break;
-					case SOUTH:
-						drawShipHeadSouth(x, y, aCanHitColour);
-						break;
-					case WEST:
-						drawShipHeadWest(x, y, aCanHitColour);
-						break;
-					default : //EAST
-						drawShipHeadEast(x, y, aCanHitColour);
-						break;
-					}
-				}
+				aBoard.draw(targetRectangle,x*aIncrement, y*aIncrement);	
 			} 
-
 		}
 		
 		this.drawLines();
@@ -286,27 +485,17 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 	 */
 	private void drawBoard () {
 		
-		aBoard.clear(aOceanColour);
-		//Coral Reef 
-		MinuetoRectangle coralReef = new MinuetoRectangle(aIncrement, aIncrement, aCoralColour, true);
-		//Ocean
-		MinuetoRectangle ocean = new MinuetoRectangle(aIncrement, aIncrement, aOceanColour, true);
-		//Mine
-		MinuetoRectangle mine = new MinuetoRectangle(aIncrement, aIncrement, aMineColour, true);
-		//Radar
-		MinuetoRectangle radar = new MinuetoRectangle(aIncrement, aIncrement, aRadarColour, true);
-		//Sonar
-		MinuetoRectangle sonar = new MinuetoRectangle(aIncrement, aIncrement, aSonarColour, true);
+		aBoard.clear(aRadarColour);
 
 		for (int i = 0; i < aVisibleBoard.length; i++) {
 			for (int j = 0; j < aVisibleBoard.length; j++) {
-				if (aVisibleBoard[i][j] instanceof CoralReef) aBoard.draw(coralReef, i*aIncrement, j*aIncrement);
+				if (aVisibleBoard[i][j] instanceof CoralReef) aBoard.draw(aTree, i*aIncrement, j*aIncrement);
 				else if (aVisibleBoard[i][j] instanceof ShipSquare) this.addShip(i, j);
 				else if (aVisibleBoard[i][j] instanceof BaseSquare) this.addBase(i,j);
-				else if (aVisibleBoard[i][j] instanceof MineSquare) aBoard.draw(mine, i*aIncrement, j*aIncrement);
-				else if (aVisibleBoard[i][j] instanceof RadarSquare) aBoard.draw(radar, i*aIncrement, j*aIncrement);
-				else if (aVisibleBoard[i][j] instanceof SonarSquare) aBoard.draw(sonar, i*aIncrement, j*aIncrement);
-				else aBoard.draw(ocean,  i*aIncrement, j*aIncrement);
+				else if (aVisibleBoard[i][j] instanceof MineSquare) aBoard.draw(aMine, i*aIncrement, j*aIncrement);
+				else if (aVisibleBoard[i][j] instanceof RadarSquare) aBoard.draw(aRadar, i*aIncrement, j*aIncrement);
+				else if (aVisibleBoard[i][j] instanceof SonarSquare) aBoard.draw(aSonar, i*aIncrement, j*aIncrement);
+				else aBoard.draw(aGrass,  i*aIncrement, j*aIncrement);
 			}
 		}
 		
@@ -337,19 +526,18 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		Damage baseDamage = baseSquare.getDamage();
 		
 		String myOwner = baseSquare.getOwner();
-		MinuetoColor baseColour; 
+		MinuetoImage base; 
 		
 		if (myOwner.compareTo(aUsername) == 0) {
 			if (baseDamage == Damage.DESTROYED) {
-				baseColour = aYourShipDestroyed;
-			} else baseColour = aYourBaseColour;
+				base = aBaseDestroyed;
+			} else base = aBase;
 		} else {
 			if (baseDamage == Damage.DESTROYED) {
-				baseColour = aOpponentShipDestroyed;
-			} else baseColour = aOpponentBaseColour;
+				base = aOpponentBaseDestroyed;
+			} else base= aOpponentBase;
 		}
 
-		MinuetoRectangle base = new MinuetoRectangle(aIncrement, aIncrement, baseColour, true);
 		aBoard.draw(base, pSquareX*aIncrement, pSquareY*aIncrement);
 	}
 	
@@ -371,109 +559,55 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 
 		//and also if it's undamaged, damaged or destroyed
 		Damage shipDamage = shipSquare.getDamage();
-		MinuetoColor shipColor;
-		//you can open paint and choose a colour to get the RGB values 
-		if (shipDamage == Damage.UNDAMAGED) {
-			if (isOpponent) shipColor = aOpponentShipUndamaged; 
-			else shipColor = aYourShipUndamaged; 
-		}
-		else if (shipDamage == Damage.DAMAGED) {
-			if (isOpponent) shipColor = aOpponentShipDamaged; 
-			else shipColor = aYourShipDamaged; 
-		}
-		else { //DESTROYED
-			if (isOpponent) shipColor = aOpponentShipDestroyed; //dark red
-			else shipColor = aYourShipDestroyed; //red
-		}
-		//and lastly if it's the head or body
-		if (shipSquare.isHead()) {
-			Direction shipDirection = ship.getDirection();
-			switch (shipDirection) {
-			case NORTH : 
-				drawShipHeadNorth(pSquareX, pSquareY, shipColor); 
-				break;
-			case SOUTH : 
-				drawShipHeadSouth(pSquareX, pSquareY, shipColor); 
-				break;
-			case EAST : 
-				drawShipHeadEast(pSquareX, pSquareY, shipColor); 
-				break;
-				/*or WEST*/
-			default : drawShipHeadWest(pSquareX, pSquareY, shipColor); break;
+		MinuetoImage sheep;
+		
+		
+		if (ship.getShipID() == 9 && !shipSquare.isHead()) {
+			//is Radar Boat and not the head
+			//we distinguish it with a different colouring scheme  
+			if (shipDamage == Damage.UNDAMAGED) {
+				if (isOpponent) sheep = aOpponentSheepRadar; 
+				else sheep = aSheepRadar; 
+			}
+			else { //DESTROYED (Radar ships cannot be damaged)
+				if (isOpponent) sheep = aOpponentSheepRadarDestroyed; //dark red
+				else sheep = aSheepRadarDestroyed; //red
+			}
+			
+		} else { //not Radar boat (or Radar boat head)
+			
+			//HEAD
+			if (shipSquare.isHead()) {
+				if (shipDamage == Damage.UNDAMAGED) {
+					if (isOpponent) sheep = aOpponentSheepHead; 
+					else sheep = aSheepHead; 
+				}
+				else if (shipDamage == Damage.DAMAGED) {
+					if (isOpponent) sheep = aOpponentSheepHeadDamaged; 
+					else sheep = aSheepHeadDamaged; 
+				}
+				else { //DESTROYED
+					if (isOpponent) sheep = aOpponentSheepHeadDestroyed; //dark red
+					else sheep = aSheepHeadDestroyed; //red
+				}
+			//BODY
+			} else {
+				if (shipDamage == Damage.UNDAMAGED) {
+					if (isOpponent) sheep = aOpponentSheep; 
+					else sheep = aSheep; 
+				}
+				else if (shipDamage == Damage.DAMAGED) {
+					if (isOpponent) sheep = aOpponentSheepDamaged; 
+					else sheep = aSheepDamaged; 
+				}
+				else { //DESTROYED
+					if (isOpponent) sheep = aOpponentSheepDestroyed; //dark red
+					else sheep = aSheepDestroyed; //red
+				}
 			}
 		}
-		else {
-			drawShipBody(pSquareX, pSquareY, shipColor);
-		}
-	}
-
-/*Color schema: 
- * gray ==> your ship, undamaged
- * pink ==> your ship, damaged
- * red ==> your ship, destroyed
- * dark gray ==> opponent's ship, undamaged 
- * dark pink ==> opponent's ship, damaged
- * dark red ==> opponent's ship, destroyed
- */
-	private void drawShipBody(int pX, int pY, MinuetoColor pColor) {
-		MinuetoRectangle ship = new MinuetoRectangle(aIncrement, aIncrement, pColor, true);
-		aBoard.draw(ship, pX*aIncrement, pY*aIncrement);
-	}
-	
-	private void drawShipHeadNorth(int pX, int pY, MinuetoColor pColor) {
-		int[] points = new int[6];
-		//corner
-		points[0] = pX*aIncrement;
-		points[1] = (pY+1)*aIncrement;
-		//upper middle
-		points[2] = (pX*aIncrement)+(aIncrement/2);
-		points[3] = ((pY+1)*aIncrement)-aIncrement ;
-		//corner
-		points[4] = (pX*aIncrement)+aIncrement;
-		points[5] = (pY+1)*aIncrement;
-		aBoard.drawPolygon(pColor, points);
-	}
-
-	private void drawShipHeadSouth(int pX, int pY, MinuetoColor pColor) {
-		int[] points = new int[6];
-		//corner
-		points[0] = pX*aIncrement;
-		points[1] = pY*aIncrement;
-		//lower middle
-		points[2] = (pX*aIncrement)+(aIncrement/2);
-		points[3] = (pY*aIncrement)+aIncrement;
-		//corner
-		points[4] = (pX*aIncrement)+aIncrement;
-		points[5] = pY*aIncrement;
-		aBoard.drawPolygon(pColor, points);
-	}
-	
-	private void drawShipHeadEast(int pX, int pY, MinuetoColor pColor) {
-		int[] points = new int[6];
-		//corner
-		points[0] = pX*aIncrement;
-		points[1] = pY*aIncrement;
-		//lower middle
-		points[2] = (pX*aIncrement) + aIncrement;
-		points[3] = (pY*aIncrement)+(aIncrement/2);
-		//corner
-		points[4] = (pX*aIncrement);
-		points[5] = (pY*aIncrement) + aIncrement;
-		aBoard.drawPolygon(pColor, points);
-	}
-	
-	private void drawShipHeadWest(int pX, int pY, MinuetoColor pColor) {
-		int[] points = new int[6];
-		//corner
-		points[0] = (pX*aIncrement)+ aIncrement;
-		points[1] = pY*aIncrement;
-		//lower middle
-		points[2] = (pX*aIncrement);
-		points[3] = (pY*aIncrement)+ (aIncrement/2);
-		//corner
-		points[4] = (pX*aIncrement) + aIncrement;
-		points[5] = (pY*aIncrement) + aIncrement;
-		aBoard.drawPolygon(pColor, points);
+		
+		aBoard.draw(sheep, pSquareX*aIncrement, pSquareY*aIncrement);
 	}
 	
 	//given mouse coordinates, board will convert to a game square
