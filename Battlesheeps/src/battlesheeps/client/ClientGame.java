@@ -227,6 +227,8 @@ public class ClientGame {
 			}
 		});
 		
+		menuBar.add(helpItem);
+		
 		JMenuItem jokeItem = new JMenuItem("Sheep Joke");
 		
 		jokeItem.addActionListener(new ActionListener () {
@@ -238,7 +240,7 @@ public class ClientGame {
 			}
 		});
 	
-		menuBar.add(helpItem);
+		menuBar.add(jokeItem);
 		//really inefficient way of pushing all the menu items over
 		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(Box.createHorizontalGlue());
