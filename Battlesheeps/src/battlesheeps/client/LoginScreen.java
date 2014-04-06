@@ -254,8 +254,8 @@ public class LoginScreen {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         //TODO change size according to image
-        frame.setMinimumSize(new Dimension(628,600));
-        frame.setMaximumSize(new Dimension(628,600));
+        frame.setMinimumSize(new Dimension(575,520));
+        frame.setMaximumSize(new Dimension(575,520));
         frame.setResizable(false);
         
         SpringLayout layout = new SpringLayout(); 
@@ -272,45 +272,45 @@ public class LoginScreen {
         frame.getContentPane().add(imageLabel);
         
         layout.putConstraint(SpringLayout.NORTH, imageLabel, 10, SpringLayout.NORTH, frame.getContentPane());
-        layout.putConstraint(SpringLayout.WEST, imageLabel, 40, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, imageLabel, 10, SpringLayout.WEST, frame.getContentPane());
         
         JLabel title = new JLabel("BATTLESHEEPS");
         title.setFont(f);
         
         layout.putConstraint(SpringLayout.NORTH, title, 10, SpringLayout.SOUTH, imageLabel);
-        layout.putConstraint(SpringLayout.WEST, title, 40, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, title, 200, SpringLayout.WEST, frame.getContentPane());
         
         frame.getContentPane().add(title);
         
         JLabel usernameLabel = new JLabel("Username: ");
         frame.getContentPane().add(usernameLabel);
         
-        layout.putConstraint(SpringLayout.NORTH, usernameLabel, 25, SpringLayout.SOUTH, title);
-        layout.putConstraint(SpringLayout.WEST, usernameLabel, 5, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.NORTH, usernameLabel, 15, SpringLayout.SOUTH, title);
+        layout.putConstraint(SpringLayout.WEST, usernameLabel, 155, SpringLayout.WEST, frame.getContentPane());
         
-        JTextField usernameField = new JTextField("",15);
+        JTextField usernameField = new JTextField("",13);
         frame.getContentPane().add(usernameField);
         
-        layout.putConstraint(SpringLayout.NORTH, usernameField, 25, SpringLayout.SOUTH, title);
-        layout.putConstraint(SpringLayout.WEST, usernameField, 0, SpringLayout.EAST, usernameLabel);
+        layout.putConstraint(SpringLayout.NORTH, usernameField, 15, SpringLayout.SOUTH, title);
+        layout.putConstraint(SpringLayout.WEST, usernameField, 5, SpringLayout.EAST, usernameLabel);
         
         JLabel passwordLabel = new JLabel("Password: ");
         frame.getContentPane().add(passwordLabel);
         
         layout.putConstraint(SpringLayout.NORTH, passwordLabel, 10, SpringLayout.SOUTH, usernameLabel);
-        layout.putConstraint(SpringLayout.WEST, passwordLabel, 5, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, passwordLabel, 155, SpringLayout.WEST, frame.getContentPane());
         
-        JTextField passwordField = new JPasswordField("",15);
+        JTextField passwordField = new JPasswordField("",13);
         frame.getContentPane().add(passwordField);
         
         layout.putConstraint(SpringLayout.NORTH, passwordField, 5, SpringLayout.SOUTH, usernameField);
-        layout.putConstraint(SpringLayout.WEST, passwordField, 2, SpringLayout.EAST, passwordLabel);
+        layout.putConstraint(SpringLayout.WEST, passwordField, 6, SpringLayout.EAST, passwordLabel);
                       
         JButton loginButton = new JButton("LOGIN"); 
         frame.getContentPane().add(loginButton);
         
         layout.putConstraint(SpringLayout.NORTH, loginButton, 10, SpringLayout.SOUTH, passwordField);
-        layout.putConstraint(SpringLayout.WEST, loginButton, 135, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, loginButton, 302, SpringLayout.WEST, frame.getContentPane());
         
         loginButton.addActionListener(new LoginListener(usernameField, passwordField,frame));
         
@@ -320,7 +320,7 @@ public class LoginScreen {
         createButton.addActionListener(new AccountWizard(frame));
         
         layout.putConstraint(SpringLayout.NORTH, createButton, 10, SpringLayout.SOUTH, loginButton);
-        layout.putConstraint(SpringLayout.WEST, createButton, 100, SpringLayout.WEST, frame.getContentPane());
+        layout.putConstraint(SpringLayout.WEST, createButton, 249, SpringLayout.WEST, frame.getContentPane());
  
         frame.getContentPane().setLayout(layout);
         frame.setLocationRelativeTo(null);
