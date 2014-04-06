@@ -47,14 +47,14 @@ public class MessagePanel extends JPanel {
 		
 		JLabel message = new JLabel(pMessage);
 		
-		JButton acceptButton = new JButton("Accept Coral Configuration");
+		JButton acceptButton = new JButton("Accept Tree Configuration");
 		acceptButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aClient.coralAccepted(true);
 			}
 		});
 		
-		JButton declineButton = new JButton("Decline Coral Configuration");
+		JButton declineButton = new JButton("Decline Tree Configuration");
 		declineButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aClient.coralAccepted(false);
@@ -86,13 +86,13 @@ public class MessagePanel extends JPanel {
 			shipButton = new ShipButton("Place MineLayer", pShip, aClient);
 		}
 		else if (pShip instanceof RadarBoat){
-			shipButton = new ShipButton("Place Radar Boat", pShip, aClient);
+			shipButton = new ShipButton("Place Radar Sheep", pShip, aClient);
 		} 
 		else if (pShip instanceof TorpedoBoat) {
-			shipButton = new ShipButton("Place Torpedo Boat", pShip, aClient);
+			shipButton = new ShipButton("Place Torpedo Sheep", pShip, aClient);
 		}
 		else {
-			shipButton = new ShipButton("Place Kamikaze", pShip, aClient);
+			shipButton = new ShipButton("Place Kamikaze Sheep", pShip, aClient);
 		}
 		shipButton.addShipListener();
 		this.add(shipButton);
@@ -104,14 +104,14 @@ public class MessagePanel extends JPanel {
 	public void shipChoice(){
 		this.removeAll();
 		
-		JButton defaultButton = new JButton("I want a default ship setup");
+		JButton defaultButton = new JButton("I want a default sheep setup");
 		defaultButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aClient.defaultSetup(true);
 			}
 		});
 		
-		JButton placeButton = new JButton("I want to place my ships.");
+		JButton placeButton = new JButton("I want to place my sheep.");
 		placeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				aClient.defaultSetup(false);
@@ -153,7 +153,7 @@ public class MessagePanel extends JPanel {
 		//first remove all old components
 		this.removeAll();
 		JLabel yourTurn = new JLabel("It's your turn!");
-		JLabel makeMove = new JLabel("Click on a ship for a menu.");
+		JLabel makeMove = new JLabel("Click on a sheep for a menu.");
 		
 		this.add(yourTurn);
 		this.add(makeMove);
@@ -180,9 +180,9 @@ public class MessagePanel extends JPanel {
 		shipStats[0][0] = "Cruiser";
 		shipStats[1][0] = "Destroyer";
 		shipStats[2][0] = "Mine Layer";
-		shipStats[3][0] = "Radar Boat";
-		shipStats[4][0] = "Torpedo Boat";
-		shipStats[5][0] = "Kamikaze Boat";
+		shipStats[3][0] = "Radar Sheep";
+		shipStats[4][0] = "Torpedo Sheep";
+		shipStats[5][0] = "Kamikaze Sheep";
 		
 		Integer numCruiser = new Integer(0);
 		Integer numDestroyer = new Integer(0);
@@ -284,17 +284,17 @@ public class MessagePanel extends JPanel {
 			armourLabel.setText("Armour: Heavy");		
 		}
 		else if (pShip instanceof RadarBoat) {
-			nameLabel.setText("Radar Boat");
+			nameLabel.setText("Radar Sheep");
 			weaponLabel.setText("Weapons: Cannon");
 			armourLabel.setText("Armour: Normal");
 		} 
 		else if (pShip instanceof TorpedoBoat) {
-			nameLabel.setText("Torpedo Boat");
+			nameLabel.setText("Torpedo Sheep");
 			weaponLabel = new JLabel("Weapons: Cannon, Torpedoes");
 			armourLabel = new JLabel("Armour: Normal");
 		}
 		else if (pShip instanceof KamikazeBoat) {
-			nameLabel.setText("Kamikaze Boat");
+			nameLabel.setText("Kamikaze Sheep");
 			weaponLabel.setText("Weapon: Suicide explosion");
 			armourLabel.setText("Armour: Heavy");
 		}

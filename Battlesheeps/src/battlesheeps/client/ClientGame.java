@@ -215,17 +215,29 @@ public class ClientGame {
 						"Setup Phase: A new obstacle configuration is generated.\n" +
 								"You must agree or decline the configuration.\n" +
 								"This process is repeated until both players agree.\n" +
-								"Afterwards, you enter ship setup. \n " + 
-								"Ship Setup: Click on a Place Ship button and then on a green square. \n" +
-								"Repeat for all ships and then indicate that you are done.\n" +
-								"You may rearrange ships by clicking on the ones already placed on the board.\n" +
+								"Afterwards, you enter sheep setup. \n " + 
+								"Sheep Setup: Click on a Place Sheep button and then on a blue square. \n" +
+								"Repeat for all sheep and then indicate that you are done.\n" +
+								"You may rearrange sheep by clicking on the ones already placed on the board.\n" +
 								"Once both players are done, the game begins.\n"+
-								"Move Phase: Click on a ship, then on a move button.\n" +
-								"Then click on a green square, and wait for your turn to come again.\n" +
-								"The game ends when one player's ships are all sunk.", 
+								"Move Phase: Click on a sheep, then on a move button.\n" +
+								"Then click on a blue square, and wait for your turn to come again.\n" +
+								"The game ends when one player's sheep are all gone.", 
 								"Help", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
+		
+		JMenuItem jokeItem = new JMenuItem("Sheep Joke");
+		
+		jokeItem.addActionListener(new ActionListener () {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(aMainFrame, 
+						"Q.what did the sheep say to the farmer?\n" + 
+							"A. bahahahhahah ", 
+								"Sheep Joke", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+	
 		menuBar.add(helpItem);
 		//really inefficient way of pushing all the menu items over
 		menuBar.add(Box.createHorizontalGlue());
@@ -382,7 +394,7 @@ public class ClientGame {
 
 			}
 			else {
-				aMessagePanel.displayMessage("Place your ships!");
+				aMessagePanel.displayMessage("Herd your sheep!");
 
 				//for each ship, we have to tell MessagePanel
 				//to display a button for it
@@ -423,7 +435,7 @@ public class ClientGame {
 	 */
 	public void showAvailableBasePositions(Ship pShip) {
 		
-		aMessagePanel.displayMessage("Click on a green square to place the ship.");
+		aMessagePanel.displayMessage("Click on a blue square to place the sheep.");
 		
 		//let's keep track of which ship we want to show the moves for 
 		aCurrentClickedShip = pShip;
@@ -1317,7 +1329,7 @@ public class ClientGame {
 		else {
 			//Send the move to the server!
 			Move move = new Move(pCoord, pSecondaryCoord, aCurrentClickedShip, aCurrentClickedMove, null);
-			System.out.println("Ship belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
+			System.out.println("Sheep belongs to: " + aCurrentClickedShip.getUsername() + " and it's id is: " + aCurrentClickedShip.getShipID());
 			
 			if (aCurrentClickedMove == MoveType.REPAIR_SHIP || aCurrentClickedMove == MoveType.TRIGGER_RADAR) {
 				aMessagePanel.displayMessage("" + aCurrentClickedMove +"");
