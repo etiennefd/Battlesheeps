@@ -1871,8 +1871,6 @@ public class ClientGame {
 			aClient.aMainFrame.dispose();
 			
 			aClient.aBoardPanel.dispose();
-			Move m = new Move(null, null, null, null, ServerInfo.CLOSED_CLIENT);
-			aClient.myManager.sendMove(m);
 			aClient.myManager.close();
 				
 			new Lobby(aClient.aMyUser);
