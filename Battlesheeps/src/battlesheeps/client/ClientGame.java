@@ -187,12 +187,8 @@ public class ClientGame {
 		JMenuBar menuBar = new JMenuBar();
 
 		JMenuItem lobbyItem = new JMenuItem("Return to Lobby");
-		lobbyItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// TODO
-				//return to lobby here!
-			}
-		});
+		ActionListener a = new ReturnLobbyListener(this);
+		lobbyItem.addActionListener(a);
 		menuBar.add(lobbyItem);	
 		
 		JMenuItem aboutItem = new JMenuItem("About");
@@ -1861,6 +1857,26 @@ public class ClientGame {
 		}
 	}
 		
-	
+	class ReturnLobbyListener implements ActionListener{
+		
+		private ClientGame aClient;
+		ReturnLobbyListener(ClientGame pClient) {
+			super();
+			aClient = pClient;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			aClient.aMainFrame.setVisible(false);
+			aClient.aMainFrame.dispose();
+			
+			aClient.aBoardPanel.dispose();
+			Move m = new Move(null, null, null, null, ServerInfo.CLOSED_CLIENT);
+			aClient.myManager.sendMove(m);
+			aClient.myManager.close();
+				
+			new Lobby(aClient.aMyUser);
+		}
+	}
 	
 }

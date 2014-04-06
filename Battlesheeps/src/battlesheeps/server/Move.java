@@ -10,7 +10,7 @@ public class Move implements Serializable
 {
 	private static final long serialVersionUID = -1767292751081182904L;
 	public enum ServerInfo {
-		CORAL_REEF_ACCEPT, CORAL_REEF_DECLINE, SHIP_INIT, SHIP_INIT_COMPLETE
+		CORAL_REEF_ACCEPT, CORAL_REEF_DECLINE, SHIP_INIT, SHIP_INIT_COMPLETE, CLOSED_CLIENT
 	}
 	
 	private Coordinate aCoord;
