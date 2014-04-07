@@ -207,7 +207,7 @@ public class ClientGame {
 		dialog.setContentPane(requestPane);
 		
 		//add action listener to withdraw
-		withdrawButton.addActionListener(new ReturnLobbyListener(this));
+		withdrawButton.addActionListener(new ReturnLobbyListenerExit(this, dialog));
 			
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.setLocationRelativeTo(aMainFrame);
@@ -1940,6 +1940,29 @@ public class ClientGame {
 			
 			aClient.aBoardPanel.dispose();
 			aClient.myManager.close();
+				
+			new Lobby(aClient.aMyUser);
+		}
+	}
+	class ReturnLobbyListenerExit implements ActionListener{
+		
+		private ClientGame aClient;
+		private JDialog aDialog;
+		
+		ReturnLobbyListenerExit(ClientGame pClient, JDialog pDialog) {
+			super();
+			aClient = pClient;
+			aDialog = pDialog;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			aClient.aMainFrame.setVisible(false);
+			aClient.aMainFrame.dispose();
+			
+			aClient.aBoardPanel.dispose();
+			aClient.myManager.close();
+			aDialog.dispose();
 				
 			new Lobby(aClient.aMyUser);
 		}

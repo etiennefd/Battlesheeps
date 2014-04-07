@@ -159,7 +159,7 @@ class ServerConnGame implements Runnable {
 						aMyClient.updateGame(newGame);
 						break;
 					case OPPONENT_EXIT:
-						// TODO display dialog "opponent has quit" with button to go to lobby
+						aMyClient.opponentExit();
 						break;
 				}
 			}
