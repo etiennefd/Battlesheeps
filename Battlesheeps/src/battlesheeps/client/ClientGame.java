@@ -270,26 +270,32 @@ public class ClientGame {
 	 * Setup coral for the first time. 
 	 * @param pGame
 	 */
-	public void setupCoral(ServerGame pGame) {
+	public void setupCoral(final ServerGame pGame) {
+	
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	boolean isP1 = aMyUser.equals(pGame.getP1Username());
+        		if (isP1) {
+        			aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+        		}
+        		else {
+        			aChatPanel.setOpponent(pGame.getP1Username());
+        		}
+        		
+        		//and just initializing who has which base 
+        		//East = false by default
+        		if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
+        		
+        		//tell MessagePanel to display an Accept or Decline message
+        		aMessagePanel.setupCoral("Do you like the obstacle configuration?");
+        		
+        		//we can just tell aBoardPanel to draw the given board
+        		//since no ships will be on it yet
+        		aBoardPanel.redrawBoard(pGame.getBoard());
+            }
+        });
 		
-		boolean isP1 = aMyUser.equals(pGame.getP1Username());
-		if (isP1) {
-			aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
-		}
-		else {
-			aChatPanel.setOpponent(pGame.getP1Username());
-		}
 		
-		//and just initializing who has which base 
-		//East = false by default
-		if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
-		
-		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Do you like the obstacle configuration?");
-		
-		//we can just tell aBoardPanel to draw the given board
-		//since no ships will be on it yet
-		aBoardPanel.redrawBoard(pGame.getBoard());
 		
 	}
 	
@@ -297,13 +303,18 @@ public class ClientGame {
 	 * Setup coral for the nth time. 
 	 * @param pGame
 	 */
-	public void resetupCoral(ServerGame pGame) {
-		//tell MessagePanel to display an Accept or Decline message
-		aMessagePanel.setupCoral("Both players must agree on the configuration.");
+	public void resetupCoral(final ServerGame pGame) {
 		
-		//we can just tell aBoardPanel to draw the given board
-		//since no ships will be on it yet
-		aBoardPanel.redrawBoard(pGame.getBoard());
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	//tell MessagePanel to display an Accept or Decline message
+        		aMessagePanel.setupCoral("Both players must agree on the configuration.");
+        		
+        		//we can just tell aBoardPanel to draw the given board
+        		//since no ships will be on it yet
+        		aBoardPanel.redrawBoard(pGame.getBoard());
+            }
+        });	
 		
 	}
 	
@@ -315,15 +326,23 @@ public class ClientGame {
 		aMessagePanel.displayMessage("Waiting for opponent");
 	}
 	
-	public void startShipSetup(ServerGame pGame) {
-		
-		aCurrentGame = pGame;
-		aMessagePanel.shipChoice();
+	public void startShipSetup(final ServerGame pGame) {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	aCurrentGame = pGame;
+        		aMessagePanel.shipChoice();
+            }
+        });	
 	}
 	
-	public void defaultSetup(boolean pDefault) {
-		aDefaultSetup = pDefault;
-		setupShips(aCurrentGame);
+	public void defaultSetup(final boolean pDefault) {
+	
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+        		aDefaultSetup = pDefault;
+        		setupShips(aCurrentGame);
+            }
+        });
 	}
 	
 	/**
@@ -331,81 +350,86 @@ public class ClientGame {
 	 * is placed on the board.
 	 * @param pGame
 	 */
-	public void setupShips(ServerGame pGame){
+	public void setupShips(final ServerGame pGame){
 
-		if (aMyUser.equals(pGame.getP1Username())) {
-			aCurrentShipList = pGame.getP1ShipList();
-		}
-		else {
-			aCurrentShipList = pGame.getP2ShipList();
-		}
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	if (aMyUser.equals(pGame.getP1Username())) {
+        			aCurrentShipList = pGame.getP1ShipList();
+        		}
+        		else {
+        			aCurrentShipList = pGame.getP2ShipList();
+        		}
 
-		//getting the current visible board 
-		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), aCurrentShipList);
+        		//getting the current visible board 
+        		aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), aCurrentShipList);
 
-		//unplaced ships 
-		ArrayList<Ship> unplaced = new ArrayList<Ship>();
+        		//unplaced ships 
+        		ArrayList<Ship> unplaced = new ArrayList<Ship>();
 
-		//are we done yet? 
-		int done = 0;
-		for (Ship ship : aCurrentShipList) {
-			if (!ship.onBoard()) {
-				done++;
-				unplaced.add(ship);
-			}
-		}
+        		//are we done yet? 
+        		int done = 0;
+        		for (Ship ship : aCurrentShipList) {
+        			if (!ship.onBoard()) {
+        				done++;
+        				unplaced.add(ship);
+        			}
+        		}
 
-		if (done == 0) {
-			aMessagePanel.shipSetupComplete();
-		} 
-		else {
-			if (aDefaultSetup) {
+        		if (done == 0) {
+        			aMessagePanel.shipSetupComplete();
+        		} 
+        		else {
+        			if (aDefaultSetup) {
 
-				//let's just place the first ship
-				//in the first free spot at the base
+        				//let's just place the first ship
+        				//in the first free spot at the base
 
-				int b; 
-				if (aHasWestBase) {
-					b = 1;
-				}else {//East Base
-					b = 28;
-				}
+        				int b; 
+        				if (aHasWestBase) {
+        					b = 1;
+        				}else {//East Base
+        					b = 28;
+        				}
 
-				Coordinate free = null;
-				//and now let's tell the board to display the green squares 
-				for (int i = 10; i < 20; i++) {
-					if (!(aCurrentVisibleBoard[b][i] instanceof ShipSquare)) {
-						free = new Coordinate(b,i);
-						break;
-					}
-				}
-				if (free == null) {
-					if (aHasWestBase) {
-						free = new Coordinate(0, 9);
-					}
-					else free = new Coordinate(29, 9);
-				}
+        				Coordinate free = null;
+        				//and now let's tell the board to display the green squares 
+        				for (int i = 10; i < 20; i++) {
+        					if (!(aCurrentVisibleBoard[b][i] instanceof ShipSquare)) {
+        						free = new Coordinate(b,i);
+        						break;
+        					}
+        				}
+        				if (free == null) {
+        					if (aHasWestBase) {
+        						free = new Coordinate(0, 9);
+        					}
+        					else free = new Coordinate(29, 9);
+        				}
 
-				aCurrentClickedShip = unplaced.get(0);
+        				aCurrentClickedShip = unplaced.get(0);
 
-				placedShip(free);
+        				placedShip(free);
 
-			}
-			else {
-				aMessagePanel.displayMessage("Herd your sheep!");
+        			}
+        			else {
+        				aMessagePanel.displayMessage("Herd your sheep!");
 
-				//for each ship, we have to tell MessagePanel
-				//to display a button for it
+        				//for each ship, we have to tell MessagePanel
+        				//to display a button for it
 
-				for (Ship ship : unplaced) {
-					aMessagePanel.displayShipSetupOption(ship);
-				}
+        				for (Ship ship : unplaced) {
+        					aMessagePanel.displayShipSetupOption(ship);
+        				}
 
-			}
-		}	
+        			}
+        		}	
 
-		//and telling board panel to draw it 
-		aBoardPanel.redrawBoard(aCurrentVisibleBoard);
+        		//and telling board panel to draw it 
+        		aBoardPanel.redrawBoard(aCurrentVisibleBoard);
+            }
+        });
+		
 	}
 
 	/**
@@ -504,55 +528,61 @@ public class ClientGame {
 	 * 2. the log entries will be updated 
 	 * 3. a message may be displayed  
 	 */
-	public void updateGame (ServerGame pGame) {
+	public void updateGame (final ServerGame pGame) {
 		
-		//if the game is restarted, we need to tell board panel 
-		if (!aBoardPanel.getStatus()){
-			aBoardPanel.startGame();
-			if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
-		}
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	//if the game is restarted, we need to tell board panel 
+        		if (!aBoardPanel.getStatus()){
+        			aBoardPanel.startGame();
+        			if (aMyUser.equals(pGame.getP1Username())) aHasWestBase = true;
+        		}
+        		
+        		if (pGame.isGameComplete()) {
+        			gameComplete(pGame);
+        		}
+        		else {
+        			boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
+        			
+        			List<Ship> myList;
+        			List<Ship> oppList;
+        			
+        			boolean isP1 = aMyUser.equals(pGame.getP1Username());
+        			
+        			if (isP1) {
+        				myList = pGame.getP1ShipList();
+        				oppList = pGame.getP2ShipList();
+        				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
+        			}
+        			else {
+        				myList = pGame.getP2ShipList();
+        				oppList = pGame.getP1ShipList();
+        				aChatPanel.setOpponent(pGame.getP1Username());
+        			}
+        			
+        			aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
+        					
+        			if (myTurn){
+        				//my turn 
+        				aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
+        				aMessagePanel.setYourTurn();
+        			} 
+        			else {
+        				aBoardPanel.updateTurn(aCurrentVisibleBoard, false);
+        				aMessagePanel.setNotYourTurn(myList, oppList);
+        			}
+        			
+        			LinkedList<LogEntry> logs = pGame.getLog();
+        			if (logs.size() != aNumOfLogEntries) {
+        				aLogPanel.updateLogEntries(pGame.getLog());
+        				aNumOfLogEntries = logs.size();
+        			}
+        				
+        		}
+            }
+        });
 		
-		if (pGame.isGameComplete()) {
-			gameComplete(pGame);
-		}
-		else {
-			boolean myTurn = aMyUser.equals(pGame.getTurnPlayer()); 
-			
-			List<Ship> myList;
-			List<Ship> oppList;
-			
-			boolean isP1 = aMyUser.equals(pGame.getP1Username());
-			
-			if (isP1) {
-				myList = pGame.getP1ShipList();
-				oppList = pGame.getP2ShipList();
-				aChatPanel.setOpponent(pGame.getP2Username()); // only does anything the first time updateGame is called
-			}
-			else {
-				myList = pGame.getP2ShipList();
-				oppList = pGame.getP1ShipList();
-				aChatPanel.setOpponent(pGame.getP1Username());
-			}
-			
-			aCurrentVisibleBoard = computeVisibility(pGame.getBoard(), myList);
-					
-			if (myTurn){
-				//my turn 
-				aBoardPanel.updateTurn(aCurrentVisibleBoard, true);
-				aMessagePanel.setYourTurn();
-			} 
-			else {
-				aBoardPanel.updateTurn(aCurrentVisibleBoard, false);
-				aMessagePanel.setNotYourTurn(myList, oppList);
-			}
-			
-			LinkedList<LogEntry> logs = pGame.getLog();
-			if (logs.size() != aNumOfLogEntries) {
-				aLogPanel.updateLogEntries(pGame.getLog());
-				aNumOfLogEntries = logs.size();
-			}
-				
-		}
+		
 	}
 	
 	/**
