@@ -6,6 +6,8 @@ import java.util.List;
 
 import battlesheeps.board.*;
 import battlesheeps.networking.ClientGamesAndMoves;
+import battlesheeps.networking.Request;
+import battlesheeps.networking.Request.LobbyRequest;
 import battlesheeps.server.LogEntry;
 import battlesheeps.server.Move;
 import battlesheeps.server.Move.ServerInfo;
@@ -176,6 +178,42 @@ public class ClientGame {
 		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
 		aSplitPane.setDividerLocation(0.66);		
+	}
+	
+	public void opponentExit() {
+		SpringLayout layout = new SpringLayout();
+		
+		final JPanel requestPane = new JPanel();
+        JLabel waitLabel = new JLabel("Opponent has exited the game.\nYour progress is saved.");
+        requestPane.add(waitLabel);
+        JButton withdrawButton = new JButton("Return to Lobby");
+        requestPane.add(withdrawButton);
+        
+        layout.putConstraint(SpringLayout.NORTH, waitLabel, 10, SpringLayout.NORTH, requestPane);
+        layout.putConstraint(SpringLayout.WEST, waitLabel, 10, SpringLayout.WEST, requestPane);
+
+        layout.putConstraint(SpringLayout.WEST, withdrawButton, 10, SpringLayout.WEST, requestPane);
+        layout.putConstraint(SpringLayout.SOUTH, withdrawButton, -10, SpringLayout.SOUTH, requestPane);
+        
+        requestPane.setLayout(layout);
+        
+		final JDialog dialog = new JDialog();
+		dialog.setTitle("");
+		dialog.setModal(true);
+		dialog.setMinimumSize(new Dimension(225,125));
+		dialog.setMaximumSize(new Dimension(225,125));
+		dialog.setResizable(false);
+
+		dialog.setContentPane(requestPane);
+		
+		//add action listener to withdraw
+		withdrawButton.addActionListener(new ReturnLobbyListener(this));
+			
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.setLocationRelativeTo(aMainFrame);
+		dialog.pack();
+		
+		dialog.setVisible(true);
 	}
 	
 	/*
