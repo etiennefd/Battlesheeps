@@ -184,7 +184,7 @@ public class ClientGame {
 		SpringLayout layout = new SpringLayout();
 		
 		final JPanel requestPane = new JPanel();
-        JLabel waitLabel = new JLabel("Opponent has exited the game.\nYour progress is saved.");
+        JLabel waitLabel = new JLabel("<html>Opponent has exited the game.<br>Your progress is saved.</html>");
         requestPane.add(waitLabel);
         JButton withdrawButton = new JButton("Return to Lobby");
         requestPane.add(withdrawButton);
