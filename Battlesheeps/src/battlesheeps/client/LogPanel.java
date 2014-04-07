@@ -42,7 +42,7 @@ public class LogPanel extends JPanel{
 		
 		//note: we probably want the newest entries to be displayed at the top
 		//may have to display the list backwards
-		for (int i = 0; i < pLogs.size(); i++) {
+		for (int i = pLogs.size()-1; i >= 0; i--) {
 			JLabel newEntry = new JLabel((pLogs.get(i)).toString());
 			aPanel.add(newEntry);
 		}
