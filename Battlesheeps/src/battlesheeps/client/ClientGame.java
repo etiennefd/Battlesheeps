@@ -1913,6 +1913,7 @@ public class ClientGame {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			aChatPanel.closeSocket();
 			aDialog.setVisible(false);
 			aDialog.dispose();
 			aGame.aMainFrame.setVisible(false);
@@ -1935,6 +1936,7 @@ public class ClientGame {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			aChatPanel.closeSocket();
 			aClient.aMainFrame.setVisible(false);
 			aClient.aMainFrame.dispose();
 			
@@ -1957,6 +1959,7 @@ public class ClientGame {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			aChatPanel.closeSocket();
 			aClient.aMainFrame.setVisible(false);
 			aClient.aMainFrame.dispose();
 			

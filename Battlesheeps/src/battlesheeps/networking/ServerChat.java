@@ -79,8 +79,8 @@ class ClientConn implements Runnable {
      */
     ClientConn(Socket pClient) {
         try {
-            aInput = new ObjectInputStream(pClient.getInputStream());
             aOutput = new PrintWriter(pClient.getOutputStream(), true);
+            aInput = new ObjectInputStream(pClient.getInputStream());
         } catch (IOException e) {
             System.err.println(e);
         }

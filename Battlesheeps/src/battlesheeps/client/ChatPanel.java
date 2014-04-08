@@ -51,6 +51,10 @@ public class ChatPanel extends JPanel implements ActionListener
 		aTextIn.setText("");
 	}
 	
+	public void closeSocket(){
+		if (aOpponent != null) aOpponent.close();
+	}
+	
 //	public static void main(String[] args)
 //	{
 //		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));

@@ -45,7 +45,6 @@ public class ServerLogin implements Runnable
         {
             try {
                 client = SERVER.accept();
-                System.out.println("new client accepted");
             } catch (IOException e) {
                 System.err.println("Accept failed.\n" + e);
                 System.exit(1);
@@ -113,8 +112,8 @@ class ClientConnLogin implements Runnable {
             		else { 
             			// Create account
             			addAccount(msg);
-            			System.out.println("name saved in server: "+msg.getLogin() +" "
-            					+GameManager.getInstance().getAccount(msg.getLogin()).getPassword());
+            			System.out.println("Name saved in server: " + msg.getLogin() + "    Password: "
+            					+ GameManager.getInstance().getAccount(msg.getLogin()).getPassword());
             			aOutput.writeObject(new LoginMessage(LoginType.CREATE, "", ""));
             		}
             	}
@@ -139,11 +138,6 @@ class ClientConnLogin implements Runnable {
             				{	
             					//user already logged in
             					aOutput.writeObject(new LoginMessage(LoginType.LOGIN, FAILURE, "Already logged in to this server."));
-            				}
-            				//TODO remove this check 
-            				for(Account a : aAccounts.values())
-            				{
-            					System.out.println(a.getUsername()+" "+ a.getAvailability());
             				}
             			}
             			else {

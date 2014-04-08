@@ -60,7 +60,6 @@ public class ServerGamesAndMoves implements Runnable
         {
             try {
                 client = SERVER.accept();
-                System.out.println("game client accepted!");
             } catch (IOException e) {
                 System.err.println("Accept failed.\n" + e);
                 System.exit(1);
@@ -77,9 +76,6 @@ public class ServerGamesAndMoves implements Runnable
 
 class ClientConnGame implements Runnable {
 	private static final Hashtable<String, ClientConnGame> aClientList = new Hashtable<String, ClientConnGame>();
-	
-//	private final Lock lock = new ReentrantLock();
-//	private final Condition opponentResponded  = lock.newCondition(); 
 	
     private ObjectInputStream aInput;
     private ObjectOutputStream aOutput;
@@ -145,7 +141,6 @@ class ClientConnGame implements Runnable {
             {
             	aGame.computeMoveResult(aGame.matchWithShip(msg.getaShip()), msg.getMoveType(), msg.getCoord(), msg.getSecondaryCoord());
 
-            	// TODO exit if opponent quits
             	aOutput.writeObject(aGame);
             	aOpponent.aOutput.writeObject(aGame);
             	aOutput.reset();
@@ -211,18 +206,7 @@ class ClientConnGame implements Runnable {
 					p1acceptedGame = true;
 				}
 				
-//				lock.lock();
-//				try{
-					while (!opponentRespondedToCoral) {
-//						p2responded.await();
-					}
-//				}
-//				catch (InterruptedException e){
-//					e.printStackTrace();
-//				}
-//				finally {
-//					lock.unlock();
-//				}
+				while (!opponentRespondedToCoral) {}
 				
 				if (!opponentAcceptedCoral || !p1acceptedGame){
 					aGame.generateCoralReefs();
@@ -240,18 +224,17 @@ class ClientConnGame implements Runnable {
 					
 					aOpponent.opponentAcceptedCoral = false;
 					aOpponent.opponentRespondedToCoral = true;
-//					opponentResponded.signalAll();
 				}
 				else {
 					aGame.setClientInfo(ClientInfo.FINAL_CORAL);
-					aOpponent.opponentAcceptedCoral = true;
-					aOpponent.opponentRespondedToCoral = true;
-//					opponentResponded.signalAll();
 					
 					aOutput.writeObject(aGame);
 					aOutput.reset();
 					aOpponent.aOutput.writeObject(aGame);
 					aOpponent.aOutput.reset();
+					
+					aOpponent.opponentAcceptedCoral = true;
+					aOpponent.opponentRespondedToCoral = true;
 					
 					System.out.println("p1: " + p1acceptedGame + "   p2: "+ opponentAcceptedCoral);
 					break;
@@ -266,23 +249,9 @@ class ClientConnGame implements Runnable {
 					aOpponent.opponentAcceptedCoral = true;
 				}
 				aOpponent.opponentRespondedToCoral = true;
-//				p2responded.signalAll();
 				
-				System.out.println("p2 before");
-//				lock.lock();
-//				try{
-					while (!opponentRespondedToCoral) {
-//						opponentResponded.await();
-					}
-//				}
-//				catch (InterruptedException e){
-//					e.printStackTrace();
-//				}
-//				finally {
-//					lock.unlock();
-//				}
-				System.out.println("p2 after");
-				
+				while (!opponentRespondedToCoral) {}
+
 				if (opponentAcceptedCoral){
 					break;
 				}
@@ -304,7 +273,6 @@ class ClientConnGame implements Runnable {
 			while (!aClientList.containsKey(aGame.getP1Username())) {/*WAIT for requestee to connect*/}
 			aOpponent = aClientList.get(aGame.getP1Username());
 		}
-		if (aOpponent == null) System.out.println(aUsername + " opponent connection null.");
 	}
     
 	private void sendInitialGame(GameInit init) throws IOException
@@ -315,18 +283,18 @@ class ClientConnGame implements Runnable {
 			aGameID = gm.generateGameID();
 			aGame = new ServerGame(aGameID, gm.getAccount(aUsername), gm.getAccount(init.getOpponent()));
 			gm.addGame(aGame);
-			System.out.println(aUsername + " has created game " + aGameID);
+//			System.out.println(aUsername + " has created game " + aGameID);
 			
 			while (!aClientList.containsKey(init.getOpponent())) {/*WAIT for requestee to connect*/}
 			aClientList.get(init.getOpponent()).aGameID = this.aGameID;
-			System.out.println(aUsername + " has informed opponent of GameID");
+//			System.out.println(aUsername + " has informed opponent of GameID");
 		} 
 		else {
-			System.out.println(aUsername + " is finding game");
+//			System.out.println(aUsername + " is finding game");
 			while (aGame == null){
 				aGame = gm.getGame(aGameID);
 			}
-			System.out.println(aUsername + " has joined game " + aGameID);
+//			System.out.println(aUsername + " has joined game " + aGameID);
 		}
 		
 		if (!isNewGame) aGame.setClientInfo(ClientInfo.GAME_UPDATE);
@@ -345,9 +313,18 @@ class ClientConnGame implements Runnable {
     private void close(){
     	System.out.println(aUsername + " has disconnected from GAME.");
     	removeConnection(aUsername);
+    	
+    	if (!aGame.isGameComplete() && aClientList.containsKey(aOpponent.aUsername))
+    	{
+    		aGame.setClientInfo(ClientInfo.OPPONENT_EXIT);
+    		try{
+				aOpponent.aOutput.writeObject(aGame);
+			}
+			catch (IOException e) {
+				System.err.println("Error informing other player of exit: " + e);
+			}
+    	}
 		try {
-			aGame.setClientInfo(ClientInfo.OPPONENT_EXIT);
-			aOpponent.aOutput.writeObject(aGame);
 			aInput.close();
 			aOutput.close();
 		}
