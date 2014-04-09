@@ -147,11 +147,13 @@ public class GameBoard extends JInternalFrame implements MinuetoMouseHandler, Mi
 		//and loading the images - ONCE! 
 		loadImages();
 		
+	}
+	
+	public void startThread() {
 		/****DANGER ZONE: STARTING THE THREAD!*****/
 		
 		Thread thread = new Thread(this);
 		thread.start();
-		
 	}
 	
 	private void createFrame() {

@@ -177,6 +177,7 @@ public class ClientGame {
 		this.aMainFrame.setLocationRelativeTo(null);
 		this.aMainFrame.setVisible(true);
 		aBoardPanel.setVisible(true);
+		aBoardPanel.startThread();
 		aSplitPane.setDividerLocation(0.66);		
 	}
 	
@@ -246,6 +247,7 @@ public class ClientGame {
 		helpItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(aMainFrame, 
+						"Important: Games are saved automatically AFTER setup completes." +
 						"Setup Phase: A new obstacle configuration is generated.\n" +
 								"You must agree or decline the configuration.\n" +
 								"This process is repeated until both players agree.\n" +
