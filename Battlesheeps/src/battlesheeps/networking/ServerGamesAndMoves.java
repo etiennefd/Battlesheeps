@@ -132,6 +132,7 @@ class ClientConnGame implements Runnable {
         		
         		System.out.println("SHIP SETUP for user: " + aUsername);
         		shipInit();
+        		aGame.setupComplete(); //TODO is this the right spot to say setup is complete? 
         	}
         	
         	System.out.println("GAME UPDATES for user: " + aUsername);

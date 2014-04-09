@@ -56,6 +56,9 @@ public class ServerGame implements Serializable
 	private ArrayList<Ship> aShipListP2;
 	private LinkedList<LogEntry> aLogEntryList = new LinkedList<LogEntry>();
 	
+	//Field relating to the setup phase of the game
+	private boolean aSetupInProgress = true;
+	
 	//Fields related to the ending of the game
 	private boolean aGameComplete;
 	private String aWinner;
@@ -2273,4 +2276,13 @@ public class ServerGame implements Serializable
 		return s;
 	}
 
+	public void setupComplete() {
+		// TODO Auto-generated method stub
+		aSetupInProgress = false;
+		aTurnNum = 1;
+	}
+
+	public boolean inSetup() {
+		return aSetupInProgress;
+	}
 }

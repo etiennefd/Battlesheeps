@@ -572,6 +572,7 @@ public class Lobby
     		System.out.println("user has saved games");
     		for (LobbyMessageGameSummary game : aClient.getSavedGames())
    	        {	
+    			
     			//below this user is player one in this game
     			if(game.getPlayer1().equals(aClient.getAccount()))
     			{
@@ -711,7 +712,7 @@ public class Lobby
         JMenuItem instructionsButton = new JMenuItem("Game Instructions");
         instructionsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(aFrame, "Select a player to send a game request. If a player with whom\n" +
+				JOptionPane.showMessageDialog(aFrame, "Double click on a player to send a game request. If a player with whom\n" +
 						"you have already started a game is available, you can continue that game.\n" +
 						"Once a game starts, both players must accept the obstacle configuration. \n" +
 						"Then they can place their ships, and then play. \n\nThe goal is to sink every enemy ship.", 

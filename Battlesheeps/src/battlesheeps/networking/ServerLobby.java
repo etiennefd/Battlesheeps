@@ -177,8 +177,10 @@ class ClientConnLobby implements Runnable {
 	            				ServerGame sg = GameManager.getInstance().getGame(currentGames.next());
 	            				Account p1 = GameManager.getInstance().getAccount(sg.getP1Username());
 	            				Account p2 = GameManager.getInstance().getAccount(sg.getP2Username());
-	
-	            				games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
+	            				//TODO only adding a game if it's not in setup
+	            				if (!sg.inSetup()) {
+	            					games.add(new LobbyMessageGameSummary(sg.getGameID(), p1, p2, sg.getTurnNum(), sg.getDateLastPlayed()));
+	            				}
 	            			}
             			}
             			lobbyMsg.setGames(games);
